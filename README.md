@@ -14,25 +14,19 @@
    - [x] Hard Hat Detection (Kaggle) 다운로드
    - [x] Safety Helmet and Reflective Jacket (Kaggle) 다운로드
 
-2. **데이터 전처리** ⏳ 대기
-   - [ ] 라벨링 포맷 통일 (Pascal VOC XML → YOLO TXT)
-   - [ ] 클래스 ID 매핑 통일 (helmet, head/no_helmet, vest 등)
-   - [ ] 이미지-라벨 파일 매칭 검증
-   - [ ] 손상된 파일 및 잘못된 라벨 제거
-
-3. **데이터 분할** ⏳ 대기
-   - [ ] Train/Val/Test 분할 (70/15/15)
-   - [ ] 데이터셋 YAML 파일 작성 (configs/ppe_dataset.yaml)
-
-4. **데이터 검증** ⏳ 대기
-   - [ ] 라벨 시각화로 정확성 확인
-   - [ ] 클래스 분포 분석
+2. **데이터 전처리** 🔄 진행 중
+   - [x] Step 1: Dataset 1 VOC → YOLO 변환 (4,581개)
+   - [x] Step 2: Dataset 2 클래스 ID 확인 (10,500개)
+   - [x] Step 3: 데이터셋 통합 (15,081개)
+   - [x] Step 4: Train/Val/Test 분할 (70/15/15)
+   - [ ] Step 5: 데이터셋 YAML 파일 생성
+   - [ ] Step 6: 데이터 검증 및 시각화
 
 ### Phase 3: 모델 훈련 ⏳ 대기
 1. **모델 설정**
    - [ ] YOLOv8 모델 선택 (yolov8n 또는 yolov8s)
-   - [ ] 훈련 설정 파일 작성 (configs/train_config.yaml)
-   - [ ] 클래스 정의 (helmet, head, vest)
+   - [x] 훈련 설정 파일 작성 (configs/train_config.yaml)
+   - [x] 클래스 정의 (helmet, vest)
 
 2. **Transfer Learning**
    - [ ] COCO 사전 훈련 가중치 로드
@@ -73,6 +67,76 @@
 - [ ] 실시간 모니터링 화면
 - [ ] 이미지/비디오 업로드 기능
 - [ ] 결과 저장 및 리포트 생성
+
+---
+
+## ⚙️ 설정 파일 (configs/)
+
+### 설정 파일 개요
+
+| 파일 | 용도 | 사용 시점 |
+|------|------|-----------|
+| `ppe_dataset.yaml` | 데이터셋 위치 및 클래스 정보 | YOLO 훈련/검증/추론 시 필수 |
+| `train_config.yaml` | 훈련 하이퍼파라미터 | 모델 훈련 시 설정 로드 |
+
+### ppe_dataset.yaml
+**YOLO 모델이 데이터를 찾기 위한 필수 설정 파일**
+
+```yaml
+# 데이터셋 위치 (configs 폴더 기준 상대 경로)
+path: ../images
+train: train/images
+val: val/images
+test: test/images
+
+# 클래스 정의
+nc: 2
+names:
+  0: helmet
+  1: vest
+```
+
+**사용 예시:**
+```python
+from ultralytics import YOLO
+
+model = YOLO('yolov8n.pt')
+model.train(data='configs/ppe_dataset.yaml', epochs=100)
+model.val(data='configs/ppe_dataset.yaml')
+```
+
+### train_config.yaml
+**훈련 하이퍼파라미터 관리 파일 (사용자 정의)**
+
+주요 설정 항목:
+- **model**: 모델 크기 선택 (yolov8n/s/m/l/x)
+- **train**: epochs, batch_size, learning rate 등
+- **augment**: 데이터 증강 설정
+- **output**: 결과물 저장 위치
+
+**사용 예시:**
+```python
+import yaml
+
+with open('configs/train_config.yaml') as f:
+    config = yaml.safe_load(f)
+
+model.train(
+    data='configs/ppe_dataset.yaml',
+    epochs=config['train']['epochs'],
+    batch=config['train']['batch_size'],
+    imgsz=config['train']['img_size'],
+    patience=config['train']['patience']
+)
+```
+
+**주요 튜닝 포인트:**
+| 파라미터 | 기본값 | 설명 |
+|----------|--------|------|
+| epochs | 100 | 너무 적으면 학습 부족, 너무 많으면 과적합 |
+| batch_size | 16 | GPU 메모리에 따라 조절 (8, 16, 32) |
+| lr0 | 0.01 | 초기 학습률 |
+| img_size | 640 | 클수록 정확하지만 느림 |
 
 ---
 
@@ -203,10 +267,10 @@ dataset2_mapping = {
 
 ---
 
-### Step 5: 데이터셋 YAML 생성 ⏳ 대기
+### Step 5: 데이터셋 YAML 생성 ✅ 완료
 ```yaml
 # configs/ppe_dataset.yaml
-path: /path/to/SafetyVisionAI/images
+path: ../images    # configs 폴더 기준 상대 경로
 train: train/images
 val: val/images
 test: test/images
@@ -216,6 +280,11 @@ names:
   0: helmet
   1: vest
 ```
+
+**실행 결과:**
+- 생성 파일: `configs/ppe_dataset.yaml`
+- 클래스 수: 2개 (helmet, vest)
+- 상대 경로 사용으로 다른 개발자도 바로 사용 가능
 
 ---
 
@@ -465,11 +534,10 @@ uv run python src/inference.py --model models/best_model.pt --source webcam
 classes:
   0: helmet      # 헬멧 착용
   1: vest        # 안전조끼 착용
-  2: head        # 헬멧 미착용 (머리만 보임)
 ```
 
 **데이터셋 출처:**
-- Hard Hat Detection (Kaggle): helmet, head 클래스
+- Hard Hat Detection (Kaggle): helmet 클래스 사용 (head, person 제외)
 - Safety Helmet and Reflective Jacket (Kaggle): helmet, vest 클래스
 
 ## 🛠️ 라벨링 도구 추천
