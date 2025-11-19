@@ -29,8 +29,8 @@ Step 6: 데이터셋 검증
 - 필요시 데이터 증강이나 클래스 가중치로 해결 가능
 
 ## 입력/출력
-- 입력: images/train/, images/val/, images/test/
-- 출력: images/processed/samples/ (시각화 이미지)
+- 입력: dataset/data/train/, dataset/data/val/, dataset/data/test/
+- 출력: dataset/raw_data/processed/samples/ (시각화 이미지)
 """
 
 from pathlib import Path
@@ -68,7 +68,7 @@ def validate_dataset():
     # 1. 경로 설정
     # =========================================================================
     base_dir = Path(__file__).parent.parent.parent
-    images_dir = base_dir / 'images'
+    images_dir = base_dir / 'dataset' / 'data'
 
     print("=" * 50)
     print("Step 6: 데이터셋 검증")
@@ -189,9 +189,9 @@ def visualize_samples(num_samples=5):
     # 1. 경로 설정
     # =========================================================================
     base_dir = Path(__file__).parent.parent.parent
-    images_dir = base_dir / 'images'
+    images_dir = base_dir / 'dataset' / 'data'
     # 시각화 결과를 저장할 디렉토리
-    output_dir = base_dir / 'images' / 'processed' / 'samples'
+    output_dir = base_dir / 'dataset' / 'raw_data' / 'processed' / 'samples'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 50)

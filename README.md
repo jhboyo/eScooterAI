@@ -78,12 +78,14 @@ SafetyVisionAI/
 ├── configs/                # 설정 파일
 │   ├── ppe_dataset.yaml   # 데이터셋 설정 (YOLO 필수)
 │   └── train_config.yaml  # 훈련 하이퍼파라미터
-├── images/                 # 데이터셋
-│   ├── raw/               # 원본 데이터
-│   ├── processed/         # 전처리 중간 결과
-│   ├── train/             # 훈련 데이터 (70%)
-│   ├── val/               # 검증 데이터 (15%)
-│   └── test/              # 테스트 데이터 (15%)
+├── dataset/                # 데이터셋
+│   ├── data/              # 훈련 데이터 (Hugging Face 업로드용)
+│   │   ├── train/         # 훈련 데이터 (70%)
+│   │   ├── val/           # 검증 데이터 (15%)
+│   │   └── test/          # 테스트 데이터 (15%)
+│   └── raw_data/          # 전처리 전 원본
+│       ├── raw/           # 원본 데이터
+│       └── processed/     # 전처리 중간 결과
 ├── models/                 # 훈련된 모델
 ├── src/                    # 소스 코드
 │   ├── 1_preprocess/      # 전처리 스크립트
@@ -282,7 +284,7 @@ Dataset 2는 이미 YOLO 형식이므로 클래스 ID만 확인
 | **합계** | **15,081** | **15,081** | **100%** | **39,157** | **16,049** |
 
 - 모든 이미지-라벨 매칭 완료 (누락 없음)
-- 샘플 이미지: `images/processed/samples/`
+- 샘플 이미지: `dataset/raw_data/processed/samples/`
 
 ---
 
@@ -299,7 +301,21 @@ cp .env.example .env
 # 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
 ```
 
-### Step 2: 데이터셋 YAML 생성
+### Step 2: 데이터셋 다운로드 (Hugging Face)
+Hugging Face에서 데이터셋 다운로드
+
+```bash
+# hf CLI 설치
+uv tool install huggingface-hub
+
+# 로그인 (최초 1회)
+uv tool run hf auth login
+
+# 데이터셋 다운로드
+uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dataset/data
+```
+
+### Step 3: 데이터셋 YAML 생성
 `.env`의 `PROJECT_ROOT`를 기반으로 데이터셋 설정 파일 생성
 
 ```bash
@@ -308,7 +324,7 @@ uv run python src/1_preprocess/step5_generate_yaml.py
 
 **결과:** `configs/ppe_dataset.yaml` 생성 (절대 경로 포함)
 
-### Step 3: 훈련 실행
+### Step 4: 훈련 실행
 YOLOv8 모델 훈련 (Transfer Learning)
 
 ```bash
@@ -326,7 +342,7 @@ uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 - Image Size: 640x640
 - Optimizer: AdamW
 
-### Step 4: 결과 시각화
+### Step 5: 결과 시각화
 훈련 결과를 그래프로 시각화
 
 ```bash
@@ -335,7 +351,7 @@ uv run python src/2_training/visualize_results.py
 
 **결과:** `models/ppe_detection/training_curves.png` 생성
 
-### Step 5: 모델 평가 (예정)
+### Step 6: 모델 평가 (예정)
 테스트 데이터셋으로 모델 성능 평가
 
 ```bash

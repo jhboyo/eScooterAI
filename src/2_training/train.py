@@ -118,6 +118,7 @@ def train(args):
     batch_size = config['train']['batch_size']
     img_size = config['train']['img_size']
     patience = config['train']['patience']
+    workers = config['train'].get('workers', 8)  # 데이터 로드 스레드 수
 
     # Optimizer 설정
     optimizer = config['train']['optimizer']
@@ -172,6 +173,7 @@ def train(args):
         batch=batch_size,
         imgsz=img_size,
         patience=patience,
+        workers=workers,
 
         # Optimizer 설정
         optimizer=optimizer,

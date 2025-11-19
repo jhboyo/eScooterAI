@@ -47,9 +47,10 @@ data:
 # 모델 훈련에 사용되는 하이퍼파라미터
 train:
   epochs: 100  # 전체 데이터셋 학습 반복 횟수
-  batch_size: 16  # 한 번에 처리할 이미지 수 (GPU 메모리에 따라 조절)
+  batch_size: 128  # 한 번에 처리할 이미지 수 (GPU 메모리에 따라 조절)
   img_size: 640  # 입력 이미지 크기 (가로/세로)
   patience: 20  # Early stopping: 성능 개선 없을 시 중단 기준
+  workers: 8    # 데이터 로드 스레드 수
 
   # Optimizer settings
   # 최적화 알고리즘 및 학습률 설정

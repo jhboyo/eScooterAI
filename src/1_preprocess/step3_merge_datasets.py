@@ -17,9 +17,9 @@ Dataset 1 (변환된 YOLO)과 Dataset 2를 하나로 통합합니다.
   - Dataset 2: ds2_image_001.jpg
 
 ## 입력/출력
-- 입력 1: images/processed/dataset1/ (Step 1 결과)
-- 입력 2: images/raw/safety-Helmet-Reflective-Jacket/
-- 출력: images/processed/merged/
+- 입력 1: dataset/raw_data/processed/dataset1/ (Step 1 결과)
+- 입력 2: dataset/raw_data/raw/safety-Helmet-Reflective-Jacket/
+- 출력: dataset/raw_data/processed/merged/
 """
 
 import shutil
@@ -49,13 +49,13 @@ def merge_datasets():
     base_dir = Path(__file__).parent.parent.parent
 
     # Dataset 1: Step 1에서 변환된 YOLO 데이터
-    dataset1_dir = base_dir / 'images' / 'processed' / 'dataset1'
+    dataset1_dir = base_dir / 'dataset' / 'raw_data' / 'processed' / 'dataset1'
 
     # Dataset 2: 원본 YOLO 데이터 (Kaggle에서 다운로드)
-    dataset2_dir = base_dir / 'images' / 'raw' / 'safety-Helmet-Reflective-Jacket'
+    dataset2_dir = base_dir / 'dataset' / 'raw_data' / 'raw' / 'safety-Helmet-Reflective-Jacket'
 
     # 출력 디렉토리: 통합된 데이터 저장
-    output_dir = base_dir / 'images' / 'processed' / 'merged'
+    output_dir = base_dir / 'dataset' / 'raw_data' / 'processed' / 'merged'
     output_images_dir = output_dir / 'images'
     output_labels_dir = output_dir / 'labels'
 

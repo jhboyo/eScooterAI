@@ -84,7 +84,7 @@ def generate_yaml():
 
     # 환경 변수에서 프로젝트 루트 경로 가져오기
     project_root = os.getenv('PROJECT_ROOT', str(base_dir))
-    images_path = Path(project_root) / 'images'
+    images_path = Path(project_root) / 'dataset' / 'data'
 
     # 설정 파일을 저장할 디렉토리
     config_dir = base_dir / 'configs'

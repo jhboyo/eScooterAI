@@ -26,8 +26,8 @@ Dataset 1 (kaggle-safey_helmet)의 XML 라벨을 YOLO 형식으로 변환합니�
 - person → -1 (제외: 전신 탐지 불필요)
 
 ## 입력/출력
-- 입력: images/raw/kaggle-safey_helmet/annotations/*.xml
-- 출력: images/processed/dataset1/labels/*.txt
+- 입력: dataset/raw_data/raw/kaggle-safey_helmet/annotations/*.xml
+- 출력: dataset/raw_data/processed/dataset1/labels/*.txt
 """
 
 import xml.etree.ElementTree as ET
@@ -172,12 +172,12 @@ def convert_dataset1():
     base_dir = Path(__file__).parent.parent.parent
 
     # 입력 경로: 원본 데이터셋 위치
-    input_dir = base_dir / 'images' / 'raw' / 'kaggle-safey_helmet'
+    input_dir = base_dir / 'dataset' / 'raw_data' / 'raw' / 'kaggle-safey_helmet'
     annotations_dir = input_dir / 'annotations'  # XML 파일들
     images_dir = input_dir / 'images'            # 이미지 파일들
 
     # 출력 경로: 변환된 데이터 저장 위치
-    output_dir = base_dir / 'images' / 'processed' / 'dataset1'
+    output_dir = base_dir / 'dataset' / 'raw_data' / 'processed' / 'dataset1'
     output_images_dir = output_dir / 'images'    # 이미지 저장
     output_labels_dir = output_dir / 'labels'    # 라벨(TXT) 저장
 

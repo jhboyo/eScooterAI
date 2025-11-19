@@ -14,4 +14,6 @@ dependencies = [
     "ultralytics>=8.3.229",
     "python-dotenv>=1.2.1",
     "pandas>=2.1.0",
+    "huggingface-hub>=0.20.0",
+    "hf-transfer>=0.1.0",
 ]

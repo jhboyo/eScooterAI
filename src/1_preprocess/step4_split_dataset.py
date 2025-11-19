@@ -20,11 +20,11 @@ Step 4: 데이터셋 분할
 - 42는 "은하수를 여행하는 히치하이커" 에서 유래한 관례
 
 ## 입력/출력
-- 입력: images/processed/merged/ (Step 3 결과)
+- 입력: dataset/raw_data/processed/merged/ (Step 3 결과)
 - 출력:
-  - images/train/images/, images/train/labels/
-  - images/val/images/, images/val/labels/
-  - images/test/images/, images/test/labels/
+  - dataset/data/train/images/, dataset/data/train/labels/
+  - dataset/data/val/images/, dataset/data/val/labels/
+  - dataset/data/test/images/, dataset/data/test/labels/
 """
 
 import shutil
@@ -63,12 +63,12 @@ def split_dataset(train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, seed=42):
     base_dir = Path(__file__).parent.parent.parent
 
     # 입력 디렉토리: Step 3에서 통합된 데이터
-    merged_dir = base_dir / 'images' / 'processed' / 'merged'
+    merged_dir = base_dir / 'dataset' / 'raw_data' / 'processed' / 'merged'
     merged_images = merged_dir / 'images'
     merged_labels = merged_dir / 'labels'
 
     # 출력 디렉토리: 최종 분할된 데이터
-    output_base = base_dir / 'images'
+    output_base = base_dir / 'dataset' / 'data'
 
     # 각 분할의 출력 경로 정의
     splits = {

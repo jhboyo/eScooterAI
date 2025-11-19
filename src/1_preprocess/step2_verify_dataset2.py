@@ -18,7 +18,7 @@ Dataset 2 (safety-Helmet-Reflective-Jacket)의 클래스 ID를 확인합니다.
 예: 0 → 1, 1 → 0 (순서가 반대인 경우)
 
 ## 입력/출력
-- 입력: images/raw/safety-Helmet-Reflective-Jacket/
+- 입력: dataset/raw_data/raw/safety-Helmet-Reflective-Jacket/
 - 출력: 없음 (확인만 수행)
 """
 
@@ -48,7 +48,7 @@ def verify_dataset2():
     # 프로젝트 루트 디렉토리
     base_dir = Path(__file__).parent.parent.parent
     # Dataset 2 위치
-    dataset2_dir = base_dir / 'images' / 'raw' / 'safety-Helmet-Reflective-Jacket'
+    dataset2_dir = base_dir / 'dataset' / 'raw_data' / 'raw' / 'safety-Helmet-Reflective-Jacket'
 
     print("=" * 50)
     print("Step 2: Dataset 2 클래스 ID 확인")
