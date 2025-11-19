@@ -56,16 +56,18 @@ wandb/
 mlruns/
 tensorboard/
 
-# Data
-data/raw/
-data/processed/
-data/train/
-data/val/
-data/test/
+# Data/Images
+images/raw/
+images/processed/
+images/train/
+images/val/
+images/test/
+!images/**/.gitkeep
+
+# Data files
 *.csv
 *.json
 *.xml
-*.txt
 !requirements.txt
 !README.md
 
