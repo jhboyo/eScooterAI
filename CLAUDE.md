@@ -63,6 +63,10 @@ SafetyVisionAI/
 # uv로 의존성 설치
 uv sync
 
+# 환경 변수 파일 생성 (최초 1회)
+cp .env.example .env
+# .env 파일에서 PROJECT_ROOT를 본인의 경로로 수정
+
 # 가상환경 활성화 (자동으로 관리됨)
 uv run python main.py
 ```

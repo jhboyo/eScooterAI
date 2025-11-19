@@ -1,43 +1,51 @@
 """
 YOLOv8 모델 훈련 스크립트
 
+<<<<<<< HEAD
 ## 이 스크립트란?
 YOLOv8 모델을 PPE 데이터셋으로 훈련시키는 메인 훈련 스크립트입니다.
 Transfer Learning을 사용하여 COCO 사전학습 가중치에서 시작합니다.
+=======
+## 이 스크립트는?
+YOLOv8 모델을 PPE 데이터셋으로 훈련하는 메인 훈련 스크립트입니다.
+Transfer Learning을 활용하여 COCO 사전학습 가중치를 사용합니다.
+>>>>>>> 4c2dc88 (macbook에서 epoch 3 훈련 완료)
 
 ## 사용 방법
 ```bash
 # 기본 실행 (configs/train_config.yaml 사용)
-uv run python src/train.py
+uv run python src/2_training/train.py
 
-# 커스텀 설정 파일 사용
-uv run python src/train.py --config configs/custom_config.yaml
+# 다른 설정 파일 사용
+uv run python src/2_training/train.py --config configs/custom_config.yaml
 
-# 데이터셋 경로 직접 지정
-uv run python src/train.py --data configs/ppe_dataset.yaml
+# 데이터셋 직접 지정
+uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 ```
 
-## 주요 기능
+## 실행 과정
 1. YOLOv8 모델 로드 (yolov8n.pt - Nano 버전)
 2. configs/train_config.yaml에서 하이퍼파라미터 로드
 3. configs/ppe_dataset.yaml에서 데이터셋 정보 로드
 4. 훈련 실행 및 모델 저장
-5. 훈련 결과 및 메트릭 출력
+5. 훈련 결과 및 통계 출력
 
 ## 출력 파일
 훈련 완료 후 models/ppe_detection/ 폴더에 다음 파일들이 생성됩니다:
 - weights/best.pt: 최고 성능 모델
 - weights/last.pt: 마지막 체크포인트
-- results.csv: 에포크별 훈련 메트릭
+- results.csv: 에포크별 훈련 통계
 - confusion_matrix.png: 혼동 행렬
 - PR_curve.png: Precision-Recall 곡선
 - results.png: 훈련 결과 그래프
 """
 
 import argparse
+import os
 from pathlib import Path
 import yaml
 import torch
+from dotenv import load_dotenv
 from ultralytics import YOLO
 
 
@@ -84,7 +92,7 @@ def train(args):
     Args:
         args: 명령줄 인자 (argparse Namespace)
 
-    처리 과정:
+    실행 순서:
     1. 디바이스 확인
     2. 설정 파일 로드
     3. YOLOv8 모델 로드
@@ -146,7 +154,7 @@ def train(args):
     # =========================================================================
     print("YOLOv8 모델 로드 중...")
 
-    # 사전학습된 가중치 로드 (Transfer Learning)
+    # 사전학습 가중치 로드 (Transfer Learning)
     # yolov8n.pt: COCO 데이터셋으로 학습된 Nano 버전
     model = YOLO(f"{model_name}.pt")
 
@@ -202,11 +210,11 @@ def train(args):
         # 디바이스 설정
         device=device,
 
-        # 로깅 설정
+        # 로그 설정
         verbose=config['verbose'],
         save_period=config['save_period'],
 
-        # 추가 설정
+        # 기타 설정
         save=True,          # 체크포인트 저장
         plots=True,         # 훈련 그래프 저장
         val=True,           # 훈련 중 검증 수행
@@ -227,14 +235,14 @@ def train(args):
     print(f"\n결과 파일 위치: {output_path}")
     print(f"   - 최고 성능 모델: {weights_path / 'best.pt'}")
     print(f"   - 마지막 체크포인트: {weights_path / 'last.pt'}")
-    print(f"   - 훈련 메트릭: {output_path / 'results.csv'}")
+    print(f"   - 훈련 통계: {output_path / 'results.csv'}")
     print(f"   - 혼동 행렬: {output_path / 'confusion_matrix.png'}")
     print(f"   - PR 곡선: {output_path / 'PR_curve.png'}")
     print()
 
-    # 최종 메트릭 출력
+    # 최고 성능 출력
     if hasattr(results, 'results_dict'):
-        print("최종 성능 메트릭:")
+        print("최고 성능 통계:")
         metrics = results.results_dict
         if 'metrics/mAP50(B)' in metrics:
             print(f"   - mAP@0.5: {metrics['metrics/mAP50(B)']:.4f}")
@@ -247,8 +255,8 @@ def train(args):
 
     print()
     print("다음 단계:")
-    print("   1. 모델 평가: uv run python src/evaluate.py")
-    print("   2. 추론 테스트: uv run python src/inference.py --source test_image.jpg")
+    print("   1. 모델 평가: uv run python src/4_test/evaluate.py")
+    print("   2. 추론 테스트: uv run python src/3_inference/inference.py --source test_image.jpg")
     print()
 
     return results
@@ -259,12 +267,20 @@ def main():
     메인 함수 - 명령줄 인자 파싱 및 훈련 실행
     """
     # 기본 경로 설정
-    # __file__ → src/2_training/train.py
-    # parent → src/2_training/
-    # parent.parent → src/
-    # parent.parent.parent → 프로젝트 루트
+    # __file__ -> src/2_training/train.py
+    # parent -> src/2_training/
+    # parent.parent -> src/
+    # parent.parent.parent -> 프로젝트 루트
     base_dir = Path(__file__).parent.parent.parent
-    default_config = base_dir / 'configs' / 'train_config.yaml'
+
+    # .env 파일 로드
+    env_path = base_dir / '.env'
+    load_dotenv(env_path)
+
+    # 환경 변수에서 프로젝트 루트 경로 가져오기
+    project_root = os.getenv('PROJECT_ROOT', str(base_dir))
+
+    default_config = Path(project_root) / 'configs' / 'train_config.yaml'
 
     # 명령줄 인자 파싱
     parser = argparse.ArgumentParser(

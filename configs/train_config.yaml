@@ -82,7 +82,7 @@ augment:
 output:
   save_dir: "models"  # 모델 저장 디렉토리
   name: "ppe_detection"  # 실험 이름 (models/ppe_detection/)
-  exist_ok: false  # 기존 결과 덮어쓰기 허용 여부
+  exist_ok: true  # 기존 결과 덮어쓰기 허용 여부
 
 # Device settings
 # GPU/CPU 설정
