@@ -6,7 +6,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| **목표** | 작업자 개인보호구(PPE) 착용 상태 실시간 감지 |
+| **목표** | 작업자 개인보호구(PPE) 착용 상태 감지 |
 | **탐지 대상** | 헬멧(helmet), 안전조끼(vest) |
 | **모델** | YOLOv8 (Transfer Learning) |
 | **데이터셋** | 15,081장 (Kaggle 2개 데이터셋 통합) |
@@ -52,7 +52,7 @@ uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 # 이미지 추론
 uv run python src/3_inference/inference.py --model models/best_model.pt --input test_image.jpg
 
-# 웹캠 실시간 추론
+# 웹캠 실시간 추론(검토)
 uv run python src/3_inference/inference.py --model models/best_model.pt --source webcam
 ```
 
@@ -151,14 +151,14 @@ SafetyVisionAI/
 ### Phase 5: 추론 시스템 ⏳
 - [ ] `src/inference.py` 작성
 - [ ] 이미지 추론
-- [ ] 비디오 파일 추론
-- [ ] 웹캠 실시간 추론
+- [ ] 비디오 파일 추론(예정)
+- [ ] 웹캠 실시간 추론(예정)
 - [ ] 결과 시각화 (바운딩 박스, 클래스명, 신뢰도)
 
 ### Phase 6: 웹 인터페이스 ⏳
 - [ ] Streamlit 대시보드
-- [ ] 실시간 모니터링
-- [ ] 이미지/비디오 업로드
+- [ ] 실시간 모니터링(예정)
+- [ ] 이미지/비디오 업로드(예정)
 
 ---
 
@@ -343,7 +343,6 @@ Dataset 2는 이미 YOLO 형식이므로 클래스 ID만 확인
 |------|--------|
 | mAP@0.5 | > 85% |
 | FPS | > 30 (실시간) |
-| 안정성 | 24시간 연속 운영 |
 
 ---
 
