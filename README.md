@@ -74,6 +74,146 @@
 - [ ] 이미지/비디오 업로드 기능
 - [ ] 결과 저장 및 리포트 생성
 
+---
+
+## 📊 데이터셋 분석
+
+### Dataset 1: kaggle-safey_helmet (Hard Hat Detection)
+| 항목 | 내용 |
+|------|------|
+| **이미지 수** | 5,000장 |
+| **라벨 형식** | Pascal VOC (XML) |
+| **이미지 형식** | PNG (416x416) |
+| **클래스** | helmet (18,966개), head (5,785개), person (751개) |
+
+### Dataset 2: safety-Helmet-Reflective-Jacket
+| 항목 | 내용 |
+|------|------|
+| **이미지 수** | Train 7,350 / Valid 1,575 / Test 1,575 (총 10,500장) |
+| **라벨 형식** | YOLO (TXT) ✅ |
+| **이미지 형식** | JPG |
+| **클래스** | 0: Safety-Helmet (10,868개), 1: Reflective-Jacket (8,210개) |
+
+### 클래스 매핑 계획
+| 통일 클래스 | Dataset 1 원본 | Dataset 2 원본 |
+|-------------|----------------|----------------|
+| 0: helmet | helmet | 0: Safety-Helmet |
+| 1: vest | ❌ 없음 | 1: Reflective-Jacket |
+| - | head (제외) | - |
+| - | person (제외) | - |
+
+### 최종 데이터셋 예상
+| 클래스 | Dataset 1 | Dataset 2 | 총 개수 |
+|--------|-----------|-----------|---------|
+| helmet | 18,966 | 10,868 | ~29,834 |
+| vest | 0 | 8,210 | ~8,210 |
+
+**총 이미지**: ~15,500장 | **총 객체**: ~38,044개
+
+---
+
+## 🔧 전처리 실행 (Phase 2-2)
+
+### 실행 방법
+
+#### 전체 실행 (한 번에)
+```bash
+uv run python src/preprocess_all.py
+```
+
+#### 단계별 실행
+```bash
+# Step 1: Dataset 1 VOC → YOLO 변환
+uv run python src/preprocess/step1_convert_voc_to_yolo.py
+
+# Step 2: Dataset 2 클래스 ID 확인
+uv run python src/preprocess/step2_verify_dataset2.py
+
+# Step 3: 데이터셋 통합
+uv run python src/preprocess/step3_merge_datasets.py
+
+# Step 4: Train/Val/Test 분할
+uv run python src/preprocess/step4_split_dataset.py
+
+# Step 5: YAML 파일 생성
+uv run python src/preprocess/step5_generate_yaml.py
+
+# Step 6: 데이터 검증
+uv run python src/preprocess/step6_validate_dataset.py
+```
+
+---
+
+### Step 1: Dataset 1 변환 (VOC → YOLO) ✅ 완료
+```python
+# 클래스 매핑
+dataset1_mapping = {
+    'helmet': 0,   # → helmet
+    'head': -1,    # → 제외
+    'person': -1   # → 제외
+}
+```
+
+**실행 결과:**
+- 입력: 5,000개 XML 파일
+- 변환됨: 4,581개 (helmet이 있는 이미지)
+- 스킵됨: 419개 (helmet 없음)
+- 출력: `images/processed/dataset1/`
+
+---
+
+### Step 2: Dataset 2 클래스 ID 확인 ✅ 완료
+```python
+# 클래스 매핑 (이미 YOLO 형식)
+dataset2_mapping = {
+    0: 0,  # Safety-Helmet → helmet
+    1: 1   # Reflective-Jacket → vest
+}
+```
+
+**실행 결과:**
+- 총 이미지: 10,500개 (Train 7,350 / Valid 1,575 / Test 1,575)
+- helmet: 20,191개
+- vest: 16,049개
+- 결론: 변환 불필요, 그대로 사용 가능
+
+---
+
+### Step 3: 데이터 통합 ⏳ 대기
+- 두 데이터셋을 `images/processed/merged/`로 병합
+- 파일명 충돌 방지 (prefix 추가: `ds1_`, `ds2_`)
+
+---
+
+### Step 4: Train/Val/Test 분할 ⏳ 대기
+- Train/Val/Test 재분할 (70/15/15)
+- `images/train/`, `images/val/`, `images/test/`에 저장
+
+---
+
+### Step 5: 데이터셋 YAML 생성 ⏳ 대기
+```yaml
+# configs/ppe_dataset.yaml
+path: /path/to/SafetyVisionAI/images
+train: train/images
+val: val/images
+test: test/images
+
+nc: 2
+names:
+  0: helmet
+  1: vest
+```
+
+---
+
+### Step 6: 데이터 검증 ⏳ 대기
+- 이미지-라벨 매칭 확인
+- 클래스 분포 시각화
+- 샘플 이미지 바운딩박스 시각화
+
+---
+
 ## ⚡ 집중 개발 전략 (3주 단축 계획)
 
 ### 핵심 기능 우선순위
