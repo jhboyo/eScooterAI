@@ -10,8 +10,18 @@
 
 ---
 
-## 연구 배경
+## 프로젝트 개요
 
+| 항목 | 내용 |
+|------|------|
+| **목표** | 산업현장의 작업자 개인보호구(PPE) 착용 상태 감지 |
+| **탐지 대상** | 헬멧(helmet), 안전조끼(vest) |
+| **모델** | YOLOv8 (Transfer Learning) |
+| **데이터셋** | 15,081장 (Kaggle 2개 데이터셋 통합) |
+
+---
+
+## 연구 배경
 
 ### 산업안전보건기준에 관한 규칙 제32조 제1항
 
@@ -29,21 +39,124 @@
 
 **AI 기반 자동 안전 모니터링 시스템**을 통해:
 - 실시간 PPE 착용 상태 자동 감지
+- 미착용 시 즉각적인 알림 (예정)
+- 24시간 지속적인 모니터링 가능 (예정)
 
-  <img src="materials/train_batch0.jpg" width="600" alt="Train Batch Sample">
-- (미착용 시 즉각적인 알림)
-- (24시간 지속적인 모니터링 가능)
+<img src="materials/train_batch0.jpg" width="600" alt="Train Batch Sample">
 
 ---
 
-## 프로젝트 개요
+## 훈련 결과 (A100 GPU)
 
-| 항목 | 내용 |
+### 최종 성능 지표
+
+| 지표 | 결과 |
 |------|------|
-| **목표** | 산업현장의 작업자 개인보호구(PPE) 착용 상태 감지 |
-| **탐지 대상** | 헬멧(helmet), 안전조끼(vest) |
-| **모델** | YOLOv8 (Transfer Learning) |
-| **데이터셋** | 15,081장 (Kaggle 2개 데이터셋 통합) |
+| **mAP@0.5** | 0.9440 (94.4%) |
+| **mAP@0.5:0.95** | 0.7308 (73.1%) |
+| **Precision** | 0.9217 (92.2%) |
+| **Recall** | 0.8911 (89.1%) |
+
+### 클래스별 성능 분석
+
+| 클래스 | Precision | Recall | AP@0.5 | AP@0.5:0.95 |
+|--------|-----------|--------|--------|-------------|
+| **Helmet** | 0.9364 (93.6%) | 0.8923 (89.2%) | 0.9444 (94.4%) | 0.6970 (69.7%) |
+| **Vest** | 0.9104 (91.0%) | 0.8877 (88.8%) | 0.9434 (94.3%) | 0.7654 (76.5%) |
+
+**분석:**
+- 두 클래스 모두 **AP@0.5가 94% 이상**으로 매우 우수
+- Vest가 helmet보다 **mAP@0.5:0.95에서 6.8%p 높음** → 조끼의 바운딩 박스가 더 정확
+- 두 클래스 간 성능 차이가 크지 않아 **균형 잡힌 모델**
+
+### 훈련 환경
+
+| 항목 | 설정 |
+|------|------|
+| GPU | RunPod A100 |
+| Epochs | 100 |
+| Batch Size | 128 |
+| Image Size | 640x640 |
+| Model | YOLOv8n (Nano) |
+| Optimizer | AdamW |
+| Initial LR | 0.01 |
+| AMP | True (Mixed Precision) |
+| 총 훈련 시간 | 약 57분 (3,409초) |
+
+### Loss 감소 추이
+
+| Loss 종류 | 초기값 | 최종값 | 감소율 |
+|-----------|--------|--------|--------|
+| train/box_loss | 1.50 | 0.79 | 47% |
+| train/cls_loss | 1.83 | 0.45 | 75% |
+| train/dfl_loss | 1.38 | 0.98 | 29% |
+| val/box_loss | 2.64 | 0.92 | 65% |
+| val/cls_loss | 7.16 | 0.49 | 93% |
+| val/dfl_loss | 3.27 | 1.03 | 69% |
+
+모든 손실이 꾸준히 감소하며, validation loss도 함께 감소하여 **과적합(overfitting) 없이** 잘 학습되었습니다.
+
+### 학습 곡선
+
+<img src="models/ppe_detection/results.png" width="800" alt="Training Results">
+
+### 혼동 행렬 (Confusion Matrix) 분석
+
+#### 클래스별 탐지 결과
+
+| 클래스 | 정확히 탐지 | 정확도 | 미탐율 |
+|--------|-------------|--------|--------|
+| **Helmet** | 5,456개 | 91% | 9% |
+| **Vest** | 2,085개 | 91% | 8% |
+
+#### 클래스 간 혼동
+
+| 혼동 유형 | 건수 | 비율 |
+|-----------|------|------|
+| Helmet → Vest | 5개 | 0.08% |
+| Vest → Helmet | 8개 | 0.35% |
+| **총 클래스 간 혼동** | **13개** | **매우 낮음** |
+
+#### False Positive (오탐)
+
+| 오탐 유형 | 건수 |
+|-----------|------|
+| Background → Helmet | 549개 |
+| Background → Vest | 287개 |
+
+<img src="models/ppe_detection/confusion_matrix_normalized.png" width="500" alt="Confusion Matrix Normalized">
+
+### 결과 해석
+
+#### 강점
+1. **높은 탐지 정확도**: mAP@0.5 = 94.4%로 목표(85%) 크게 초과
+2. **클래스 간 혼동 최소화**: helmet-vest 혼동이 거의 없음 (13건/7,500건 이하)
+3. **안정적인 학습**: 과적합 없이 꾸준한 성능 향상
+4. **빠른 수렴**: 50 epoch 이후 안정화
+
+#### 개선 가능 영역
+1. **False Positive 감소**: background를 PPE로 오탐하는 경우 (836건)
+2. **Recall 향상**: 일부 객체 미탐지 (helmet 9%, vest 8%)
+
+#### 결론
+
+이 모델은 **건설현장 PPE 탐지에 매우 적합**합니다:
+
+- **실용성**: 91%+ 정확도로 실시간 모니터링 가능
+- **신뢰성**: helmet/vest 간 혼동이 거의 없어 안전 모니터링에 신뢰할 수 있음
+- **효율성**: YOLOv8n 경량 모델로 빠른 추론 속도 기대
+
+### 결과 파일
+
+| 파일 | 위치 |
+|------|------|
+| 최고 성능 모델 | `models/ppe_detection/weights/best.pt` |
+| 마지막 체크포인트 | `models/ppe_detection/weights/last.pt` |
+| 훈련 통계 | `models/ppe_detection/results.csv` |
+| 혼동 행렬 | `models/ppe_detection/confusion_matrix.png` |
+| PR 곡선 | `models/ppe_detection/BoxPR_curve.png` |
+
+---
 
 ## 빠른 시작
 
@@ -62,18 +175,21 @@ cp .env.example .env
 source .venv/bin/activate
 ```
 
-### 데이터 전처리
+### 데이터셋 다운로드 (Hugging Face)
 ```bash
-# 전체 전처리 실행
-uv run python src/1_preprocess/preprocess_all.py
+# hf CLI 설치
+uv tool install huggingface-hub
 
-# 또는 단계별 실행
-uv run python src/1_preprocess/step1_convert_voc_to_yolo.py
-uv run python src/1_preprocess/step2_verify_dataset2.py
-uv run python src/1_preprocess/step3_merge_datasets.py
-uv run python src/1_preprocess/step4_split_dataset.py
+# 로그인 (최초 1회)
+uv tool run hf auth login
+
+# 데이터셋 다운로드
+uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dataset/data
+```
+
+### 데이터셋 YAML 생성
+```bash
 uv run python src/1_preprocess/step5_generate_yaml.py
-uv run python src/1_preprocess/step6_validate_dataset.py
 ```
 
 ### 모델 훈련
@@ -84,10 +200,7 @@ uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 ### 추론
 ```bash
 # 이미지 추론
-uv run python src/3_inference/inference.py --model models/best_model.pt --input test_image.jpg
-
-# 웹캠 실시간 추론
-uv run python src/inference.py --model models/best_model.pt --source webcam
+uv run python src/3_inference/inference.py --model models/ppe_detection/weights/best.pt --input test_image.jpg
 ```
 
 ---
@@ -102,143 +215,6 @@ uv run python src/inference.py --model models/best_model.pt --source webcam
 | **이미지 처리** | OpenCV, NumPy |
 | **시각화** | Matplotlib |
 | **웹 UI** | Streamlit (예정) |
-
----
-
-## 프로젝트 구조
-
-```
-SafetyVisionAI/
-├── configs/                # 설정 파일
-│   ├── ppe_dataset.yaml   # 데이터셋 설정 (YOLO 필수)
-│   └── train_config.yaml  # 훈련 하이퍼파라미터
-├── dataset/                # 데이터셋
-│   ├── data/              # 훈련 데이터 (Hugging Face 업로드용)
-│   │   ├── train/         # 훈련 데이터 (70%)
-│   │   ├── val/           # 검증 데이터 (15%)
-│   │   └── test/          # 테스트 데이터 (15%)
-│   └── raw_data/          # 전처리 전 원본
-│       ├── raw/           # 원본 데이터
-│       └── processed/     # 전처리 중간 결과
-├── models/                 # 훈련된 모델
-├── src/                    # 소스 코드
-│   ├── 1_preprocess/      # 전처리 스크립트
-│   ├── 2_training/        # 훈련 스크립트
-│   ├── 3_inference/       # 추론 스크립트
-│   └── 4_test/            # 테스트 스크립트
-├── notebooks/              # Jupyter 노트북
-│   └── preprocess/        # 전처리 노트북
-├── materials/              # 참고 자료
-├── pyproject.toml          # 의존성 정의
-└── README.md
-```
-
----
-
-## 진행 현황
-
-### Phase 1: 환경 설정 ✅
-- [x] Python 가상환경 생성 (uv)
-- [x] 라이브러리 설치
-- [x] 프로젝트 구조 생성
-
-### Phase 2: Dataset 준비 & 전처리 진행 ✅
-- [x] Step 1: Dataset 1 VOC → YOLO 변환 (4,581개)
-- [x] Step 2: Dataset 2 클래스 ID 확인 (10,500개)
-- [x] Step 3: Dataset 통합 (15,081개)
-- [x] Step 4: Train/Val/Test 분할 (70/15/15)
-- [x] Step 5: Dataset YAML 생성
-- [x] Step 6: 데이터 검증 및 시각화
-
-### Phase 3: 모델 훈련 ✅
-- [x] YOLOv8 모델 선택 (yolov8n - Nano)
-- [x] 훈련 설정 파일 작성
-- [x] 클래스 정의 (helmet, vest)
-- [x] Transfer Learning 실행 (MacBook 3 epochs 테스트 완료)
-- [x] 전체 훈련 (100 epochs) - RunPod A100 완료
-- [ ] 하이퍼파라미터 튜닝
-
-### Phase 4: 모델 평가 ✅
-- [x] mAP@0.5, mAP@0.5:0.95 측정
-- [x] Precision, Recall 계산
-- [x] Confusion Matrix 생성
-- [ ] 클래스별 성능 분석
-- [ ] FPS 측정
-
-### Phase 5: 추론 시스템 ⏳
-- [ ] `src/inference.py` 작성
-- [ ] 이미지 추론
-- [ ] 비디오 파일 추론(예정)
-- [ ] 웹캠 실시간 추론(예정)
-- [ ] 결과 시각화 (바운딩 박스, 클래스명, 신뢰도)
-
-### Phase 6: 웹 인터페이스 ⏳
-- [ ] Streamlit 대시보드
-- [ ] 실시간 모니터링
-
----
-
-## 설정 파일
-
-### ppe_dataset.yaml
-YOLO 모델이 데이터를 찾기 위한 **필수** 설정 파일
-
-```yaml
-path: /path/to/project/images   # 절대 경로 (자동 생성)
-train: train/images
-val: val/images
-test: test/images
-
-nc: 2
-names:
-  0: helmet
-  1: vest
-```
-
-**주의:** 이 파일의 `path`는 `.env`의 `PROJECT_ROOT`를 기반으로 자동 생성됩니다.
-
-**다른 개발자 설정 방법:**
-```bash
-# 1. .env 파일에서 PROJECT_ROOT를 본인의 경로로 수정
-# 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
-
-# 2. YAML 파일 재생성
-uv run python src/1_preprocess/step5_generate_yaml.py
-```
-
-**사용:**
-```python
-from ultralytics import YOLO
-model = YOLO('yolov8n.pt')
-model.train(data='configs/ppe_dataset.yaml', epochs=100)
-```
-
-### train_config.yaml
-훈련 하이퍼파라미터 관리 파일
-
-| 파라미터 | 기본값 | 설명 |
-|----------|--------|------|
-| epochs | 100 | 학습 반복 횟수 |
-| batch_size | 16 | 배치 크기 (GPU 메모리에 따라 조절) |
-| lr0 | 0.01 | 초기 학습률 |
-| img_size | 640 | 입력 이미지 크기 |
-
-### 훈련 출력 파일
-훈련 완료 후 `models/ppe_detection/` 폴더에 생성되는 파일들:
-
-| 분류 | 파일 | 설명 |
-|------|------|------|
-| **핵심 결과** | `weights/best.pt` | 최고 성능 모델 |
-| **핵심 결과** | `weights/last.pt` | 마지막 체크포인트 |
-| **성능 지표** | `results.csv` | 에포크별 훈련 통계 |
-| **평가 시각화** | `confusion_matrix.png` | 혼동 행렬 |
-| **평가 시각화** | `PR_curve.png` | Precision-Recall 곡선 |
-| **평가 시각화** | `training_curves.png` | 훈련 결과 그래프 (visualize_results.py로 생성) |
-| **디버깅용** | `train_batch*.jpg` | 데이터 로딩/augmentation 확인용 |
-| **디버깅용** | `labels.jpg` | 클래스별 객체 수 분포 |
-| **디버깅용** | `args.yaml` | 훈련에 사용된 설정값 |
-
-**참고:** 디버깅용 파일들(`train_batch*.jpg`, `labels.jpg`, `args.yaml`)은 훈련 시작 시 자동 생성되며, `.gitignore`에 포함되어 Git에서 추적되지 않습니다.
 
 ---
 
@@ -268,47 +244,8 @@ model.train(data='configs/ppe_dataset.yaml', epochs=100)
 | Test | 2,263 | 15% |
 | **합계** | **15,081** | 100% |
 
----
+### 데이터 검증 결과
 
-## 전처리 상세
-
-### Step 1: VOC → YOLO 변환
-Dataset 1 (Hard Hat Detection)을 Pascal VOC에서 YOLO 형식으로 변환
-
-```python
-# 클래스 매핑
-dataset1_mapping = {
-    'helmet': 0,   # 사용
-    'head': -1,    # 제외
-    'person': -1   # 제외
-}
-```
-
-**결과:** 5,000개 → 4,581개 (helmet이 있는 이미지만)
-
-### Step 2: Dataset 2 확인
-Dataset 2는 이미 YOLO 형식이므로 클래스 ID만 확인
-
-**결과:** 10,500개 (helmet: 20,191개, vest: 16,049개)
-
-### Step 3: 데이터 통합
-두 데이터셋을 prefix로 구분하여 병합
-
-- `ds1_` : Dataset 1 파일
-- `ds2_` : Dataset 2 파일
-
-**결과:** 15,081개
-
-### Step 4: Train/Val/Test 분할
-70/15/15 비율로 랜덤 분할
-
-### Step 5: YAML 생성
-`configs/ppe_dataset.yaml` 생성 (상대 경로 사용)
-
-### Step 6: 데이터 검증
-이미지-라벨 매칭 확인 및 시각화
-
-**검증 결과:**
 | 구분 | 이미지 | 라벨 | 매칭 | helmet | vest |
 |------|--------|------|------|--------|------|
 | Train | 10,556 | 10,556 | 100% | 27,240 | 11,334 |
@@ -316,180 +253,106 @@ Dataset 2는 이미 YOLO 형식이므로 클래스 ID만 확인
 | Test | 2,263 | 2,263 | 100% | 5,944 | 2,436 |
 | **합계** | **15,081** | **15,081** | **100%** | **39,157** | **16,049** |
 
-- 모든 이미지-라벨 매칭 완료 (누락 없음)
-- 샘플 이미지: `dataset/raw_data/processed/samples/`
-
 ---
 
-## 모델 훈련 상세
+## 프로젝트 구조
 
-### Step 1: 환경 설정
-`.env` 파일에서 프로젝트 경로 설정
-
-```bash
-# .env 파일 생성
-cp .env.example .env
-
-# PROJECT_ROOT를 본인의 경로로 수정
-# 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
 ```
-
-### Step 2: 데이터셋 다운로드 (Hugging Face)
-Hugging Face에서 데이터셋 다운로드
-
-```bash
-# hf CLI 설치
-uv tool install huggingface-hub
-
-# 로그인 (최초 1회)
-uv tool run hf auth login
-
-# 데이터셋 다운로드
-uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dataset/data
-```
-
-### Step 3: 데이터셋 YAML 생성
-`.env`의 `PROJECT_ROOT`를 기반으로 데이터셋 설정 파일 생성
-
-```bash
-uv run python src/1_preprocess/step5_generate_yaml.py
-```
-
-**결과:** `configs/ppe_dataset.yaml` 생성 (절대 경로 포함)
-
-### Step 4: 훈련 실행
-YOLOv8 모델 훈련 (Transfer Learning)
-
-```bash
-# 기본 실행 (configs/train_config.yaml 사용)
-uv run python src/2_training/train.py
-
-# 데이터셋 직접 지정
-uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
-```
-
-**훈련 설정:**
-- 모델: YOLOv8n (Nano) - COCO 사전학습 가중치
-- Epochs: 100
-- Batch Size: 16
-- Image Size: 640x640
-- Optimizer: AdamW
-
-### Step 5: 결과 시각화
-훈련 결과를 그래프로 시각화
-
-```bash
-uv run python src/2_training/visualize_results.py
-```
-
-**결과:** `models/ppe_detection/training_curves.png` 생성
-
-### Step 6: 모델 평가 (예정)
-테스트 데이터셋으로 모델 성능 평가
-
-```bash
-uv run python src/4_test/evaluate.py
+SafetyVisionAI/
+├── configs/                # 설정 파일
+│   ├── ppe_dataset.yaml   # 데이터셋 설정 (YOLO 필수)
+│   └── train_config.yaml  # 훈련 하이퍼파라미터
+├── dataset/                # 데이터셋
+│   ├── data/              # 훈련 데이터 (Hugging Face 업로드용)
+│   │   ├── train/         # 훈련 데이터 (70%)
+│   │   ├── val/           # 검증 데이터 (15%)
+│   │   └── test/          # 테스트 데이터 (15%)
+│   └── raw_data/          # 전처리 전 원본
+│       ├── raw/           # 원본 데이터
+│       └── processed/     # 전처리 중간 결과
+├── models/                 # 훈련된 모델
+├── src/                    # 소스 코드
+│   ├── 1_preprocess/      # 전처리 스크립트
+│   ├── 2_training/        # 훈련 스크립트
+│   ├── 3_inference/       # 추론 스크립트
+│   └── 4_test/            # 테스트 스크립트
+├── notebooks/              # Jupyter 노트북
+├── materials/              # 참고 자료
+├── pyproject.toml          # 의존성 정의
+└── README.md
 ```
 
 ---
 
-## 훈련 결과 (A100 GPU)
+## 진행 현황
 
-### 최종 성능 지표
+### Phase 1: 환경 설정 ✅
+- [v] Python 가상환경 생성 (uv)
+- [v] 라이브러리 설치
+- [v] 프로젝트 구조 생성
 
-| 지표 | 결과 | 목표 | 달성 |
-|------|------|------|------|
-| **mAP@0.5** | 0.9440 (94.4%) | > 85% | ✅ |
-| **mAP@0.5:0.95** | 0.7308 (73.1%) | - | - |
-| **Precision** | 0.9217 (92.2%) | - | - |
-| **Recall** | 0.8911 (89.1%) | - | - |
+### Phase 2: Dataset 준비 & 전처리 ✅
+- [v] Step 1: Dataset 1 VOC → YOLO 변환 (4,581개)
+- [v] Step 2: Dataset 2 클래스 ID 확인 (10,500개)
+- [v] Step 3: Dataset 통합 (15,081개)
+- [v] Step 4: Train/Val/Test 분할 (70/15/15)
+- [v] Step 5: Dataset YAML 생성
+- [v] Step 6: 데이터 검증 및 시각화
 
-### 훈련 환경
+### Phase 3: 모델 훈련 ✅
+- [v] YOLOv8 모델 선택 (yolov8n - Nano)
+- [v] 훈련 설정 파일 작성
+- [v] 클래스 정의 (helmet, vest)
+- [v] Transfer Learning 실행 (MacBook 3 epochs 테스트 완료)
+- [v] 전체 훈련 (100 epochs) - RunPod A100 완료
+- [ ] 하이퍼파라미터 튜닝
 
-| 항목 | 설정 |
-|------|------|
-| GPU | RunPod A100 |
-| Epochs | 100 |
-| Batch Size | 128 |
-| Image Size | 640x640 |
-| Model | YOLOv8n (Nano) |
-| Optimizer | AdamW |
-| Initial LR | 0.01 |
-| AMP | True (Mixed Precision) |
-| 총 훈련 시간 | 약 57분 (3,409초) |
+### Phase 4: 모델 평가 ✅
+- [v] mAP@0.5, mAP@0.5:0.95 측정
+- [v] Precision, Recall 계산
+- [v] Confusion Matrix 생성
+- [v] 클래스별 성능 분석
 
-### Loss 감소 추이
+### Phase 5: 추론 시스템 ⏳
+- [ ] 이미지 추론
+- [ ] 비디오 파일 추론 (예정)
+- [ ] 웹캠 실시간 추론 (예정)
+- [ ] 결과 시각화 (바운딩 박스, 클래스명, 신뢰도)
 
-| Loss 종류 | 초기값 | 최종값 | 감소율 |
-|-----------|--------|--------|--------|
-| train/box_loss | 1.50 | 0.79 | 47% |
-| train/cls_loss | 1.83 | 0.45 | 75% |
-| train/dfl_loss | 1.38 | 0.98 | 29% |
-| val/box_loss | 2.64 | 0.92 | 65% |
-| val/cls_loss | 7.16 | 0.49 | 93% |
-| val/dfl_loss | 3.27 | 1.03 | 69% |
+### Phase 6: 웹 인터페이스 ⏳
+- [ ] Streamlit 대시보드
+- [ ] 실시간 모니터링
 
-모든 손실이 꾸준히 감소하며, validation loss도 함께 감소하여 **과적합(overfitting) 없이** 잘 학습되었습니다.
+---
 
-### 혼동 행렬 (Confusion Matrix) 분석
+## 설정 파일
 
-#### 클래스별 탐지 성능
+### ppe_dataset.yaml
+YOLO 모델이 데이터를 찾기 위한 **필수** 설정 파일
 
-| 클래스 | 정확히 탐지 | 정확도 | 미탐율 |
-|--------|-------------|--------|--------|
-| **Helmet** | 5,456개 | 91% | 9% |
-| **Vest** | 2,085개 | 91% | 8% |
+```yaml
+path: /path/to/project/images   # 절대 경로 (자동 생성)
+train: train/images
+val: val/images
+test: test/images
 
-#### 클래스 간 혼동
+nc: 2
+names:
+  0: helmet
+  1: vest
+```
 
-| 혼동 유형 | 건수 | 비율 |
-|-----------|------|------|
-| Helmet → Vest | 5개 | 0.08% |
-| Vest → Helmet | 8개 | 0.35% |
-| **총 클래스 간 혼동** | **13개** | **매우 낮음** |
+**주의:** 이 파일의 `path`는 `.env`의 `PROJECT_ROOT`를 기반으로 자동 생성됩니다.
 
-#### False Positive (오탐)
+### train_config.yaml
+훈련 하이퍼파라미터 관리 파일
 
-| 오탐 유형 | 건수 |
-|-----------|------|
-| Background → Helmet | 549개 |
-| Background → Vest | 287개 |
-
-<img src="models/ppe_detection/confusion_matrix_normalized.png" width="500" alt="Confusion Matrix Normalized">
-
-### 학습 곡선
-
-<img src="models/ppe_detection/results.png" width="800" alt="Training Results">
-
-### 결과 파일
-
-| 파일 | 위치 |
-|------|------|
-| 최고 성능 모델 | `models/ppe_detection/weights/best.pt` |
-| 마지막 체크포인트 | `models/ppe_detection/weights/last.pt` |
-| 훈련 통계 | `models/ppe_detection/results.csv` |
-| 혼동 행렬 | `models/ppe_detection/confusion_matrix.png` |
-| PR 곡선 | `models/ppe_detection/BoxPR_curve.png` |
-
-### 결과 해석
-
-#### 강점
-1. **높은 탐지 정확도**: mAP@0.5 = 94.4%로 목표(85%) 크게 초과
-2. **클래스 간 혼동 최소화**: helmet-vest 혼동이 거의 없음 (13건/7,500건 이하)
-3. **안정적인 학습**: 과적합 없이 꾸준한 성능 향상
-4. **빠른 수렴**: 50 epoch 이후 안정화
-
-#### 개선 가능 영역
-1. **False Positive 감소**: background를 PPE로 오탐하는 경우 (836건)
-2. **Recall 향상**: 일부 객체 미탐지 (helmet 9%, vest 8%)
-
-#### 결론
-
-이 모델은 **건설현장 PPE 탐지에 매우 적합**합니다:
-
-- **실용성**: 91%+ 정확도로 실시간 모니터링 가능
-- **신뢰성**: helmet/vest 간 혼동이 거의 없어 안전 모니터링에 신뢰할 수 있음
-- **효율성**: YOLOv8n 경량 모델로 빠른 추론 속도 기대
+| 파라미터 | 기본값 | 설명 |
+|----------|--------|------|
+| epochs | 100 | 학습 반복 횟수 |
+| batch_size | 16 | 배치 크기 (GPU 메모리에 따라 조절) |
+| lr0 | 0.01 | 초기 학습률 |
+| img_size | 640 | 입력 이미지 크기 |
 
 ---
 
@@ -514,5 +377,3 @@ uv run python src/4_test/evaluate.py
 - [YOLO 공식 문서](https://docs.ultralytics.com/)
 - [영상 - 중대재해법 비웃는 건설현장](https://www.youtube.com/watch?v=9rDv59u3cnc)
 - [스타트업 미스릴 브로셔](https://6542f7fa-15be-45d4-980e-46706516dc78.usrfiles.com/ugd/6542f7_9f7aaea5869742518907c1a3bf09ba8a.pdf)
-
-
