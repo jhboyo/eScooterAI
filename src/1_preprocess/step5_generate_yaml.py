@@ -28,21 +28,22 @@ YOLO 모델이 훈련할 때 이 파일을 읽어서 다음 정보를 파악합�
    results = model.predict(source='image.jpg')
    ```
 
-## 왜 상대 경로를 사용하나요?
-- 절대 경로: /Users/joonho/workspace/.../images
-  → 다른 개발자 PC에서는 경로가 다르므로 작동 안 함
-- 상대 경로: ../images (configs 폴더 기준)
-  → 프로젝트만 복사하면 어디서든 작동
+## 경로 설정
+이 스크립트는 .env 파일의 PROJECT_ROOT 환경 변수를 읽어서
+절대 경로를 자동으로 생성합니다.
+
+다른 개발자는 .env 파일의 PROJECT_ROOT만 수정하면 됩니다.
+예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
 
 ## YAML 파일 구조
 ```yaml
-path: ../images          # 데이터셋 루트 경로 (configs 기준 상대 경로)
-train: train/images      # 훈련 이미지 경로 (path 기준)
-val: val/images          # 검증 이미지 경로 (path 기준)
-test: test/images        # 테스트 이미지 경로 (path 기준)
-nc: 2                    # 클래스 수 (number of classes)
+path: /path/to/project/images   # 절대 경로 (.env에서 자동 생성)
+train: train/images             # 훈련 이미지 경로 (path 기준)
+val: val/images                 # 검증 이미지 경로 (path 기준)
+test: test/images               # 테스트 이미지 경로 (path 기준)
+nc: 2                           # 클래스 수 (number of classes)
 names:
-  0: helmet              # 클래스 ID: 이름 매핑
+  0: helmet                     # 클래스 ID: 이름 매핑
   1: vest
 ```
 

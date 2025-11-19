@@ -106,12 +106,12 @@ SafetyVisionAI/
 - [x] 라이브러리 설치
 - [x] 프로젝트 구조 생성
 
-### Phase 2: 데이터셋 준비 ✅
+### Phase 2: Dataset 준비 & 전처리 진행 ✅
 - [x] Step 1: Dataset 1 VOC → YOLO 변환 (4,581개)
 - [x] Step 2: Dataset 2 클래스 ID 확인 (10,500개)
-- [x] Step 3: 데이터셋 통합 (15,081개)
+- [x] Step 3: Dataset 통합 (15,081개)
 - [x] Step 4: Train/Val/Test 분할 (70/15/15)
-- [x] Step 5: 데이터셋 YAML 생성
+- [x] Step 5: Dataset YAML 생성
 - [x] Step 6: 데이터 검증 및 시각화
 
 ### Phase 3: 모델 훈련 🔄 (진행 중)
@@ -149,7 +149,7 @@ SafetyVisionAI/
 YOLO 모델이 데이터를 찾기 위한 **필수** 설정 파일
 
 ```yaml
-path: ../images          # configs 폴더 기준 상대 경로
+path: /path/to/project/images   # 절대 경로 (자동 생성)
 train: train/images
 val: val/images
 test: test/images
@@ -158,6 +158,17 @@ nc: 2
 names:
   0: helmet
   1: vest
+```
+
+**주의:** 이 파일의 `path`는 `.env`의 `PROJECT_ROOT`를 기반으로 자동 생성됩니다.
+
+**다른 개발자 설정 방법:**
+```bash
+# 1. .env 파일에서 PROJECT_ROOT를 본인의 경로로 수정
+# 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
+
+# 2. YAML 파일 재생성
+uv run python src/1_preprocess/step5_generate_yaml.py
 ```
 
 **사용:**
@@ -176,6 +187,23 @@ model.train(data='configs/ppe_dataset.yaml', epochs=100)
 | batch_size | 16 | 배치 크기 (GPU 메모리에 따라 조절) |
 | lr0 | 0.01 | 초기 학습률 |
 | img_size | 640 | 입력 이미지 크기 |
+
+### 훈련 출력 파일
+훈련 완료 후 `models/ppe_detection/` 폴더에 생성되는 파일들:
+
+| 분류 | 파일 | 설명 |
+|------|------|------|
+| **핵심 결과** | `weights/best.pt` | 최고 성능 모델 |
+| **핵심 결과** | `weights/last.pt` | 마지막 체크포인트 |
+| **성능 지표** | `results.csv` | 에포크별 훈련 통계 |
+| **평가 시각화** | `confusion_matrix.png` | 혼동 행렬 |
+| **평가 시각화** | `PR_curve.png` | Precision-Recall 곡선 |
+| **평가 시각화** | `training_curves.png` | 훈련 결과 그래프 (visualize_results.py로 생성) |
+| **디버깅용** | `train_batch*.jpg` | 데이터 로딩/augmentation 확인용 |
+| **디버깅용** | `labels.jpg` | 클래스별 객체 수 분포 |
+| **디버깅용** | `args.yaml` | 훈련에 사용된 설정값 |
+
+**참고:** 디버깅용 파일들(`train_batch*.jpg`, `labels.jpg`, `args.yaml`)은 훈련 시작 시 자동 생성되며, `.gitignore`에 포함되어 Git에서 추적되지 않습니다.
 
 ---
 
@@ -255,6 +283,64 @@ Dataset 2는 이미 YOLO 형식이므로 클래스 ID만 확인
 
 - 모든 이미지-라벨 매칭 완료 (누락 없음)
 - 샘플 이미지: `images/processed/samples/`
+
+---
+
+## 모델 훈련 상세
+
+### Step 1: 환경 설정
+`.env` 파일에서 프로젝트 경로 설정
+
+```bash
+# .env 파일 생성
+cp .env.example .env
+
+# PROJECT_ROOT를 본인의 경로로 수정
+# 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
+```
+
+### Step 2: 데이터셋 YAML 생성
+`.env`의 `PROJECT_ROOT`를 기반으로 데이터셋 설정 파일 생성
+
+```bash
+uv run python src/1_preprocess/step5_generate_yaml.py
+```
+
+**결과:** `configs/ppe_dataset.yaml` 생성 (절대 경로 포함)
+
+### Step 3: 훈련 실행
+YOLOv8 모델 훈련 (Transfer Learning)
+
+```bash
+# 기본 실행 (configs/train_config.yaml 사용)
+uv run python src/2_training/train.py
+
+# 데이터셋 직접 지정
+uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
+```
+
+**훈련 설정:**
+- 모델: YOLOv8n (Nano) - COCO 사전학습 가중치
+- Epochs: 100
+- Batch Size: 16
+- Image Size: 640x640
+- Optimizer: AdamW
+
+### Step 4: 결과 시각화
+훈련 결과를 그래프로 시각화
+
+```bash
+uv run python src/2_training/visualize_results.py
+```
+
+**결과:** `models/ppe_detection/training_curves.png` 생성
+
+### Step 5: 모델 평가 (예정)
+테스트 데이터셋으로 모델 성능 평가
+
+```bash
+uv run python src/4_test/evaluate.py
+```
 
 ---
 
