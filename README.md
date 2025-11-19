@@ -179,15 +179,27 @@ dataset2_mapping = {
 
 ---
 
-### Step 3: 데이터 통합 ⏳ 대기
+### Step 3: 데이터 통합 ✅ 완료
 - 두 데이터셋을 `images/processed/merged/`로 병합
 - 파일명 충돌 방지 (prefix 추가: `ds1_`, `ds2_`)
 
+**실행 결과:**
+- Dataset 1: 4,581개 (이미지 + 라벨)
+- Dataset 2: 10,500개 (이미지 + 라벨)
+- 총 통합: 15,081개
+- 출력: `images/processed/merged/`
+
 ---
 
-### Step 4: Train/Val/Test 분할 ⏳ 대기
+### Step 4: Train/Val/Test 분할 ✅ 완료
 - Train/Val/Test 재분할 (70/15/15)
 - `images/train/`, `images/val/`, `images/test/`에 저장
+
+**실행 결과:**
+- Train: 10,556개 (70%)
+- Val: 2,262개 (15%)
+- Test: 2,263개 (15%)
+- 총: 15,081개
 
 ---
 
