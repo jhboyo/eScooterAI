@@ -37,7 +37,12 @@ SafetyVisionAI/
 │       └── labels/
 ├── models/            # 훈련된 모델 파일
 ├── src/               # 소스 코드
-├── notebooks/         # Jupyter 노트북 (실험, 데이터 분석)
+│   ├── 1_preprocess/ # 전처리 스크립트
+│   ├── 2_training/   # 훈련 스크립트
+│   ├── 3_inference/  # 추론 스크립트
+│   └── 4_test/       # 테스트 스크립트
+├── notebooks/         # Jupyter 노트북
+│   └── preprocess/   # 전처리 노트북
 ├── configs/           # 설정 파일
 ├── pyproject.toml     # Python 의존성 및 프로젝트 설정 (uv 사용)
 ├── uv.lock           # 의존성 락파일
@@ -63,19 +68,19 @@ uv run python main.py
 ```
 
 ## 명령어
+### 데이터 전처리
+```bash
+uv run python src/1_preprocess/preprocess_all.py
+```
+
 ### 모델 훈련
 ```bash
-uv run python src/train.py --config configs/train_config.yaml
+uv run python src/2_training/train.py --config configs/train_config.yaml
 ```
 
 ### 추론/테스트
 ```bash
-uv run python src/inference.py --model models/best_model.pth --input data/test_images/
-```
-
-### 데이터 전처리
-```bash
-uv run python src/preprocess.py --input data/raw/ --output data/processed/
+uv run python src/3_inference/inference.py --model models/ppe_detection/weights/best.pt --source test_image.jpg
 ```
 
 ### 메인 애플리케이션 실행

@@ -4,22 +4,17 @@
 모든 전처리 단계를 순차적으로 실행합니다.
 
 사용법:
-    uv run python src/preprocess_all.py
+    uv run python src/1_preprocess/preprocess_all.py
 """
 
-import sys
 import time
-from pathlib import Path
 
-# 프로젝트 루트를 path에 추가
-sys.path.insert(0, str(Path(__file__).parent))
-
-from preprocess.step1_convert_voc_to_yolo import convert_dataset1
-from preprocess.step2_verify_dataset2 import verify_dataset2
-from preprocess.step3_merge_datasets import merge_datasets
-from preprocess.step4_split_dataset import split_dataset
-from preprocess.step5_generate_yaml import generate_yaml
-from preprocess.step6_validate_dataset import validate_dataset, visualize_samples
+from step1_convert_voc_to_yolo import convert_dataset1
+from step2_verify_dataset2 import verify_dataset2
+from step3_merge_datasets import merge_datasets
+from step4_split_dataset import split_dataset
+from step5_generate_yaml import generate_yaml
+from step6_validate_dataset import validate_dataset, visualize_samples
 
 
 def run_all():
@@ -73,8 +68,8 @@ def run_all():
         print("   - images/test/        (테스트 데이터)")
         print("   - configs/ppe_dataset.yaml (데이터셋 설정)")
         print()
-        print("🎯 다음 단계:")
-        print("   uv run python src/train.py --data configs/ppe_dataset.yaml")
+        print("다음 단계:")
+        print("   uv run python src/2_training/train.py --data configs/ppe_dataset.yaml")
         print()
 
     except Exception as e:

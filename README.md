@@ -18,6 +18,12 @@
 # 의존성 설치
 uv sync
 
+# 환경 변수 파일 생성 (최초 1회)
+cp .env.example .env
+
+# .env 파일에서 PROJECT_ROOT를 본인의 경로로 수정
+# 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
+
 # 가상환경 활성화 (자동 관리)
 source .venv/bin/activate
 ```
@@ -25,29 +31,29 @@ source .venv/bin/activate
 ### 데이터 전처리
 ```bash
 # 전체 전처리 실행
-uv run python src/preprocess_all.py
+uv run python src/1_preprocess/preprocess_all.py
 
 # 또는 단계별 실행
-uv run python src/preprocess/step1_convert_voc_to_yolo.py
-uv run python src/preprocess/step2_verify_dataset2.py
-uv run python src/preprocess/step3_merge_datasets.py
-uv run python src/preprocess/step4_split_dataset.py
-uv run python src/preprocess/step5_generate_yaml.py
-uv run python src/preprocess/step6_validate_dataset.py
+uv run python src/1_preprocess/step1_convert_voc_to_yolo.py
+uv run python src/1_preprocess/step2_verify_dataset2.py
+uv run python src/1_preprocess/step3_merge_datasets.py
+uv run python src/1_preprocess/step4_split_dataset.py
+uv run python src/1_preprocess/step5_generate_yaml.py
+uv run python src/1_preprocess/step6_validate_dataset.py
 ```
 
 ### 모델 훈련
 ```bash
-uv run python src/train.py --data configs/ppe_dataset.yaml
+uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 ```
 
 ### 추론
 ```bash
 # 이미지 추론
-uv run python src/inference.py --model models/best_model.pt --input test_image.jpg
+uv run python src/3_inference/inference.py --model models/best_model.pt --input test_image.jpg
 
 # 웹캠 실시간 추론
-uv run python src/inference.py --model models/best_model.pt --source webcam
+uv run python src/3_inference/inference.py --model models/best_model.pt --source webcam
 ```
 
 ---
@@ -80,11 +86,15 @@ SafetyVisionAI/
 │   └── test/              # 테스트 데이터 (15%)
 ├── models/                 # 훈련된 모델
 ├── src/                    # 소스 코드
-│   ├── preprocess/        # 전처리 스크립트
-│   ├── preprocess_all.py  # 전체 전처리 실행
-│   ├── train.py           # 모델 훈련
-│   └── inference.py       # 추론
+│   ├── 1_preprocess/      # 전처리 스크립트
+│   │   └── preprocess_all.py
+│   ├── 2_training/        # 훈련 스크립트
+│   │   └── train.py
+│   ├── 3_inference/       # 추론 스크립트
+│   │   └── inference.py
+│   └── 4_test/            # 테스트 스크립트
 ├── notebooks/              # Jupyter 노트북
+│   └── preprocess/        # 전처리 노트북
 ├── materials/              # 참고 자료
 ├── pyproject.toml          # 의존성 정의
 └── README.md
@@ -107,26 +117,108 @@ SafetyVisionAI/
 - [x] Step 5: 데이터셋 YAML 생성
 - [x] Step 6: 데이터 검증 및 시각화
 
-### Phase 3: 모델 훈련 ⏳
-- [ ] YOLOv8 모델 선택
-- [x] 훈련 설정 파일 작성
+### Phase 3: 모델 훈련 🔄 진행 중
+
+#### Step 1: 환경 준비 ✅
+- [x] Ultralytics (YOLOv8) 패키지 설치
+- [x] GPU 사용 가능 여부 확인 (MPS - Apple Silicon)
+- [x] pyproject.toml 의존성 업데이트
+
+#### Step 2: 훈련 스크립트 작성 ✅
+- [x] `src/train.py` 작성
+- [x] YOLOv8 모델 로드 (yolov8n.pt)
+- [x] 데이터셋/하이퍼파라미터 설정 로드
+- [x] 훈련 설정 파일 작성 (configs/train_config.yaml)
 - [x] 클래스 정의 (helmet, vest)
-- [ ] Transfer Learning 실행
-- [ ] 하이퍼파라미터 튜닝
+
+#### Step 3: 훈련 실행
+- [ ] 테스트 훈련 (10 epochs)
+- [ ] 전체 훈련 (100 epochs)
+- [ ] 훈련 로그 및 메트릭 확인
+
+#### Step 4: 모델 저장
+- [ ] best.pt (최고 성능 모델)
+- [ ] last.pt (마지막 체크포인트)
 
 ### Phase 4: 모델 평가 ⏳
-- [ ] mAP, Precision, Recall 측정
+- [ ] `src/evaluate.py` 작성
+- [ ] mAP@0.5, mAP@0.5:0.95 측정
+- [ ] Precision, Recall, F1-Score 계산
 - [ ] 클래스별 성능 분석
+- [ ] Confusion Matrix 생성
 - [ ] FPS 측정
 
 ### Phase 5: 추론 시스템 ⏳
-- [ ] 이미지/비디오 추론
+- [ ] `src/inference.py` 작성
+- [ ] 이미지 추론
+- [ ] 비디오 파일 추론
 - [ ] 웹캠 실시간 추론
-- [ ] 결과 시각화
+- [ ] 결과 시각화 (바운딩 박스, 클래스명, 신뢰도)
 
 ### Phase 6: 웹 인터페이스 ⏳
 - [ ] Streamlit 대시보드
 - [ ] 실시간 모니터링
+- [ ] 이미지/비디오 업로드
+
+---
+
+## 모델 훈련 계획 (Phase 3 상세)
+
+### 훈련 환경
+
+| 항목 | 설정 |
+|------|------|
+| 모델 | YOLOv8n (Nano - 경량) |
+| 프레임워크 | Ultralytics |
+| 데이터셋 | 15,081장 (Train 70% / Val 15% / Test 15%) |
+
+### 하이퍼파라미터
+
+| 파라미터 | 값 | 설명 |
+|----------|-----|------|
+| epochs | 100 | 훈련 반복 횟수 |
+| batch_size | 16 | GPU 메모리에 따라 조절 (8, 16, 32) |
+| img_size | 640 | 입력 이미지 크기 |
+| lr0 | 0.01 | 초기 학습률 |
+| patience | 20 | Early stopping (성능 개선 없으면 중단) |
+
+### 예상 결과 파일
+
+```
+models/
+└── ppe_detection/
+    ├── weights/
+    │   ├── best.pt        # 최고 성능 모델
+    │   └── last.pt        # 마지막 체크포인트
+    ├── results.csv        # 훈련 메트릭
+    ├── confusion_matrix.png
+    ├── PR_curve.png
+    └── results.png
+```
+
+### 예상 소요 시간
+
+| 환경 | 예상 시간 |
+|------|-----------|
+| GPU (CUDA) | 1-2시간 |
+| CPU | 6-12시간 |
+| Apple Silicon (MPS) | 2-4시간 |
+
+### 실행 명령어
+
+```bash
+# 1. 의존성 설치
+uv add ultralytics
+
+# 2. 훈련 실행
+uv run python src/train.py
+
+# 3. 평가 실행
+uv run python src/evaluate.py
+
+# 4. 추론 테스트
+uv run python src/inference.py --source test_image.jpg
+```
 
 ---
 

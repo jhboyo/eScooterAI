@@ -11,4 +11,6 @@ dependencies = [
     "matplotlib>=3.7.0",
     "pillow>=9.5.0",
     "jupyter>=1.0.0",
+    "ultralytics>=8.3.229",
+    "python-dotenv>=1.2.1",
 ]
