@@ -30,7 +30,7 @@
 **AI 기반 자동 안전 모니터링 시스템**을 통해:
 - 실시간 PPE 착용 상태 자동 감지
 
-  <img src="models/test_run/train_batch0.jpg" width="600" alt="Train Batch Sample">
+  <img src="materials/train_batch0.jpg" width="600" alt="Train Batch Sample">
 - (미착용 시 즉각적인 알림)
 - (24시간 지속적인 모니터링 가능)
 
