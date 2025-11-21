@@ -144,20 +144,35 @@ patience: 50  # 조기 종료 patience
 uv run python src/1_preprocess/step6_validate_dataset.py
 ```
 
-**예상 결과:**
-| 클래스 | Train | Val | Test | 합계 |
-|--------|-------|-----|------|------|
-| helmet | ~27,000 | ~6,000 | ~6,000 | ~39,000 |
-| head | ~? | ~? | ~? | ~? |
-| vest | ~11,000 | ~2,300 | ~2,400 | ~16,000 |
+**실제 결과 (재분배 후):** ✅
+| 클래스 | Train | Val | Test | 합계 | 비율 |
+|--------|-------|-----|------|------|------|
+| helmet | 25,425 | 6,793 | 6,939 | 39,157 | 64.2% |
+| head | 3,679 | 1,144 | 962 | 5,785 | 9.5% |
+| vest | 10,351 | 2,737 | 2,961 | 16,049 | 26.3% |
+| **총 객체** | **39,455** | **10,674** | **10,862** | **60,991** | **100%** |
 
-#### 3-2. 샘플 이미지 시각화
-```python
-# 3 class 라벨 시각화 확인
-# - helmet: 파란색 박스
-# - head: 빨간색 박스 (경고)
-# - vest: 초록색 박스
+**데이터셋 통계:**
+- 총 이미지: 15,500개 (Train: 9,999 / Val: 2,750 / Test: 2,751)
+- 분할 비율: Train 64.5% / Val 17.7% / Test 17.7%
+- 이미지-라벨 매칭: 100% 완료
+
+**재분배 사유:**
+- Train 데이터를 9,999개로 제한하여 검증 데이터 확보
+- Val/Test 비율 증가로 더 신뢰성 있는 평가 가능
+
+#### 3-2. 샘플 이미지 시각화 ✅
+```bash
+# 3 class 라벨 시각화 확인 (step6에서 자동 생성)
+# 저장 위치: dataset/raw_data/processed/samples/
 ```
+
+**색상 코드:**
+- helmet: 초록색 (0, 255, 0) - 안전 ✅
+- head: 빨간색 (0, 0, 255) - 경고 ⚠️
+- vest: 주황색 (255, 165, 0) - 안전 ✅
+
+**생성된 샘플:** 5개 이미지 (sample_1.jpg ~ sample_5.jpg)
 
 ---
 
@@ -170,7 +185,7 @@ uv run python src/1_preprocess/step6_validate_dataset.py
 # 3 epoch 테스트 훈련
 uv run python src/2_training/train.py \
   --data configs/ppe_dataset.yaml \
-  --epochs 3 \
+  --epochs 1 \
   --batch 16 \
   --device mps
 ```
@@ -187,11 +202,13 @@ uv run python src/2_training/train.py \
 
 #### 4-2. 예상 훈련 시간
 - A100 GPU: 약 60-70분 (3 class 추가로 약간 증가)
-- MacBook M1/M2: 테스트 훈련(3 epochs) 약 10-15분
+- MacBook M1/M2: 테스트 훈련(1 epochs) 
 
 ---
 
 ### Phase 5: 성능 평가 📈
+
+모델의 최종 성능은 학습 및 검증 과정에 사용되지 않은 **테스트 데이터셋**을 통해 객관적으로 평가됩니다. 이는 모델의 실제 일반화 능력을 파악하는 데 매우 중요합니다.
 
 #### 5-1. 목표 성능 지표
 
@@ -273,31 +290,40 @@ uv run python src/3_inference/inference.py \
 
 ## 체크리스트
 
-### 데이터 준비
-- [ ] 원본 데이터 백업
-- [ ] 클래스 매핑 재정의 (step3_merge_datasets.py)
-- [ ] 전처리 스크립트 실행 (step1~6)
-- [ ] 3 class 데이터 검증
-- [ ] 클래스 분포 확인
+### Phase 1: 데이터 준비 ✅ **완료**
+- [x] 원본 데이터 백업
+- [x] 클래스 매핑 재정의 (step1, step3 수정)
+- [x] 전처리 스크립트 실행 (step1~6)
+- [x] 3 class 데이터 검증
+- [x] 클래스 분포 확인 (helmet: 39,157 / head: 5,785 / vest: 16,049)
 
-### 설정 및 훈련
-- [ ] ppe_dataset.yaml 업데이트 (nc: 3)
-- [ ] train_config.yaml 확인
+### Phase 2: 설정 파일 업데이트 ✅ **완료**
+- [x] ppe_dataset.yaml 업데이트 (nc: 3)
+- [x] step 파일 주석 업데이트 (3 class)
+
+### Phase 3: 데이터 검증 ✅ **완료**
+- [x] 클래스 분포 확인
+- [x] 샘플 이미지 시각화 (5개 생성)
+
+### Phase 4: 모델 재훈련 🚀 **진행 중**
+- [ ] train_config.yaml nc: 3 업데이트
 - [ ] MacBook 테스트 훈련 (3 epochs)
 - [ ] RunPod A100 본 훈련 (100 epochs)
 - [ ] 훈련 결과 저장 및 백업
 
-### 평가 및 분석
+### Phase 5: 성능 평가 📈
 - [ ] mAP, Precision, Recall 계산
 - [ ] 클래스별 성능 분석
 - [ ] 혼동 행렬 확인 (helmet vs. head)
 - [ ] 2 class vs. 3 class 성능 비교
 
-### 추론 및 문서화
-- [ ] 추론 스크립트 업데이트
+### Phase 6: 추론 시스템 업데이트 🔍
+- [ ] 추론 스크립트 3 class 업데이트
 - [ ] 색상 코드 및 경고 로직 추가
 - [ ] 테스트 이미지 추론 확인
-- [ ] README.md 업데이트
+
+### Phase 7: 문서화 📝
+- [ ] README.md 업데이트 (3 class)
 - [ ] 논문 작성 자료 정리
 
 ---

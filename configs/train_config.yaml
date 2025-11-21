@@ -36,7 +36,7 @@
 model:
   name: "yolov8n"  # 모델 크기: n(nano) < s(small) < m(medium) < l(large) < x(xlarge)
   pretrained: true  # COCO 사전학습 가중치 사용 (Transfer Learning)
-  nc: 2  # 클래스 수: helmet, vest
+  nc: 3  # 클래스 수: helmet, head, vest (3 Class)
 
 # Dataset configuration
 # 데이터셋 YAML 파일 경로 (상대 경로 권장)
