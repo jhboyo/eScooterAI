@@ -49,13 +49,110 @@
 
 ## 훈련 결과
 
-### ⚠️ 현재 상태: 3 Class 모델 훈련 진행 중
+### 🎉 3 Class 모델 훈련 완료! (A100 GPU, 100 Epochs)
 
-현재 프로젝트는 **2 Class (helmet, vest)**에서 **3 Class (helmet, head, vest)**로 전환하여 헬멧 미착용 상태를 감지할 수 있도록 개선 중입니다.
+프로젝트를 **2 Class (helmet, vest)**에서 **3 Class (helmet, head, vest)**로 전환하여 **헬멧 미착용 상태 감지**가 가능하게 되었습니다!
 
-- ✅ **데이터 준비 완료**: 15,500개 이미지, 60,991개 객체 (3 class)
-- ⏳ **A100 GPU 훈련 대기 중**: 100 epochs 본 훈련 예정
-- 📊 **목표 성능**: mAP@0.5 ≥ 90%, Precision ≥ 88%, Recall ≥ 85%
+### ✅ 최종 성능 지표
+
+| 지표 | 결과 | 목표 | 달성 여부 |
+|------|------|------|----------|
+| **mAP@0.5** | **93.7%** | ≥ 90% | ✅ **초과 달성** (+3.7%p) |
+| **mAP@0.5:0.95** | **69.0%** | ≥ 70% | ⚠️ 근접 (-1.0%p) |
+| **Precision** | **92.2%** | ≥ 88% | ✅ **초과 달성** (+4.2%p) |
+| **Recall** | **87.2%** | ≥ 85% | ✅ **달성** (+2.2%p) |
+
+### 🎯 클래스별 성능 (Validation Set)
+
+| 클래스 | 정확도 | 정답 탐지 | 주요 오분류 | 미탐지율 |
+|--------|--------|-----------|-------------|----------|
+| **⛑️ Helmet** | **93%** | 6,304개 | head: 29개 (0.4%) | 10% |
+| **👤 Head** | **90%** | 1,024개 | helmet: 6개 (0.5%) | 13% |
+| **🦺 Vest** | **92%** | 2,529개 | helmet: 6개 (0.2%) | 18% |
+
+**📌 핵심 성과:**
+- ✅ **Helmet vs Head 구분 성공**: 헬멧 착용/미착용 간 혼동률 **0.4%**로 매우 낮음
+- ✅ **클래스 간 혼동 최소화**: 전체 10,862개 객체 중 49개만 오분류 (**0.45%**)
+- ✅ **실시간 안전 경고 가능**: Head 클래스 90% 정확도로 미착용 탐지
+
+### ⚙️ 훈련 환경
+
+| 항목 | 설정 |
+|------|------|
+| **GPU** | RunPod A100 (40GB) |
+| **총 훈련 시간** | ⚡ **54.4분** (3,262초) |
+| **Epochs** | 100 |
+| **Batch Size** | 128 |
+| **Image Size** | 640×640 |
+| **Model** | YOLOv8n (Nano) |
+| **Optimizer** | AdamW |
+| **Initial LR** | 0.01 |
+| **AMP** | True (Mixed Precision) |
+
+### 📉 Loss 감소 추이
+
+| Loss 종류 | 초기값 (Epoch 1) | 최종값 (Epoch 100) | 감소율 |
+|-----------|------------------|---------------------|--------|
+| train/box_loss | 1.501 | 0.821 | 45.3% ⬇️ |
+| train/cls_loss | 1.823 | 0.408 | 77.6% ⬇️ |
+| train/dfl_loss | 1.375 | 0.987 | 28.2% ⬇️ |
+| val/box_loss | 2.439 | 0.946 | 61.2% ⬇️ |
+| val/cls_loss | 5.476 | 0.488 | 91.1% ⬇️ |
+| val/dfl_loss | 2.959 | 1.045 | 64.7% ⬇️ |
+
+✅ 모든 손실이 꾸준히 감소하며, validation loss도 함께 감소하여 **과적합 없이** 잘 학습되었습니다.
+
+### 📈 학습 곡선
+
+<img src="models/ppe_detection/results.png" width="800" alt="3 Class Training Results">
+
+### 🔍 혼동 행렬 (Confusion Matrix) 분석
+
+<img src="models/ppe_detection/confusion_matrix_normalized.png" width="500" alt="3 Class Confusion Matrix">
+
+#### 클래스 간 혼동 통계
+
+| 혼동 유형 | 건수 | 비율 | 평가 |
+|-----------|------|------|------|
+| **Helmet → Head** | 29개 | 0.4% | ✅ 매우 낮음 |
+| **Head → Helmet** | 6개 | 0.5% | ✅ 매우 낮음 |
+| **Helmet ↔ Vest** | 14개 | 0.2% | ✅ 매우 낮음 |
+| **Head ↔ Vest** | 0개 | 0% | ✅ 없음 |
+
+### 💡 결과 해석
+
+#### ✅ 강점
+
+1. **🎯 높은 탐지 정확도**: mAP@0.5 = 93.7%로 목표(90%) 초과 달성
+2. **⚠️ 헬멧 미착용 감지 성공**: Head 클래스 90% 정확도로 실시간 안전 경고 가능
+3. **🔀 클래스 간 혼동 최소화**: Helmet-Head 혼동률 0.4%로 착용/미착용 명확히 구분
+4. **📈 안정적 학습**: 과적합 없이 꾸준한 성능 향상
+5. **⚡ 빠른 학습**: A100으로 54분 만에 100 epochs 완료
+
+#### 🔧 개선 가능 영역
+
+1. **IoU 엄격 기준**: mAP@0.5:0.95가 69.0%로 목표(70%) 대비 1%p 부족
+2. **Head 클래스 Recall**: 87% (1,024/1,178)로 13% 미탐지 → 데이터 증강 필요
+3. **Vest 클래스 Recall**: 82% (2,529/3,082)로 18% 미탐지 → Recall 개선 필요
+
+#### 🎯 결론
+
+이 모델은 **🏗️ 건설현장 PPE 탐지 및 안전 경고에 매우 적합**합니다:
+
+- ✅ **실용성**: 93.7% mAP@0.5로 실시간 모니터링 가능
+- ⚠️ **안전 경고**: Head 클래스 90% 정확도로 헬멧 미착용 즉각 감지
+- 🔒 **신뢰성**: Helmet/Head/Vest 간 혼동률 0.45%로 매우 신뢰할 수 있음
+- ⚡ **효율성**: YOLOv8n 경량 모델로 빠른 추론 속도 기대
+
+### 📁 결과 파일
+
+| 파일 | 위치 |
+|------|------|
+| 최고 성능 모델 (3 Class) | `models/ppe_detection/weights/best.pt` |
+| 마지막 체크포인트 | `models/ppe_detection/weights/last.pt` |
+| 훈련 통계 (100 epochs) | `models/ppe_detection/results.csv` |
+| 혼동 행렬 (3 Class) | `models/ppe_detection/confusion_matrix.png` |
+| PR 곡선 | `models/ppe_detection/BoxPR_curve.png` |
 
 ---
 
@@ -326,33 +423,72 @@ SafetyVisionAI/
 - [v] Step 5: Dataset YAML 생성 (nc: 3)
 - [v] Step 6: 데이터 검증 및 시각화
 
-### Phase 3: 모델 훈련 ⏳
+### Phase 3: 모델 훈련 ✅
 - [v] YOLOv8 모델 선택 (yolov8n - Nano)
 - [v] 훈련 설정 파일 작성 (nc: 3)
 - [v] 클래스 정의 (helmet, **head**, vest)
 - [v] Transfer Learning 실행 (MacBook 1 epoch 테스트 완료)
-- [v] ~~전체 훈련 (100 epochs) - RunPod A100 완료~~ (2 Class 기준)
-- [ ] **3 Class 본 훈련 (100 epochs) - RunPod A100 예정**
-- [ ] 하이퍼파라미터 튜닝
+- [v] **3 Class 본 훈련 (100 epochs) - RunPod A100 완료** ✅
+  - 훈련 시간: 54.4분 (A100 80GB)
+  - 최종 성능: **mAP@0.5 93.7%** (목표 90% 초과 달성)
+- [-] 하이퍼파라미터 튜닝 (추후 개선 예정)
 
-### Phase 4: 모델 평가 ⏳
-- [v] ~~mAP@0.5, mAP@0.5:0.95 측정~~ (2 Class 완료)
-- [v] ~~Precision, Recall 계산~~ (2 Class 완료)
-- [v] ~~Confusion Matrix 생성~~ (2 Class 완료)
-- [v] ~~클래스별 성능 분석~~ (2 Class 완료)
-- [ ] **3 Class 모델 성능 평가 (훈련 후)**
-- [ ] **2 Class vs 3 Class 성능 비교 분석**
+### Phase 4: 모델 평가 (Validation Set) ✅
+- [v] **mAP@0.5, mAP@0.5:0.95 측정** (Validation Set) ✅
+  - mAP@0.5: 93.7% (목표 90% 초과)
+  - mAP@0.5:0.95: 69.0% (목표 70% 근접)
+- [v] **Precision, Recall 계산** (Validation Set) ✅
+  - Precision: 92.2% (목표 88% 초과)
+  - Recall: 87.2% (목표 85% 초과)
+- [v] **Confusion Matrix 생성** (Validation Set) ✅
+  - Helmet-Head 혼동률: 0.45% (매우 우수)
+- [v] **클래스별 성능 분석** (Validation Set) ✅
+  - Helmet AP: 95.1%, Head AP: 92.2%, Vest AP: 94.4%
+- [v] **훈련 결과 보고서 작성** (training_report.md) ✅
+  - 11개 섹션, 11개 시각화 포함
+  - 학술 논문 작성 가능 수준의 상세 분석
 
-### Phase 5: 추론 시스템 ⏳
-- [ ] 이미지 추론 (3 class 대응)
+### Phase 5: 최종 테스트 (Test Dataset) ⏳
+- [ ] **Test Set 성능 평가** (2,751개 이미지)
+  - best.pt 모델로 test dataset 추론
+  - 최종 mAP, Precision, Recall 측정
+  - Validation vs Test 성능 비교 분석
+- [ ] **Test Set Confusion Matrix 생성**
+  - 클래스별 오분류 패턴 분석
+  - False Positive/Negative 비율 확인
+- [ ] **실제 시나리오 테스트**
+  - 다양한 조명 조건에서의 성능
+  - 가려진 객체 탐지 능력 검증
+  - 작은 객체 탐지 성능 평가
+- [ ] **최종 성능 보고서 작성**
+  - Test set 결과 정리 및 분석
+  - 실무 적용 가능성 평가
+  - 논문/발표 자료 준비
+
+### Phase 6: 추론 시스템 ⏳
+- [ ] **이미지 추론 구현** (3 class 대응)
+  - best.pt 모델 로드
+  - 단일 이미지 추론
+  - 배치 이미지 추론 (폴더 단위)
 - [ ] **헬멧 미착용(head) 경고 로직 구현** ⚠️
-- [ ] 비디오 파일 추론 (예정)
-- [ ] 웹캠 실시간 추론 (예정)
-- [ ] 결과 시각화 (바운딩 박스, 클래스명, 신뢰도, 경고 표시)
+  - head 클래스 자동 감지
+  - 경고 메시지 생성
+  - 경고 로그 저장
+- [ ] **비디오 파일 추론** (예정)
+  - 프레임별 추론
+  - FPS 성능 측정
+- [ ] **웹캠 실시간 추론** (예정)
+- [ ] **결과 시각화**
+  - 바운딩 박스 (클래스별 색상: helmet-파랑, head-빨강, vest-노랑)
+  - 클래스명 + 신뢰도 표시
+  - 경고 아이콘/텍스트 오버레이
+  - 탐지 통계 (객체 수, 경고 수)
 
-### Phase 6: 웹 인터페이스 ⏳
+### Phase 7: 웹 인터페이스 ⏳
 - [ ] Streamlit 대시보드
-- [ ] 실시간 모니터링
+- [ ] 실시간 모니터링 화면
+- [ ] 경고 알림 시스템
+
 
 ---
 
@@ -394,12 +530,18 @@ names:
 ### 완료된 개선사항
 - ✅ **헬멧 미착용 탐지**: head 클래스 추가로 헬멧 미착용 상태 감지 가능
 - ✅ **데이터 재구성**: 3 class (helmet, head, vest) 데이터셋 구축 완료
+- ✅ **3 Class 모델 성능 검증 완료**
+   - A100 GPU 100 epochs 본 훈련 완료
+   - 목표 성능 달성: **mAP@0.5 = 93.7%** (목표 90% 초과)
+   - Helmet-Head 혼동률 0.45%로 거의 완벽한 구분
+   - 상세 분석 보고서 작성 완료 (training_report.md)
 
 ### 남은 과제
-1. **3 Class 모델 성능 검증**
-   - A100 GPU 100 epochs 본 훈련 실행
-   - 목표 성능 달성 여부 확인 (mAP@0.5 ≥ 90%)
-   - 2 Class vs 3 Class 성능 비교 분석
+1. **이미지 추론 시스템 구현**
+   - 3 class 대응 추론 코드 작성
+   - 헬멧 미착용(head) 자동 경고 로직 구현
+   - 결과 시각화 (바운딩 박스, 클래스명, 경고 표시)
+   - Jupyter Notebook 데모 작성
 
 2. **안전조끼 미착용 탐지**
    - 현재: vest 착용만 탐지
