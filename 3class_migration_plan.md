@@ -413,4 +413,3 @@ uv run python src/3_inference/inference.py \
 
 **마지막 업데이트**: 2025-11-21
 **작성자**: Safety Vision AI Team
-**현재 브랜치**: `3class` (권장)

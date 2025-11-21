@@ -4,7 +4,7 @@ RunPod GPU 환경에서 Safety Vision AI 프로젝트를 설정하고 훈련하�
 
 ## 사전 요구사항
 
-- RunPod GPU 인스턴스 (A100 권장)
+- RunPod GPU 인스턴스 (A100)
 
 
 ---
@@ -227,7 +227,7 @@ uv run python src/3_inference/inference.py \
 
 | GPU | Batch Size | 100 Epochs |
 |-----|------------|------------|
-| A100 80GB | 64 | ~2-3시간 |
+| A100 80GB | 64 | ~1시간 |
 | A100 40GB | 32 | ~3-4시간 |
 | T4 16GB | 16 | ~8-10시간 |
 
