@@ -185,7 +185,7 @@ uv run python src/1_preprocess/step6_validate_dataset.py
 # 3 epoch 테스트 훈련
 uv run python src/2_training/train.py \
   --data configs/ppe_dataset.yaml \
-  --epochs 3 \
+  --epochs 1 \
   --batch 16 \
   --device mps
 ```
@@ -202,11 +202,13 @@ uv run python src/2_training/train.py \
 
 #### 4-2. 예상 훈련 시간
 - A100 GPU: 약 60-70분 (3 class 추가로 약간 증가)
-- MacBook M1/M2: 테스트 훈련(3 epochs) 약 10-15분
+- MacBook M1/M2: 테스트 훈련(1 epochs) 
 
 ---
 
 ### Phase 5: 성능 평가 📈
+
+모델의 최종 성능은 학습 및 검증 과정에 사용되지 않은 **테스트 데이터셋**을 통해 객관적으로 평가됩니다. 이는 모델의 실제 일반화 능력을 파악하는 데 매우 중요합니다.
 
 #### 5-1. 목표 성능 지표
 

@@ -1,14 +1,25 @@
 """
-YOLOv8 모델 훈련 스크립트
+YOLOv8 모델 훈련 스크립트 (3 Class)
 
 ## 이 스크립트는?
-YOLOv8 모델을 PPE 데이터셋으로 훈련하는 메인 훈련 스크립트입니다.
+YOLOv8 모델을 PPE 데이터셋(3 class)으로 훈련하는 메인 훈련 스크립트입니다.
 Transfer Learning을 활용하여 COCO 사전학습 가중치를 사용합니다.
+
+## 탐지 클래스
+- Class 0: helmet (헬멧 착용) ✅
+- Class 1: head (헬멧 미착용) ⚠️
+- Class 2: vest (안전조끼 착용) ✅
 
 ## 사용 방법
 ```bash
 # 기본 실행 (configs/train_config.yaml 사용)
 uv run python src/2_training/train.py
+
+# MacBook 테스트 훈련 (3 epochs, batch 16)
+uv run python src/2_training/train.py --epochs 1 --batch 16 --device mps
+
+# RunPod A100 본 훈련 (100 epochs, batch 128)
+uv run python src/2_training/train.py --epochs 100 --batch 128 --device 0
 
 # 다른 설정 파일 사용
 uv run python src/2_training/train.py --config configs/custom_config.yaml
@@ -95,14 +106,11 @@ def train(args):
     """
 
     # =========================================================================
-    # 1. 디바이스 확인
+    # 1. 초기화
     # =========================================================================
     print("=" * 60)
-    print("YOLOv8 PPE Detection 모델 훈련")
+    print("YOLOv8 PPE Detection 모델 훈련 (3 Class)")
     print("=" * 60)
-    print()
-
-    device = check_device()
     print()
 
     # =========================================================================
@@ -111,14 +119,22 @@ def train(args):
     print("설정 파일 로드 중...")
     config = load_config(args.config)
 
-    # 설정값 추출
+    # 설정값 추출 (명령줄 인자 우선)
     model_name = config['model']['name']
     data_yaml = args.data if args.data else config['data']['yaml']
-    epochs = config['train']['epochs']
-    batch_size = config['train']['batch_size']
+    epochs = args.epochs if args.epochs is not None else config['train']['epochs']
+    batch_size = args.batch if args.batch is not None else config['train']['batch_size']
     img_size = config['train']['img_size']
     patience = config['train']['patience']
     workers = config['train'].get('workers', 8)  # 데이터 로드 스레드 수
+
+    # 디바이스 설정 (명령줄 인자 우선)
+    if args.device:
+        device = args.device
+    elif config.get('device'):
+        device = config['device']
+    else:
+        device = check_device()
 
     # Optimizer 설정
     optimizer = config['train']['optimizer']
@@ -296,6 +312,27 @@ def main():
         type=str,
         default=None,
         help='데이터셋 YAML 파일 경로 (default: configs/ppe_dataset.yaml)'
+    )
+
+    parser.add_argument(
+        '--epochs',
+        type=int,
+        default=None,
+        help='훈련 에포크 수 (default: train_config.yaml 값 사용)'
+    )
+
+    parser.add_argument(
+        '--batch',
+        type=int,
+        default=None,
+        help='배치 크기 (default: train_config.yaml 값 사용)'
+    )
+
+    parser.add_argument(
+        '--device',
+        type=str,
+        default=None,
+        help='디바이스 설정 (예: cpu, 0, mps) (default: 자동 감지)'
     )
 
     args = parser.parse_args()
