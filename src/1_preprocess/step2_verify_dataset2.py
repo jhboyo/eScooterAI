@@ -1,21 +1,21 @@
 """
-Step 2: Dataset 2 클래스 ID 확인
+Step 2: Dataset 2 클래스 ID 확인 (3 Class)
 
 Dataset 2 (safety-Helmet-Reflective-Jacket)의 클래스 ID를 확인합니다.
 
 ## 이 단계가 필요한 이유
 - Dataset 2는 이미 YOLO 형식 (.txt)으로 제공됨
-- 하지만 클래스 ID가 우리 프로젝트와 일치하는지 확인 필요
-- 확인 결과 변환 없이 그대로 사용 가능
+- 하지만 클래스 ID가 우리 프로젝트(3 class)와 일치하는지 확인 필요
+- Step 3에서 vest 클래스를 1 → 2로 변환할 예정
 
-## Dataset 2 클래스 구성
-- 0: Safety-Helmet → 우리 프로젝트의 helmet (0)
-- 1: Reflective-Jacket → 우리 프로젝트의 vest (1)
+## Dataset 2 클래스 구성 (원본)
+- 0: Safety-Helmet → helmet (0) - 유지
+- 1: Reflective-Jacket → vest (2) - Step 3에서 1→2로 변환
 
-## 클래스 ID가 다르면?
-만약 Dataset 2의 클래스 ID가 우리 프로젝트와 다르다면
-라벨 파일의 첫 번째 숫자(class_id)를 변경해야 함
-예: 0 → 1, 1 → 0 (순서가 반대인 경우)
+## 3 Class 최종 매핑
+- 0: helmet (Dataset 1 + Dataset 2)
+- 1: head (Dataset 1만)
+- 2: vest (Dataset 2만, Step 3에서 변환)
 
 ## 입력/출력
 - 입력: dataset/raw_data/raw/safety-Helmet-Reflective-Jacket/

@@ -1,13 +1,14 @@
 """
-Step 3: 데이터셋 통합
+Step 3: 데이터셋 통합 (3 Class)
 
 Dataset 1 (변환된 YOLO)과 Dataset 2를 하나로 통합합니다.
 
 ## 왜 통합이 필요한가?
 - 두 개의 Kaggle 데이터셋을 하나의 훈련 데이터셋으로 합침
-- Dataset 1: helmet만 포함 (4,581개)
-- Dataset 2: helmet + vest 포함 (10,500개)
+- Dataset 1: helmet (class 0) + head (class 1) 포함
+- Dataset 2: helmet (class 0) + vest (class 2) 포함
 - 통합 후 총 15,081개의 이미지-라벨 쌍
+- 3 class 구성: helmet(0), head(1), vest(2)
 
 ## 파일명 충돌 방지
 - 서로 다른 데이터셋에서 같은 파일명이 있을 수 있음
@@ -130,12 +131,35 @@ def merge_datasets():
                     total_images += 1
 
         # -----------------------------------------------------------------
-        # 라벨 복사
+        # 라벨 복사 및 클래스 ID 변환 (3 class 매핑)
         # -----------------------------------------------------------------
+        # Dataset 2의 클래스 매핑:
+        # - 원래: helmet(0), vest(1)
+        # - 3 class: helmet(0), vest(2) <- vest를 1→2로 변경 필요!
         if labels_dir.exists():
             for lbl in labels_dir.glob('*.txt'):
                 new_name = f"ds2_{lbl.name}"  # 예: ds2_image_001.txt
-                shutil.copy(lbl, output_labels_dir / new_name)
+                output_path = output_labels_dir / new_name
+
+                # 라벨 파일 읽고 클래스 ID 변환
+                with open(lbl, 'r') as f:
+                    lines = f.readlines()
+
+                # 클래스 ID 변환: vest(1) → vest(2)
+                converted_lines = []
+                for line in lines:
+                    parts = line.strip().split()
+                    if len(parts) >= 5:  # YOLO 형식 검증
+                        class_id = int(parts[0])
+                        # Dataset 2 매핑: 0=helmet(유지), 1=vest(→2로 변경)
+                        if class_id == 1:
+                            parts[0] = '2'  # vest: 1 → 2
+                        converted_lines.append(' '.join(parts))
+
+                # 변환된 라벨 저장
+                with open(output_path, 'w') as f:
+                    f.write('\n'.join(converted_lines))
+
                 ds2_count['labels'] += 1
                 total_labels += 1
 

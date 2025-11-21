@@ -64,6 +64,7 @@ dataset/raw_data/
 dataset/data/train/
 dataset/data/val/
 dataset/data/test/
+dataset/data_backup_*/
 !dataset/**/.gitkeep
 
 # Data files
@@ -72,6 +73,11 @@ dataset/data/test/
 *.xml
 !requirements.txt
 !README.md
+
+# Backup files
+*.bak
+*_backup_*
+configs/*_2class.yaml.bak
 
 # OS
 .DS_Store
