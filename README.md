@@ -410,6 +410,9 @@ SafetyVisionAI/
 │   ├── 3_test/            # Test Dataset 평가 스크립트
 │   └── 4_inference/       # 추론 스크립트 (실제 사용)
 ├── notebooks/              # Jupyter 노트북
+├── output/                 # 출력 결과
+│   ├── sample_detections/ # 샘플 탐지 결과 이미지
+│   └── test_results/      # Test Dataset 평가 결과
 ├── materials/              # 참고 자료
 ├── pyproject.toml          # 의존성 정의
 └── README.md

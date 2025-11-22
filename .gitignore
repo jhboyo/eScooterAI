@@ -104,3 +104,4 @@ logs/
 .env.production.local
 
 CLAUDE.md
+runs/

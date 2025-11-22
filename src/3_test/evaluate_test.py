@@ -224,8 +224,8 @@ def evaluate_test_set(args):
     print("💾 결과 파일 저장 중...")
 
     # 결과 디렉토리 생성
-    output_dir = Path('test_results')
-    output_dir.mkdir(exist_ok=True)
+    output_dir = Path('output/test_results')
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # 결과 CSV 저장
     results_data = {
