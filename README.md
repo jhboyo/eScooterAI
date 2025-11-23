@@ -15,6 +15,10 @@
 - 🎯 실시간 헬멧/안전조끼 탐지
 - 📊 안전 수준 자동 평가
 - 🖼️ 원본/결과 비교 시각화
+- 📱 **Telegram 실시간 알림** (헬멧 미착용 2명 이상 또는 착용률 80% 미만 시 자동 경고!)
+
+> ⚠️ **실시간 안전 알림 시스템**: 위험 상황 감지 시 Telegram Bot이 팀 그룹 채팅으로 **즉각 알림 전송**!
+> 탐지 결과 이미지와 안전 통계를 포함한 상세한 경고 메시지를 받아보세요.
 
 ---
 
@@ -56,8 +60,8 @@
 **AI 기반 자동 안전 모니터링 시스템**을 통해:
 - 실시간 PPE 착용 상태 자동 감지
 - **헬멧 미착용(head) 탐지로 즉각적인 경고 가능** ⚠️
-- 미착용 시 즉각적인 알림 (예정)
-- 24시간 지속적인 모니터링 가능 (예정)
+- **Telegram Bot 실시간 알림** (헬멧 미착용 2명 이상 또는 착용률 80% 미만 시) 📱
+- 24시간 지속적인 모니터링 가능
 
 <img src="materials/train_batch0.jpg" width="600" alt="Train Batch Sample">
 
@@ -289,6 +293,47 @@ cp .env.example .env
 source .venv/bin/activate
 ```
 
+### Telegram Bot 알림 설정 (선택사항)
+
+헬멧 미착용 감지 시 실시간 알림을 받으려면:
+
+**1. Telegram Bot 생성**
+```bash
+# Telegram 앱에서 @BotFather 검색
+# /newbot 명령어로 Bot 생성
+# Bot Token 복사 (예: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz)
+```
+
+**2. Telegram 그룹 생성 및 Bot 추가**
+```bash
+# Telegram에서 새 그룹 만들기 (팀원 초대)
+# 그룹에 Bot 추가
+# 그룹에서 /start 명령어 전송
+```
+
+**3. Chat ID 확인**
+```bash
+# Bot Token으로 Chat ID 확인
+curl https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
+
+# 그룹 Chat ID는 음수 (예: -5051005167)
+```
+
+**4. .env 파일 설정**
+```bash
+# .env 파일에 추가
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_CHAT_ID=your_chat_id_here
+TELEGRAM_ALERTS_ENABLED=true
+```
+
+**알림 발송 조건:**
+- 헬멧 미착용자 **2명 이상** 감지
+- 헬멧 착용률 **80% 미만**
+- (둘 중 하나만 만족해도 알림 전송)
+
+자세한 가이드: `docs/STREAMLIT_CLOUD_SECRETS.md` 참고
+
 ### 데이터셋 다운로드 (Hugging Face)
 ```bash
 # hf CLI 설치
@@ -335,6 +380,7 @@ uv run streamlit run src/5_web_interface/app.py
 - 📊 **통계 분석**: 헬멧 착용률 자동 계산 및 안전 수준 평가
 - 🖼️ **시각화**: 원본/결과 비교 뷰, 바운딩 박스 시각화
 - ⚙️ **설정**: 신뢰도 임계값, IoU 임계값 조정 가능
+- 📱 **Telegram 알림**: 헬멧 미착용 감지 시 실시간 그룹 알림 전송
 
 #### 💻 CLI 추론 (명령줄)
 ```bash
@@ -367,6 +413,7 @@ uv run python src/4_inference/sample_inference.py
 | **이미지 처리** | OpenCV, PIL, NumPy |
 | **시각화** | Matplotlib, Plotly |
 | **웹 UI** | Streamlit |
+| **알림** | Telegram Bot API |
 
 ---
 
@@ -444,16 +491,19 @@ SafetyVisionAI/
 │   ├── 2_training/        # 훈련 스크립트
 │   ├── 3_test/            # Test Dataset 평가 스크립트
 │   ├── 4_inference/       # 추론 스크립트 (CLI)
-│   └── 5_web_interface/   # 웹 인터페이스 (Streamlit)
-│       ├── app.py         # 메인 앱
-│       ├── components/    # UI 컴포넌트
-│       │   ├── uploader.py   # 이미지 업로드
-│       │   └── statistics.py # 통계 차트
-│       ├── utils/         # 유틸리티
-│       │   ├── inference.py  # 추론 로직
-│       │   └── plotting.py   # 시각화
-│       └── assets/        # 정적 파일
-│           └── styles.css # CSS 스타일
+│   ├── 5_web_interface/   # 웹 인터페이스 (Streamlit)
+│   │   ├── app.py         # 메인 앱
+│   │   ├── components/    # UI 컴포넌트
+│   │   │   ├── uploader.py   # 이미지 업로드
+│   │   │   └── statistics.py # 통계 차트
+│   │   ├── utils/         # 유틸리티
+│   │   │   ├── inference.py  # 추론 로직
+│   │   │   └── plotting.py   # 시각화
+│   │   └── assets/        # 정적 파일
+│   │       └── styles.css # CSS 스타일
+│   └── alert/             # 알림 모듈
+│       ├── __init__.py
+│       └── telegram_notifier.py  # Telegram Bot 알림
 ├── notebooks/              # Jupyter 노트북
 ├── output/                 # 출력 결과
 │   ├── inference/         # 통합 추론 결과 (이미지 + JSON)
@@ -560,6 +610,11 @@ SafetyVisionAI/
   - [v] 설정 패널 (신뢰도, IoU 임계값 조정)
   - [v] 디버그 모드 (개발자용 상세 정보)
   - [v] 반응형 UI 및 커스텀 CSS 스타일
+  - [v] **Telegram Bot 실시간 알림** 📱
+    - 헬멧 미착용자 2명 이상 또는 착용률 80% 미만 시 자동 알림
+    - 그룹 채팅 지원 (팀원 모두에게 알림 전송)
+    - 탐지 결과 이미지 포함 전송
+    - 안전 수준별 긴급도 표시 (Excellent/Caution/Dangerous)
 - [v] **Streamlit Community Cloud 배포 완료** ✅
   - [v] GitHub 연동 자동 배포 (CI/CD)
   - [v] YOLOv8 모델 (best.pt, 6.0MB) 포함
@@ -766,6 +821,14 @@ names:
    - 무료 호스팅 (Streamlit Community Cloud)
    - 실시간 웹 데모: https://safetyvisionai.streamlit.app
    - 배포 가이드 문서 (DEPLOYMENT_GUIDE.md)
+- ✅ **Telegram Bot 실시간 알림 시스템 구축 완료** (2025-11-23) 📱
+   - 헬멧 미착용자 2명 이상 또는 착용률 80% 미만 시 자동 알림
+   - Telegram 그룹 채팅 지원 (팀원 모두 알림 수신)
+   - 탐지 결과 이미지 포함 전송
+   - 안전 수준별 메시지 포맷 (Excellent/Caution/Dangerous)
+   - 환경 변수 기반 설정 (.env 파일)
+   - Streamlit Cloud Secrets 지원
+   - 알림 모듈 (`src/alert/telegram_notifier.py`) 구현
 
 ### 남은 과제
 
