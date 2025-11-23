@@ -1,0 +1,6 @@
+# Disable Git LFS for deployment model files
+# Streamlit Cloud and other platforms don't support Git LFS well
+# These files are small enough (6MB) to be stored as regular git blobs
+
+models/ppe_detection/weights/*.pt -filter -diff -merge -text
+models/ppe_detection/weights/*.pth -filter -diff -merge -text
