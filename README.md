@@ -1,23 +1,3 @@
----
-title: Safety Vision AI
-emoji: 🏗️
-colorFrom: blue
-colorTo: green
-sdk: streamlit
-sdk_version: "1.51.0"
-app_file: src/5_web_interface/app.py
-pinned: false
-license: mit
-tags:
-  - computer-vision
-  - yolov8
-  - object-detection
-  - safety
-  - ppe-detection
-  - construction-safety
-short_description: YOLOv8 기반 건설현장 안전 장비(PPE) 착용 감지 시스템
----
-
 # SafetyVisionAI
 
 딥러닝 기반 건설현장 안전 장비(PPE) 착용 모니터링 플랫폼
@@ -26,10 +6,9 @@ short_description: YOLOv8 기반 건설현장 안전 장비(PPE) 착용 감지 �
 
 ## 🚀 웹 데모 (Live Demo)
 
-[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/jhboyo/safey-vision-ai)
-[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://huggingface.co/spaces/jhboyo/safey-vision-ai)
+[![Streamlit Cloud](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://safetyvisionai.streamlit.app)
 
-**👉 실시간 웹 데모: https://huggingface.co/spaces/jhboyo/safey-vision-ai**
+**👉 실시간 웹 데모: https://safetyvisionai.streamlit.app**
 
 브라우저에서 바로 PPE 탐지를 테스트해보세요!
 - 📁 이미지 업로드 (드래그 앤 드롭)
