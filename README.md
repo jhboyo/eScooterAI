@@ -24,7 +24,7 @@
 
 ## 팀 정보
 
-- **팀명**: Safety Vision AI
+- **팀명**: SafetyVisionAI
 - **프로젝트**: 딥러닝 기반 건설현장 안전 장비 착용 모니터링 플랫폼
 - **멤버**: 김상진, 김준호, 김한솔, 유승근, 홍준재
 
@@ -293,31 +293,6 @@ cp .env.example .env
 source .venv/bin/activate
 ```
 
-### Telegram Bot 알림 설정 (선택사항)
-
-헬멧 미착용 감지 시 실시간 알림을 받으려면:
-
-**1. Telegram Bot 생성**
-```bash
-# Telegram 앱에서 @BotFather 검색
-# /newbot 명령어로 Bot 생성
-# Bot Token 복사 (예: 1234567890:ABCdefGHIjklMNOpqrsTUVwxyz)
-```
-
-**2. Telegram 그룹 생성 및 Bot 추가**
-```bash
-# Telegram에서 새 그룹 만들기 (팀원 초대)
-# 그룹에 Bot 추가
-# 그룹에서 /start 명령어 전송
-```
-
-**3. Chat ID 확인**
-```bash
-# Bot Token으로 Chat ID 확인
-curl https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates
-
-# 그룹 Chat ID는 음수 (예: -5051005167)
-```
 
 **4. .env 파일 설정**
 ```bash
@@ -400,6 +375,33 @@ uv run python src/inference/inference.py --input test.jpg --conf 0.3
 # 샘플 추론 데모 (5개 샘플 이미지)
 uv run python src/inference/sample_inference.py
 ```
+
+#### 📹 웹캠 실시간 추론 (NEW!) ✨
+
+**🎥 노트북 카메라 또는 외부 웹캠으로 실시간 PPE 탐지**
+
+```bash
+# 기본 실행 (노트북 내장 카메라)
+uv run python src/webcam_inference/webcam_inference.py
+
+# 외부 웹캠 사용
+uv run python src/webcam_inference/webcam_inference.py --camera 1
+
+# 신뢰도 조정
+uv run python src/webcam_inference/webcam_inference.py --conf 0.3
+
+# 해상도 설정
+uv run python src/webcam_inference/webcam_inference.py --width 1280 --height 720
+```
+
+**주요 기능:**
+- 🎥 **실시간 영상 처리**: 노트북/외부 웹캠 지원
+- 📊 **통계 오버레이**: FPS, 착용률, 안전 수준 실시간 표시
+- ⚠️ **즉각 경고**: 헬멧 미착용자 감지 시 화면 경고
+- ⌨️ **키보드 컨트롤**: Q(종료), S(스크린샷), P(일시정지), +/-(신뢰도), H(도움말)
+- ⚡ **고성능**: 평균 25-31 FPS (YOLOv8n)
+
+**자세한 사용법**: [웹캠 추론 가이드](src/webcam_inference/README.md)
 
 ---
 
@@ -501,6 +503,10 @@ SafetyVisionAI/
 │   │   │   └── plotting.py   # 시각화
 │   │   └── assets/        # 정적 파일
 │   │       └── styles.css # CSS 스타일
+│   ├── webcam_inference/ # 웹캠 실시간 추론 (NEW!)
+│   │   ├── webcam_inference.py  # 실시간 추론 메인
+│   │   ├── utils.py       # 유틸리티 (FPS, 통계, 시각화)
+│   │   └── README.md      # 사용 가이드
 │   └── alert/             # 알림 모듈
 │       ├── __init__.py
 │       └── telegram_notifier.py  # Telegram Bot 알림
@@ -509,6 +515,7 @@ SafetyVisionAI/
 │   ├── inference/         # 통합 추론 결과 (이미지 + JSON)
 │   ├── batch_test/        # 배치 추론 테스트 결과
 │   ├── sample_detections/ # 샘플 탐지 결과 이미지
+│   ├── webcam_screenshots/ # 웹캠 스크린샷 (NEW!)
 │   └── test_results/      # Test Dataset 평가 결과
 ├── materials/              # 참고 자료
 ├── .streamlit/             # Streamlit 설정
@@ -623,13 +630,16 @@ SafetyVisionAI/
   - [v] 배포 URL: https://safetyvisionai.streamlit.app
   - [v] 배포 가이드 문서 작성 (DEPLOYMENT_GUIDE.md)
 
-### Phase 8: 실시간 추론 및 성능 개선(추후 과제) ⏳
-- [ ] **웹캠 실시간 추론**
-  - 실시간 영상 처리
-  - 프레임 단위 객체 탐지
-  - 실시간 안전 경고 알림
-  - FPS 최적화
-- [ ] **배치 추론 최적화**
+### Phase 8: 실시간 추론 및 성능 개선 🚀
+- [v] **웹캠 실시간 추론** ✅ (2025-11-23 구현 완료)
+  - [v] 실시간 영상 처리 (노트북 카메라 / 외부 웹캠)
+  - [v] 프레임 단위 객체 탐지 (helmet, head, vest)
+  - [v] 실시간 통계 오버레이 (FPS, 착용률, 안전 수준)
+  - [v] 실시간 안전 경고 알림 (헬멧 미착용자 감지 시)
+  - [v] 키보드 컨트롤 (Q: 종료, S: 스크린샷, P: 일시정지, +/-: 신뢰도 조정, H: 도움말)
+  - [v] FPS 카운터 및 성능 최적화
+  - [v] 구현 문서 작성 (docs/WEBCAM_INFERENCE_PLAN.md)
+- [ ] **배치 추론 최적화** (추후 과제)
   - 현재: 순차 처리 (이미지를 하나씩 처리)
   - 개선: 진짜 배치 처리 (여러 이미지를 한 번에 묶어서 처리)
   - 효과: GPU 병렬 처리로 추론 속도 대폭 향상
