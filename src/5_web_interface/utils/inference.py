@@ -41,6 +41,19 @@ def load_model(model_path: str) -> Optional[YOLO]:
 
         if not model_file.exists():
             st.error(f"❌ 모델 파일을 찾을 수 없습니다: {model_path}")
+
+            # 디버깅 정보
+            import os
+            with st.expander("🔍 디버깅 정보"):
+                st.code(f"""
+현재 파일: {Path(__file__).resolve()}
+모델 경로: {model_file}
+파일 존재: {model_file.exists()}
+작업 디렉토리: {os.getcwd()}
+디렉토리 내용:
+{chr(10).join([f"  - {p}" for p in Path('.').glob('**/*') if p.is_file()][:20])}
+                """)
+
             st.info("💡 프로젝트 루트에서 다음 명령으로 학습을 먼저 수행하세요:\n```bash\nuv run python src/2_training/train.py\n```")
             return None
 
@@ -277,28 +290,27 @@ def get_model_path(model_name: str) -> Path:
     """
     import os
 
-    # 프로젝트 루트 찾기
+    # 현재 파일의 절대 경로
     current_file = Path(__file__).resolve()
 
-    # Hugging Face Spaces 환경 감지
-    # utils/inference.py 위치:
-    #   - 로컬: src/5_web_interface/utils/inference.py
-    #   - HF: utils/inference.py
-    if os.environ.get("SPACE_ID"):
-        # Hugging Face Spaces: utils/inference.py -> 루트
-        project_root = current_file.parent.parent
-    else:
-        # 로컬에서 models 디렉토리가 있는지 확인
-        # utils/inference.py -> utils -> 5_web_interface -> src -> SafetyVisionAI
-        potential_root = current_file.parent.parent
-        if (potential_root / "models").exists():
-            # 배포 환경 (deploy/huggingface)
-            project_root = potential_root
-        else:
-            # 로컬 개발 환경
-            project_root = current_file.parent.parent.parent.parent
+    # utils/inference.py 위치에서 프로젝트 루트 찾기
+    # 방법: models 디렉토리가 있는 곳을 찾을 때까지 상위로 이동
 
-    # 모델 경로
-    model_path = project_root / "models" / "ppe_detection" / "weights" / model_name
+    # 시도 1: utils/inference.py -> utils -> project_root (HF Spaces)
+    potential_root = current_file.parent.parent
+    if (potential_root / "models" / "ppe_detection" / "weights" / model_name).exists():
+        return potential_root / "models" / "ppe_detection" / "weights" / model_name
 
-    return model_path
+    # 시도 2: utils/inference.py -> utils -> 5_web_interface -> project_root (deploy/huggingface)
+    potential_root = current_file.parent.parent.parent
+    if (potential_root / "models" / "ppe_detection" / "weights" / model_name).exists():
+        return potential_root / "models" / "ppe_detection" / "weights" / model_name
+
+    # 시도 3: utils/inference.py -> utils -> 5_web_interface -> src -> project_root (로컬)
+    potential_root = current_file.parent.parent.parent.parent
+    if (potential_root / "models" / "ppe_detection" / "weights" / model_name).exists():
+        return potential_root / "models" / "ppe_detection" / "weights" / model_name
+
+    # 모든 시도 실패 - 기본 경로 반환 (에러 메시지용)
+    # HF Spaces를 기본으로 가정
+    return current_file.parent.parent / "models" / "ppe_detection" / "weights" / model_name
