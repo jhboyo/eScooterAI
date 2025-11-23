@@ -115,7 +115,7 @@ requests>=2.31.0  # HTTP 요청 (Telegram API 호출용)
 
 #### Step 2-2: 알림 모듈 작성
 
-**파일: `src/5_web_interface/utils/telegram_notifier.py` (새로 생성)**
+**파일: `src/web_interface/utils/telegram_notifier.py` (새로 생성)**
 
 ```python
 """
@@ -263,7 +263,7 @@ notifier = TelegramNotifier()
 
 #### Step 3-1: app.py에 알림 기능 추가
 
-**파일: `src/5_web_interface/app.py`**
+**파일: `src/web_interface/app.py`**
 
 1. **Import 추가** (파일 상단)
 ```python
@@ -370,7 +370,7 @@ SafetyVisionAI/
 ├── .env.example                        # 설정 예시
 ├── requirements.txt                    # requests 추가
 ├── src/
-│   └── 5_web_interface/
+│   └── web_interface/
 │       ├── app.py                      # Telegram 통합
 │       └── utils/
 │           ├── inference.py

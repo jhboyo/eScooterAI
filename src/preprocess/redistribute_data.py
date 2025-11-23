@@ -13,7 +13,7 @@ Step 4에서 초기 분할(70/15/15) 후, Train 데이터를 제한하여 검증
 
 ## 사용 방법
 ```bash
-uv run python src/1_preprocess/redistribute_data.py
+uv run python src/preprocess/redistribute_data.py
 ```
 
 ## 파라미터 커스터마이징

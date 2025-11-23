@@ -54,7 +54,7 @@ def load_model(model_path: str) -> Optional[YOLO]:
 {chr(10).join([f"  - {p}" for p in Path('.').glob('**/*') if p.is_file()][:20])}
                 """)
 
-            st.info("💡 프로젝트 루트에서 다음 명령으로 학습을 먼저 수행하세요:\n```bash\nuv run python src/2_training/train.py\n```")
+            st.info("💡 프로젝트 루트에서 다음 명령으로 학습을 먼저 수행하세요:\n```bash\nuv run python src/training/train.py\n```")
             return None
 
         # Git LFS 포인터 파일 검증
@@ -345,7 +345,7 @@ def get_model_path(model_name: str) -> Path:
 
     # 환경별 프로젝트 루트 설정
     if is_streamlit_cloud:
-        # Streamlit Cloud: /mount/src/safetyvisionai/src/5_web_interface/utils/inference.py
+        # Streamlit Cloud: /mount/src/safetyvisionai/src/web_interface/utils/inference.py
         # -> /mount/src/safetyvisionai/
         project_root = current_file.parent.parent.parent.parent
     elif is_hf_spaces:
@@ -353,7 +353,7 @@ def get_model_path(model_name: str) -> Path:
         # <root>/utils/inference.py -> <root>/
         project_root = current_file.parent.parent
     else:
-        # 로컬 개발: SafetyVisionAI/src/5_web_interface/utils/inference.py
+        # 로컬 개발: SafetyVisionAI/src/web_interface/utils/inference.py
         # -> SafetyVisionAI/
         project_root = current_file.parent.parent.parent.parent
 

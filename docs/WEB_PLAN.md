@@ -13,7 +13,7 @@ Streamlit 기반의 직관적인 웹 대시보드를 구축하여 PPE Detection 
 #### 구현 내용
 1. **프로젝트 구조 생성**
    ```
-   src/5_web_interface/
+   src/web_interface/
    ├── __init__.py
    ├── app.py                    # 메인 Streamlit 앱
    ├── components/
@@ -52,7 +52,7 @@ Streamlit 기반의 직관적인 웹 대시보드를 구축하여 PPE Detection 
 #### 실행 방법
 ```bash
 # 웹 대시보드 실행
-uv run streamlit run src/5_web_interface/app.py
+uv run streamlit run src/web_interface/app.py
 
 # 브라우저 자동 접속
 # 수동 접속: http://localhost:8501
@@ -114,7 +114,7 @@ uv run streamlit run src/5_web_interface/app.py
 
 ```
 src/
-└── 5_web_interface/
+└── web_interface/
     ├── __init__.py
     ├── app.py                  # 메인 Streamlit 앱
     ├── components/             # UI 컴포넌트
@@ -223,9 +223,9 @@ src/
 - [x] Python 모듈 import 정상 작동
 
 #### 구현 파일
-- `src/5_web_interface/components/uploader.py` (313줄)
-- `src/5_web_interface/assets/styles.css` (197줄)
-- `src/5_web_interface/app.py` (업데이트)
+- `src/web_interface/components/uploader.py` (313줄)
+- `src/web_interface/assets/styles.css` (197줄)
+- `src/web_interface/app.py` (업데이트)
 
 #### 다음 단계
 Step 3에서 업로드된 이미지를 YOLOv8 모델에 전달하여 PPE 탐지 추론 수행
@@ -387,7 +387,7 @@ Step 4에서 추론 결과를 시각화하여 사용자에게 표시
 - `uv add streamlit plotly` 명령으로 설치
 
 ### 2. 앱 실행
-- 개발 모드: `uv run streamlit run src/5_web_interface/app.py`
+- 개발 모드: `uv run streamlit run src/web_interface/app.py`
 - 프로덕션 모드: 포트 지정 옵션 사용 가능
 
 ### 3. 브라우저 접속

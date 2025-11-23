@@ -4,7 +4,7 @@
 모든 전처리 단계를 순차적으로 실행합니다.
 
 사용법:
-    uv run python src/1_preprocess/preprocess_all.py
+    uv run python src/preprocess/preprocess_all.py
 """
 
 import time
@@ -69,7 +69,7 @@ def run_all():
         print("   - configs/ppe_dataset.yaml (데이터셋 설정)")
         print()
         print("다음 단계:")
-        print("   uv run python src/2_training/train.py --data configs/ppe_dataset.yaml")
+        print("   uv run python src/training/train.py --data configs/ppe_dataset.yaml")
         print()
 
     except Exception as e:

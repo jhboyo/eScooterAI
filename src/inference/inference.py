@@ -12,16 +12,16 @@ Features:
 
 Usage:
     # Single image inference
-    uv run python src/4_inference/inference.py --input path/to/image.jpg
+    uv run python src/inference/inference.py --input path/to/image.jpg
 
     # Directory inference
-    uv run python src/4_inference/inference.py --input path/to/directory
+    uv run python src/inference/inference.py --input path/to/directory
 
     # Adjust confidence threshold
-    uv run python src/4_inference/inference.py --input path/to/image.jpg --conf 0.3
+    uv run python src/inference/inference.py --input path/to/image.jpg --conf 0.3
 
     # Use custom model
-    uv run python src/4_inference/inference.py --input path/to/image.jpg --model path/to/model.pt
+    uv run python src/inference/inference.py --input path/to/image.jpg --model path/to/model.pt
 """
 
 import argparse
@@ -480,7 +480,7 @@ def main():
     args = parse_args()
 
     # 프로젝트 기본 디렉토리 설정 / Set project base directory
-    # 이 파일이 src/4_inference/inference.py에 있으므로 3단계 상위가 프로젝트 루트
+    # 이 파일이 src/inference/inference.py에 있으므로 3단계 상위가 프로젝트 루트
     base_dir = Path(__file__).parent.parent.parent
 
     # 입력 경로 설정 / Set input path

@@ -16,7 +16,7 @@
 | **App URL** | https://safetyvisionai.streamlit.app |
 | **GitHub 리포지토리** | https://github.com/jhboyo/SafetyVisionAI |
 | **브랜치** | `master` |
-| **앱 파일** | `src/5_web_interface/app.py` |
+| **앱 파일** | `src/web_interface/app.py` |
 | **Python 버전** | 3.11 |
 
 ### 주요 특징
@@ -39,7 +39,7 @@
    - "New app" 버튼 클릭
    - Repository: `jhboyo/SafetyVisionAI`
    - Branch: `master`
-   - Main file path: `src/5_web_interface/app.py`
+   - Main file path: `src/web_interface/app.py`
 
 3. **Deploy 클릭**
    - 약 2-5분 소요
@@ -73,7 +73,7 @@ git push origin master
 
 ### ✅ 모델 경로 감지
 - **해결**: Streamlit Cloud 환경 감지 로직
-- **파일**: src/5_web_interface/utils/inference.py
+- **파일**: src/web_interface/utils/inference.py
 
 ### ✅ Git LFS 문제
 - **해결**: 일반 Git으로 변환 (모델 파일 6MB)

@@ -348,12 +348,12 @@ uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dat
 
 ### 데이터셋 YAML 생성
 ```bash
-uv run python src/1_preprocess/step5_generate_yaml.py
+uv run python src/preprocess/step5_generate_yaml.py
 ```
 
 ### 모델 훈련
 ```bash
-uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
+uv run python src/training/train.py --data configs/ppe_dataset.yaml
 ```
 
 ### 추론
@@ -369,7 +369,7 @@ uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 **💻 로컬 실행**
 ```bash
 # Streamlit 웹 대시보드 실행
-uv run streamlit run src/5_web_interface/app.py
+uv run streamlit run src/web_interface/app.py
 
 # 브라우저 자동 접속: http://localhost:8501
 ```
@@ -386,19 +386,19 @@ uv run streamlit run src/5_web_interface/app.py
 ```bash
 # 통합 추론 시스템 (helmet, head, vest 동시 탐지)
 # 기본 사용 (테스트 데이터셋 전체)
-uv run python src/4_inference/inference.py
+uv run python src/inference/inference.py
 
 # 단일 이미지 추론
-uv run python src/4_inference/inference.py --input test_image.jpg
+uv run python src/inference/inference.py --input test_image.jpg
 
 # 디렉토리 전체 추론
-uv run python src/4_inference/inference.py --input path/to/directory
+uv run python src/inference/inference.py --input path/to/directory
 
 # 신뢰도 임계값 조정
-uv run python src/4_inference/inference.py --input test.jpg --conf 0.3
+uv run python src/inference/inference.py --input test.jpg --conf 0.3
 
 # 샘플 추론 데모 (5개 샘플 이미지)
-uv run python src/4_inference/sample_inference.py
+uv run python src/inference/sample_inference.py
 ```
 
 ---
@@ -487,11 +487,11 @@ SafetyVisionAI/
 │   └── ppe_detection/     # PPE 탐지 모델
 │       └── weights/       # 모델 가중치 (best.pt, last.pt)
 ├── src/                    # 소스 코드
-│   ├── 1_preprocess/      # 전처리 스크립트
-│   ├── 2_training/        # 훈련 스크립트
-│   ├── 3_test/            # Test Dataset 평가 스크립트
-│   ├── 4_inference/       # 추론 스크립트 (CLI)
-│   ├── 5_web_interface/   # 웹 인터페이스 (Streamlit)
+│   ├── preprocess/      # 전처리 스크립트
+│   ├── training/        # 훈련 스크립트
+│   ├── test_eval/            # Test Dataset 평가 스크립트
+│   ├── inference/       # 추론 스크립트 (CLI)
+│   ├── web_interface/   # 웹 인터페이스 (Streamlit)
 │   │   ├── app.py         # 메인 앱
 │   │   ├── components/    # UI 컴포넌트
 │   │   │   ├── uploader.py   # 이미지 업로드
@@ -582,8 +582,8 @@ SafetyVisionAI/
 
 ### Phase 6: 추론 시스템 ✅
 - [v] **통합 추론 시스템 구현** (3 class 대응) ✅
-  - `src/4_inference/inference.py`: 범용 추론 시스템
-  - `src/4_inference/sample_inference.py`: 샘플 데모 (5개 이미지)
+  - `src/inference/inference.py`: 범용 추론 시스템
+  - `src/inference/sample_inference.py`: 샘플 데모 (5개 이미지)
   - best.pt 모델 로드
   - 단일 이미지 추론
   - 디렉토리 추론 (순차 처리)

@@ -201,7 +201,7 @@ IoU 임계값: 0.3 ~ 0.4
 ### 현재 기본값
 
 ```python
-# src/5_web_interface/app.py
+# src/web_interface/app.py
 iou_threshold = st.slider(
     "IoU 임계값",
     min_value=0.1,
@@ -216,7 +216,7 @@ iou_threshold = st.slider(
 
 1. **웹 대시보드 실행**
    ```bash
-   uv run streamlit run src/5_web_interface/app.py
+   uv run streamlit run src/web_interface/app.py
    ```
 
 2. **사이드바에서 조정**
@@ -333,7 +333,7 @@ IoU와의 관계:
 ### 관련 자료
 - `README.md`: 프로젝트 전체 개요
 - `WEB_PLAN.md`: 웹 인터페이스 구현 계획
-- `src/5_web_interface/utils/inference.py`: 추론 코드 구현
+- `src/web_interface/utils/inference.py`: 추론 코드 구현
 
 ---
 
@@ -364,4 +364,4 @@ iou_threshold = 0.35
 
 **Last Updated**: 2025-11-22
 **Author**: Safety Vision AI Team
-**Related**: `README.md`, `WEB_PLAN.md`, `src/5_web_interface/utils/inference.py`
+**Related**: `README.md`, `WEB_PLAN.md`, `src/web_interface/utils/inference.py`

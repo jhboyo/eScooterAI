@@ -13,19 +13,19 @@ Transfer Learning을 활용하여 COCO 사전학습 가중치를 사용합니다
 ## 사용 방법
 ```bash
 # 기본 실행 (configs/train_config.yaml 사용)
-uv run python src/2_training/train.py
+uv run python src/training/train.py
 
 # MacBook 테스트 훈련 (3 epochs, batch 16)
-uv run python src/2_training/train.py --epochs 1 --batch 16 --device mps
+uv run python src/training/train.py --epochs 1 --batch 16 --device mps
 
 # RunPod A100 본 훈련 (100 epochs, batch 128)
-uv run python src/2_training/train.py --epochs 100 --batch 128 --device 0
+uv run python src/training/train.py --epochs 100 --batch 128 --device 0
 
 # 다른 설정 파일 사용
-uv run python src/2_training/train.py --config configs/custom_config.yaml
+uv run python src/training/train.py --config configs/custom_config.yaml
 
 # 데이터셋 직접 지정
-uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
+uv run python src/training/train.py --data configs/ppe_dataset.yaml
 ```
 
 ## 실행 과정
@@ -279,8 +279,8 @@ def main():
     메인 함수 - 명령줄 인자 파싱 및 훈련 실행
     """
     # 기본 경로 설정
-    # __file__ -> src/2_training/train.py
-    # parent -> src/2_training/
+    # __file__ -> src/training/train.py
+    # parent -> src/training/
     # parent.parent -> src/
     # parent.parent.parent -> 프로젝트 루트
     base_dir = Path(__file__).parent.parent.parent

@@ -17,7 +17,7 @@ import os
 # 환경 감지 및 프로젝트 루트 설정
 # ============================================================================
 # Hugging Face Spaces: app.py가 루트에 위치
-# 로컬 개발: app.py가 src/5_web_interface/에 위치
+# 로컬 개발: app.py가 src/web_interface/에 위치
 current_file = Path(__file__).resolve()
 
 # Hugging Face Spaces 환경 감지
@@ -26,7 +26,7 @@ if os.environ.get("SPACE_ID") or (current_file.parent / "models").exists():
     # Hugging Face Spaces 또는 배포 환경 (app.py가 프로젝트 루트에 위치)
     project_root = current_file.parent
 else:
-    # 로컬 개발 환경 (app.py가 src/5_web_interface/에 위치)
+    # 로컬 개발 환경 (app.py가 src/web_interface/에 위치)
     # 상위 디렉토리 2단계 올라가서 프로젝트 루트 찾기
     project_root = current_file.parent.parent.parent
 

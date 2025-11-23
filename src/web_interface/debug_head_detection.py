@@ -128,7 +128,7 @@ if __name__ == "__main__":
     if not model_path.exists():
         print(f"❌ 모델 파일을 찾을 수 없습니다: {model_path}")
         print("먼저 모델을 학습해주세요:")
-        print("uv run python src/2_training/train.py")
+        print("uv run python src/training/train.py")
         sys.exit(1)
 
     # 테스트 실행

@@ -7,7 +7,7 @@ models/ppe_detection/results.csv 파일을 읽어서 훈련 결과를 시각화�
 
 ## 사용 방법
 ```bash
-uv run python src/2_training/visualize_results.py
+uv run python src/training/visualize_results.py
 ```
 
 ## 출력 파일

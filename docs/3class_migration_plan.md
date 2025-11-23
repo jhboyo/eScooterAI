@@ -67,7 +67,7 @@ cp configs/ppe_dataset.yaml configs/ppe_dataset_2class.yaml.bak
 
 #### 1-2. 클래스 매핑 재정의
 ```python
-# src/1_preprocess/step3_merge_datasets.py 수정
+# src/preprocess/step3_merge_datasets.py 수정
 # 3 class 매핑으로 변경
 
 class_mapping = {
@@ -87,22 +87,22 @@ class_mapping = {
 #### 1-3. 데이터 재전처리
 ```bash
 # Step 1: Dataset 1 재변환 (head 클래스 포함)
-uv run python src/1_preprocess/step1_convert_voc_to_yolo.py
+uv run python src/preprocess/step1_convert_voc_to_yolo.py
 
 # Step 2: Dataset 2 확인 (변경 없음, 클래스 ID만 조정)
-uv run python src/1_preprocess/step2_check_dataset2.py
+uv run python src/preprocess/step2_check_dataset2.py
 
 # Step 3: 3 class 매핑으로 통합
-uv run python src/1_preprocess/step3_merge_datasets.py
+uv run python src/preprocess/step3_merge_datasets.py
 
 # Step 4: Train/Val/Test 재분할
-uv run python src/1_preprocess/step4_split_dataset.py
+uv run python src/preprocess/step4_split_dataset.py
 
 # Step 5: 3 class YAML 생성
-uv run python src/1_preprocess/step5_generate_yaml.py
+uv run python src/preprocess/step5_generate_yaml.py
 
 # Step 6: 데이터 검증
-uv run python src/1_preprocess/step6_validate_dataset.py
+uv run python src/preprocess/step6_validate_dataset.py
 ```
 
 ---
@@ -141,7 +141,7 @@ patience: 50  # 조기 종료 patience
 #### 3-1. 클래스 분포 확인
 ```bash
 # 각 클래스별 객체 수 확인
-uv run python src/1_preprocess/step6_validate_dataset.py
+uv run python src/preprocess/step6_validate_dataset.py
 ```
 
 **실제 결과 (재분배 후):** ✅
@@ -183,7 +183,7 @@ uv run python src/1_preprocess/step6_validate_dataset.py
 **로컬 MacBook (테스트용)**
 ```bash
 # 3 epoch 테스트 훈련
-uv run python src/2_training/train.py \
+uv run python src/training/train.py \
   --data configs/ppe_dataset.yaml \
   --epochs 1 \
   --batch 16 \
@@ -193,7 +193,7 @@ uv run python src/2_training/train.py \
 **RunPod A100 (본 훈련)**
 ```bash
 # 100 epoch 전체 훈련
-uv run python src/2_training/train.py \
+uv run python src/training/train.py \
   --data configs/ppe_dataset.yaml \
   --epochs 100 \
   --batch 128 \
@@ -239,7 +239,7 @@ uv run python src/2_training/train.py \
 
 #### 6-1. 추론 스크립트 수정
 ```python
-# src/4_inference/inference.py
+# src/inference/inference.py
 # 3 class 색상 코드 정의
 
 CLASS_COLORS = {
@@ -256,7 +256,7 @@ if class_id == 1:  # head 탐지
 #### 6-2. 테스트 추론
 ```bash
 # 이미지 추론 테스트
-uv run python src/4_inference/inference.py \
+uv run python src/inference/inference.py \
   --model models/ppe_detection_3class/weights/best.pt \
   --input dataset/data/test/images/sample.jpg
 ```

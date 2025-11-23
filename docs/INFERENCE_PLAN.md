@@ -428,12 +428,12 @@ class SafetyMonitor:
 
 ```bash
 # 권장: Dual Model 추론 (person + PPE 정확한 매칭) 🎯
-uv run python src/4_inference/inference.py \
+uv run python src/inference/inference.py \
     --source image.jpg \
     --dual-mode  # Dual model 모드 (기본 권장)
 
 # Dual Model 상세 설정
-uv run python src/4_inference/inference.py \
+uv run python src/inference/inference.py \
     --ppe-model models/ppe_detection/weights/best.pt \
     --person-model yolov8n.pt  # YOLOv8 기본 모델 (추가 학습 불필요)
     --source dataset/data/test/images/ \
@@ -441,14 +441,14 @@ uv run python src/4_inference/inference.py \
     --save-report   # 상세 리포트 저장
 
 # 안전 점수 임계값 설정
-uv run python src/4_inference/inference.py \
+uv run python src/inference/inference.py \
     --source video.mp4 \
     --dual-mode \
     --safety-threshold 80  # 80점 미만 시 경고
     --alert-email admin@site.com  # 이메일 알림
 
 # 대체 방법: 단순 추정 모드 (Dual Model 미사용 시)
-uv run python src/4_inference/inference.py \
+uv run python src/inference/inference.py \
     --model models/ppe_detection/weights/best.pt \
     --source image.jpg \
     --estimation-mode  # 헬멧 기반 추정 모드

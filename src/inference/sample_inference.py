@@ -13,7 +13,7 @@
 5. 결과 이미지 저장
 
 사용 방법:
-    uv run python src/4_inference/sample_inference.py
+    uv run python src/inference/sample_inference.py
 """
 
 import cv2
@@ -257,7 +257,7 @@ def main():
     # ========================================
     # 현재 스크립트 기준 프로젝트 루트 경로 계산
     # __file__: 현재 스크립트 파일 경로
-    # .parent.parent.parent: 3단계 상위 (src/4_inference/sample_inference.py → 루트)
+    # .parent.parent.parent: 3단계 상위 (src/inference/sample_inference.py → 루트)
     base_dir = Path(__file__).parent.parent.parent
 
     # 모델 파일 경로 (훈련된 best.pt)

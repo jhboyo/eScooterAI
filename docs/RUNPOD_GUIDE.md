@@ -77,13 +77,13 @@ uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dat
 
 ```bash
 # ppe_dataset.yaml 생성 (절대 경로 포함)
-uv run python src/1_preprocess/step5_generate_yaml.py
+uv run python src/preprocess/step5_generate_yaml.py
 ```
 
 ### 8. 모델 훈련 실행
 
 ```bash
-uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
+uv run python src/training/train.py --data configs/ppe_dataset.yaml
 ```
 
 ---
@@ -133,7 +133,7 @@ ls -la models/ppe_detection/
 ### 결과 시각화
 
 ```bash
-uv run python src/2_training/visualize_results.py
+uv run python src/training/visualize_results.py
 ```
 
 ---
@@ -151,8 +151,8 @@ cp .env.example .env && \
 sed -i "s|PROJECT_ROOT=.*|PROJECT_ROOT=$(pwd)|" .env && \
 uv tool install huggingface-hub && \
 uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dataset/data && \
-uv run python src/1_preprocess/step5_generate_yaml.py && \
-uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
+uv run python src/preprocess/step5_generate_yaml.py && \
+uv run python src/training/train.py --data configs/ppe_dataset.yaml
 ```
 
 ---
@@ -179,7 +179,7 @@ train:
 
 ```bash
 # YAML 파일 재생성
-uv run python src/1_preprocess/step5_generate_yaml.py
+uv run python src/preprocess/step5_generate_yaml.py
 
 # 경로 확인
 cat configs/ppe_dataset.yaml
@@ -216,7 +216,7 @@ uv tool run hf download jhboyo/ppe_detection-model --repo-type model --local-dir
 ### 추론 테스트
 
 ```bash
-uv run python src/4_inference/inference.py \
+uv run python src/inference/inference.py \
     --model models/ppe_detection/weights/best.pt \
     --input dataset/data/test/images/
 ```

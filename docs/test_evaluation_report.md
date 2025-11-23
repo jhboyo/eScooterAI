@@ -304,5 +304,5 @@
 ---
 
 **보고서 작성**: Claude Code
-**평가 스크립트**: `src/3_test/evaluate_test.py`
+**평가 스크립트**: `src/test_eval/evaluate_test.py`
 **평가 일시**: 2025-11-22 01:47:37
