@@ -315,24 +315,45 @@ def get_model_path(model_name: str) -> Path:
     # 현재 파일의 절대 경로
     current_file = Path(__file__).resolve()
 
-    # utils/inference.py 위치에서 프로젝트 루트 찾기
-    # 방법: models 디렉토리가 있는 곳을 찾을 때까지 상위로 이동
+    # Streamlit Cloud 환경 감지 (/mount/src/<repo-name>/)
+    is_streamlit_cloud = str(current_file).startswith('/mount/src/')
 
-    # 시도 1: utils/inference.py -> utils -> project_root (HF Spaces)
-    potential_root = current_file.parent.parent
-    if (potential_root / "models" / "ppe_detection" / "weights" / model_name).exists():
-        return potential_root / "models" / "ppe_detection" / "weights" / model_name
+    # Hugging Face Spaces 환경 감지
+    is_hf_spaces = os.environ.get("SPACE_ID") is not None
 
-    # 시도 2: utils/inference.py -> utils -> 5_web_interface -> project_root (deploy/huggingface)
-    potential_root = current_file.parent.parent.parent
-    if (potential_root / "models" / "ppe_detection" / "weights" / model_name).exists():
-        return potential_root / "models" / "ppe_detection" / "weights" / model_name
+    # 환경별 프로젝트 루트 설정
+    if is_streamlit_cloud:
+        # Streamlit Cloud: /mount/src/safetyvisionai/src/5_web_interface/utils/inference.py
+        # -> /mount/src/safetyvisionai/
+        project_root = current_file.parent.parent.parent.parent
+    elif is_hf_spaces:
+        # HF Spaces: app.py와 같은 레벨에 utils가 있음
+        # <root>/utils/inference.py -> <root>/
+        project_root = current_file.parent.parent
+    else:
+        # 로컬 개발: SafetyVisionAI/src/5_web_interface/utils/inference.py
+        # -> SafetyVisionAI/
+        project_root = current_file.parent.parent.parent.parent
 
-    # 시도 3: utils/inference.py -> utils -> 5_web_interface -> src -> project_root (로컬)
-    potential_root = current_file.parent.parent.parent.parent
-    if (potential_root / "models" / "ppe_detection" / "weights" / model_name).exists():
-        return potential_root / "models" / "ppe_detection" / "weights" / model_name
+    model_path = project_root / "models" / "ppe_detection" / "weights" / model_name
 
-    # 모든 시도 실패 - 기본 경로 반환 (에러 메시지용)
-    # HF Spaces를 기본으로 가정
-    return current_file.parent.parent / "models" / "ppe_detection" / "weights" / model_name
+    # 디버깅 정보 (파일이 없을 경우에만 출력)
+    if not model_path.exists():
+        print(f"[DEBUG] Model path not found: {model_path}")
+        print(f"[DEBUG] Current file: {current_file}")
+        print(f"[DEBUG] Project root: {project_root}")
+        print(f"[DEBUG] Is Streamlit Cloud: {is_streamlit_cloud}")
+        print(f"[DEBUG] Is HF Spaces: {is_hf_spaces}")
+
+        # 상위 디렉토리 탐색으로 폴백
+        for level in range(2, 6):
+            potential_root = current_file
+            for _ in range(level):
+                potential_root = potential_root.parent
+            potential_path = potential_root / "models" / "ppe_detection" / "weights" / model_name
+            print(f"[DEBUG] Trying level {level}: {potential_path}")
+            if potential_path.exists():
+                print(f"[DEBUG] Found at level {level}!")
+                return potential_path
+
+    return model_path

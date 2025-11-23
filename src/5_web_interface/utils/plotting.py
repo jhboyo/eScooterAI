@@ -312,11 +312,11 @@ def render_comparison_view(
 
         with col1:
             st.markdown("**원본**")
-            st.image(original, use_container_width=True)
+            st.image(original, width='stretch')
 
         with col2:
             st.markdown("**탐지 결과**")
-            st.image(result_image, use_container_width=True)
+            st.image(result_image, width='stretch')
 
         # 탐지 정보가 있으면 표시
         if num_detections > 0:

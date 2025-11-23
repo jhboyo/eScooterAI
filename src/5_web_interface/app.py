@@ -235,7 +235,7 @@ def main():
         # 탐지 시작 버튼
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("🚀 탐지 시작", use_container_width=True, type="primary"):
+            if st.button("🚀 탐지 시작", width='stretch', type="primary"):
                 # 모델 로드 (버튼 클릭 시점에 로드)
                 model_path = get_model_path(settings['model'])
                 model = load_model(str(model_path))
@@ -441,7 +441,7 @@ def main():
                     st.markdown("#### 📋 모든 탐지 상세 정보")
                     st.dataframe(
                         all_detections_detail,
-                        use_container_width=True,
+                        width='stretch',
                         hide_index=True
                     )
 
@@ -451,7 +451,7 @@ def main():
                         st.markdown("#### 🔴 헬멧 미착용 (Head) 탐지 상세")
                         st.dataframe(
                             head_detections,
-                            use_container_width=True,
+                            width='stretch',
                             hide_index=True
                         )
                     else:
@@ -476,7 +476,7 @@ def main():
         stats_table = create_image_statistics_table(st.session_state.inference_results)
         st.dataframe(
             stats_table,
-            use_container_width=True,
+            width='stretch',
             hide_index=True,
             column_config={
                 '번호': st.column_config.NumberColumn('번호', width='small'),

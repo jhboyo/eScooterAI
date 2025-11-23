@@ -209,7 +209,7 @@ def render_image_preview(uploaded_files: List, columns: int = 3):
                 file.seek(0)
 
                 # 이미지 표시
-                st.image(img, use_container_width=True, caption=file.name)
+                st.image(img, width='stretch', caption=file.name)
 
                 # 이미지 정보
                 info = get_image_info(file)
@@ -265,7 +265,7 @@ def render_file_info_table(uploaded_files: List):
     if data:
         st.dataframe(
             data,
-            use_container_width=True,
+            width='stretch',
             hide_index=True
         )
 

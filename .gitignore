@@ -44,6 +44,8 @@ venv.bak/
 # Machine Learning
 models/*.pth
 *.pt
+# 배포용 모델 파일은 예외 (Streamlit Cloud, HF Spaces 배포에 필요)
+!models/ppe_detection/weights/*.pt
 models/*/args.yaml
 models/*/*.jpg
 models/*/labels.jpg
