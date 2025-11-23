@@ -2,6 +2,23 @@
 
 딥러닝 기반 건설현장 안전 장비(PPE) 착용 모니터링 플랫폼
 
+---
+
+## 🚀 웹 데모 (Live Demo)
+
+[![Hugging Face Spaces](https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/jhboyo/safey-vision-ai)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)](https://huggingface.co/spaces/jhboyo/safey-vision-ai)
+
+**👉 실시간 웹 데모: https://huggingface.co/spaces/jhboyo/safey-vision-ai**
+
+브라우저에서 바로 PPE 탐지를 테스트해보세요!
+- 📁 이미지 업로드 (드래그 앤 드롭)
+- 🎯 실시간 헬멧/안전조끼 탐지
+- 📊 안전 수준 자동 평가
+- 🖼️ 원본/결과 비교 시각화
+
+---
+
 ## 팀 정보
 
 - **팀명**: Safety Vision AI
@@ -297,7 +314,15 @@ uv run python src/2_training/train.py --data configs/ppe_dataset.yaml
 
 ### 추론
 
-#### 🌐 웹 인터페이스
+#### 🌐 웹 인터페이스 (추천)
+
+**🚀 온라인 데모 (배포 완료)**
+```
+👉 https://huggingface.co/spaces/jhboyo/safey-vision-ai
+```
+별도 설치 없이 브라우저에서 바로 사용 가능!
+
+**💻 로컬 실행**
 ```bash
 # Streamlit 웹 대시보드 실행
 uv run streamlit run src/5_web_interface/app.py
@@ -536,6 +561,15 @@ SafetyVisionAI/
   - [v] 설정 패널 (신뢰도, IoU 임계값 조정)
   - [v] 디버그 모드 (개발자용 상세 정보)
   - [v] 반응형 UI 및 커스텀 CSS 스타일
+- [v] **Hugging Face Spaces 배포 완료** ✅
+  - [v] Docker-Streamlit 템플릿 사용
+  - [v] Git 기반 자동 배포 (CI/CD)
+  - [v] YOLOv8 모델 (best.pt, 6.0MB) 포함
+  - [v] 경량화된 의존성 (10개 핵심 패키지)
+  - [v] 무료 CPU 인스턴스 (16GB RAM, 2 vCPU)
+  - [v] 24/7 무료 호스팅
+  - [v] 배포 URL: https://huggingface.co/spaces/jhboyo/safey-vision-ai
+  - [v] 배포 가이드 문서 작성 (DEPLOYMENT_GUIDE.md)
 
 ### Phase 8: 실시간 추론 및 성능 개선(추후 과제) ⏳
 - [ ] **웹캠 실시간 추론**
@@ -729,6 +763,12 @@ names:
    - 바운딩 박스 시각화 및 원본/결과 비교 뷰
    - 헬멧 착용률 및 안전 수준 평가 자동화
    - 신뢰도/IoU 임계값 설정 UI
+- ✅ **Hugging Face Spaces 배포 완료** (2025-11-23)
+   - Docker-Streamlit 템플릿 기반 배포
+   - YOLOv8 모델 포함 (best.pt, 6.0MB)
+   - 무료 24/7 호스팅 (CPU 16GB RAM, 2 vCPU)
+   - 실시간 웹 데모: https://huggingface.co/spaces/jhboyo/safey-vision-ai
+   - 배포 가이드 문서 (DEPLOYMENT_GUIDE.md)
 
 ### 남은 과제
 

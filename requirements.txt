@@ -1,0 +1,18 @@
+# Hugging Face Spaces용 경량화된 의존성
+# Safety Vision AI - Streamlit Web Interface
+
+# 핵심 패키지
+ultralytics==8.3.229
+streamlit==1.51.0
+plotly==6.5.0
+
+# 이미지 처리
+pillow>=9.5.0
+opencv-python-headless>=4.8.0
+
+# 데이터 처리
+numpy>=1.24.0,<2.0.0
+pandas>=2.1.0
+
+# 유틸리티
+python-dotenv>=1.2.1
