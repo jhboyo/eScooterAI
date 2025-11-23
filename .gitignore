@@ -108,8 +108,3 @@ logs/
 CLAUDE.md
 runs/
 output/
-deploy/
-safety-vision-ai/
-
-# Deployment scripts (contains sensitive paths)
-scripts/deploy_to_hf.sh
