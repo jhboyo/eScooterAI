@@ -208,7 +208,7 @@ def run_inference_batch(
     conf: float = 0.25,
     iou: float = 0.45,
     max_det: int = 300,
-    show_progress: bool = True,  # 호환성을 위해 파라미터는 유지
+    show_progress: bool = True,
     debug: bool = False
 ) -> List[Dict]:
     """
@@ -220,20 +220,42 @@ def run_inference_batch(
         conf: 신뢰도 임계값
         iou: IoU 임계값
         max_det: 최대 탐지 객체 수
-        show_progress: (사용되지 않음, 호환성 유지)
+        show_progress: 진행 상태 표시 여부
         debug: 디버그 정보 출력 여부
 
     Returns:
         List[Dict]: 각 이미지의 추론 결과 리스트
     """
     results = []
+    total_images = len(images)
+
+    # 진행 상태 표시
+    if show_progress:
+        progress_bar = st.progress(0)
+        status_text = st.empty()
 
     # 각 이미지에 대해 추론 실행
     for idx, image in enumerate(images):
+        # 진행 상태 업데이트
+        if show_progress:
+            progress = (idx + 1) / total_images
+            progress_bar.progress(progress)
+            status_text.text(f"🔍 추론 중... ({idx + 1}/{total_images})")
+
         # 단일 이미지 추론
         result = run_inference_single(model, image, conf, iou, max_det, debug=debug)
         result['image_index'] = idx
         results.append(result)
+
+    # 진행 상태 표시 완료
+    if show_progress:
+        progress_bar.progress(1.0)
+        status_text.text(f"✅ 추론 완료! ({total_images}/{total_images})")
+        # 잠시 후 상태 메시지 제거
+        import time
+        time.sleep(0.5)
+        progress_bar.empty()
+        status_text.empty()
 
     return results
 
