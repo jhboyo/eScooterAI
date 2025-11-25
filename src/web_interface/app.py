@@ -44,6 +44,7 @@ load_dotenv(project_root / ".env")
 # UI 컴포넌트
 from components.uploader import render_complete_uploader  # 이미지 업로드 UI
 from components.statistics import create_image_statistics_table  # 통계 테이블 생성
+from components.webcam_detector import render_webcam_detector  # 웹캠 실시간 탐지
 
 # 유틸리티 함수
 from utils.inference import load_model, run_inference_batch, get_model_path, summarize_results  # 추론 관련
@@ -307,21 +308,28 @@ def main():
     # 사이드바에서 사용자 설정값 가져오기 (모델, 임계값 등)
     settings = sidebar_config()
 
-    # 메인 컨텐츠 영역 - 이미지 업로드 섹션
-    # 3열로 미리보기, 업로드 테이블 표시
-    uploaded_files = render_complete_uploader(preview_columns=3, show_table=True)
+    # 탭 생성: 이미지 업로드 vs 웹캠 실시간
+    tab1, tab2 = st.tabs(["📁 이미지 업로드", "📹 실시간 웹캠"])
 
-    # 업로드된 이미지가 있는 경우
-    if uploaded_files:
-        st.markdown("---")
+    # ============================================================================
+    # 탭 1: 이미지 업로드 모드
+    # ============================================================================
+    with tab1:
+        # 메인 컨텐츠 영역 - 이미지 업로드 섹션
+        # 3열로 미리보기, 업로드 테이블 표시
+        uploaded_files = render_complete_uploader(preview_columns=3, show_table=True)
 
-        # 탐지 시작 버튼 (화면 중앙 배치)
-        col1, col2, col3 = st.columns([1, 2, 1])  # 1:2:1 비율로 3열 생성
-        with col2:  # 중앙 열에 버튼 배치
-            if st.button("🚀 탐지 시작", width='stretch', type="primary"):
-                # YOLOv8 모델 로드 (버튼 클릭 시점에 로드하여 메모리 효율성 증가)
-                model_path = get_model_path(settings['model'])
-                model = load_model(str(model_path))
+        # 업로드된 이미지가 있는 경우
+        if uploaded_files:
+            st.markdown("---")
+
+            # 탐지 시작 버튼 (화면 중앙 배치)
+            col1, col2, col3 = st.columns([1, 2, 1])  # 1:2:1 비율로 3열 생성
+            with col2:  # 중앙 열에 버튼 배치
+                if st.button("🚀 탐지 시작", width='stretch', type="primary"):
+                    # YOLOv8 모델 로드 (버튼 클릭 시점에 로드하여 메모리 효율성 증가)
+                    model_path = get_model_path(settings['model'])
+                    model = load_model(str(model_path))
 
                 # 모델 로드 실패 시 에러 메시지 표시 후 중단
                 if model is None:
@@ -608,30 +616,48 @@ def main():
         # 이미지별 통계 테이블 (화면 제일 하단)
         # ============================================================================
 
-        st.markdown("---")
-        st.markdown("## 📋 이미지별 상세 통계")
-        st.caption("각 이미지의 탐지 결과를 표로 확인합니다")
+            st.markdown("---")
+            st.markdown("## 📋 이미지별 상세 통계")
+            st.caption("각 이미지의 탐지 결과를 표로 확인합니다")
 
-        # 추론 결과를 표 형식으로 변환 (유틸리티 함수 사용)
-        stats_table = create_image_statistics_table(st.session_state.inference_results)
+            # 추론 결과를 표 형식으로 변환 (유틸리티 함수 사용)
+            stats_table = create_image_statistics_table(st.session_state.inference_results)
 
-        # Streamlit 데이터프레임으로 표 렌더링
-        st.dataframe(
-            stats_table,  # 통계 테이블 데이터
-            width='stretch',  # 화면 전체 너비 사용
-            hide_index=True,  # 인덱스 열 숨기기
-            # 각 열의 너비 및 타입 설정
-            column_config={
-                '번호': st.column_config.NumberColumn('번호', width='small'),
-                '이미지 파일': st.column_config.TextColumn('이미지 파일', width='large'),
-                '🔵 Helmet': st.column_config.NumberColumn('🔵 Helmet', width='small'),
-                '🔴 Head': st.column_config.NumberColumn('🔴 Head', width='small'),
-                '🟡 Vest': st.column_config.NumberColumn('🟡 Vest', width='small'),
-                '👷 Person': st.column_config.NumberColumn('👷 Person', width='small'),
-                '착용률 (%)': st.column_config.TextColumn('착용률 (%)', width='small'),
-                '안전 수준': st.column_config.TextColumn('안전 수준', width='medium')
-            }
-        )
+            # Streamlit 데이터프레임으로 표 렌더링
+            st.dataframe(
+                stats_table,  # 통계 테이블 데이터
+                width='stretch',  # 화면 전체 너비 사용
+                hide_index=True,  # 인덱스 열 숨기기
+                # 각 열의 너비 및 타입 설정
+                column_config={
+                    '번호': st.column_config.NumberColumn('번호', width='small'),
+                    '이미지 파일': st.column_config.TextColumn('이미지 파일', width='large'),
+                    '🔵 Helmet': st.column_config.NumberColumn('🔵 Helmet', width='small'),
+                    '🔴 Head': st.column_config.NumberColumn('🔴 Head', width='small'),
+                    '🟡 Vest': st.column_config.NumberColumn('🟡 Vest', width='small'),
+                    '👷 Person': st.column_config.NumberColumn('👷 Person', width='small'),
+                    '착용률 (%)': st.column_config.TextColumn('착용률 (%)', width='small'),
+                    '안전 수준': st.column_config.TextColumn('안전 수준', width='medium')
+                }
+            )
+
+    # ============================================================================
+    # 탭 2: 웹캠 실시간 모드
+    # ============================================================================
+    with tab2:
+        # YOLOv8 모델 로드
+        model_path = get_model_path(settings['model'])
+        model = load_model(str(model_path))
+
+        if model is None:
+            st.error("❌ 모델 로드에 실패했습니다. 페이지를 새로고침하거나 관리자에게 문의하세요.")
+        else:
+            # 웹캠 실시간 탐지 UI 렌더링
+            render_webcam_detector(
+                model=model,
+                conf_threshold=settings['conf'],
+                iou_threshold=settings['iou']
+            )
 
     # ============================================================================
     # 페이지 하단 Footer
