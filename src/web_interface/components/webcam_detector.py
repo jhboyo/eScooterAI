@@ -462,11 +462,13 @@ def render_webcam_detector(model, conf_threshold: float, iou_threshold: float):
         media_stream_constraints={
             "video": {
                 "width": {"ideal": 1280},
-                "height": {"ideal": 720}
+                "height": {"ideal": 720},
+                "frameRate": {"ideal": 30, "max": 30}
             },
             "audio": False
         },
         async_processing=True,
+        sendback_audio=False,  # Disable audio to prevent RTX codec issues
     )
     
     # 실시간 통계 표시
