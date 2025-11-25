@@ -1,33 +1,33 @@
-# Streamlit Cloud & Hugging Face Spaces용 경량화된 의존성
+# Lightweight dependencies for Streamlit Cloud & Hugging Face Spaces
 # Safety Vision AI - Streamlit Web Interface
 # Updated: 2025-11-25 - Added WebRTC support
 
-# ⚠️ CRITICAL: opencv-python-headless must be installed BEFORE ultralytics
+# CRITICAL: opencv-python-headless must be installed BEFORE ultralytics
 # ultralytics depends on opencv-python, but we need the headless version
 # for cloud deployment (no GUI dependencies)
 
-# 이미지 처리 - 먼저 설치 (opencv-python-headless가 opencv-python을 대체)
+# Image processing - Install first (opencv-python-headless replaces opencv-python)
 opencv-python-headless==4.10.0.84
 pillow>=9.5.0
 
-# 데이터 처리
+# Data processing
 numpy>=1.24.0,<2.0.0
 pandas>=2.1.0
 
-# 핵심 패키지
+# Core packages
 ultralytics==8.3.229
 streamlit==1.51.0
 plotly==6.5.0
 
-# 웹캠 실시간 탐지 (WebRTC)
+# Real-time webcam detection (WebRTC)
 streamlit-webrtc>=0.47.0
 av>=10.0.0  # PyAV for video encoding/decoding
 aiortc>=1.5.0  # WebRTC implementation
 
-# 음성 경고 시스템
+# Voice alert system
 gTTS>=2.5.0
 pygame>=2.5.0
 
-# 유틸리티
+# Utilities
 python-dotenv>=1.2.1
-requests>=2.31.0  # Telegram Bot API 호출용
+requests>=2.31.0  # For Telegram Bot API

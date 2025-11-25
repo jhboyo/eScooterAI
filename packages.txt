@@ -1,8 +1,8 @@
-# OpenCV 관련
+# OpenCV dependencies
 libgl1-mesa-glx
 libglib2.0-0
 
-# FFmpeg 및 비디오 코덱 (streamlit-webrtc, PyAV 필요)
+# FFmpeg and video codecs (required by streamlit-webrtc, PyAV)
 ffmpeg
 libavcodec-dev
 libavformat-dev
@@ -11,11 +11,11 @@ libavdevice-dev
 libswscale-dev
 libswresample-dev
 
-# WebRTC 관련 (aiortc)
+# WebRTC dependencies (required by aiortc)
 libsrtp2-dev
 libopus-dev
 libvpx-dev
 
-# 오디오 (pygame)
+# Audio dependencies (required by pygame)
 libsdl2-mixer-2.0-0
 libportaudio2
