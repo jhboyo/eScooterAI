@@ -23,8 +23,7 @@ class VoiceAlertManager:
     AI 음성 경고 시스템 매니저 (Streamlit 웹앱용)
 
     PPE 미착용 감지 시 한국어 음성 경고를 재생합니다.
-    주의: Streamlit 웹앱에서는 서버에서만 음성이 재생되고 브라우저로는 전달되지 않습니다.
-    실제 음성 경고는 OpenCV 웹캠 스크립트(webcam_inference.py)를 사용하세요.
+    로컬 환경에서만 작동하며, Streamlit Cloud에서는 서버에서만 재생됩니다.
     """
 
     def __init__(self, cooldown_seconds: int = 10):
@@ -44,7 +43,7 @@ class VoiceAlertManager:
             pygame.mixer.init()
             self.enabled = True
         except Exception as e:
-            print(f"⚠️ 음성 경고 시스템 초기화 실패: {e}")
+            print(f"⚠️ 음성 경고 시스템 초기화 실패 (정상, Cloud 환경): {e}")
             self.enabled = False
     
     def _generate_audio(self, text: str, lang: str = 'ko') -> str:
@@ -82,34 +81,34 @@ class VoiceAlertManager:
     
     def play_alert(self, alert_type: str, force: bool = False):
         """
-        음성 경고 재생
-        
+        음성 경고 재생 (로컬 환경에서만 작동)
+
         Args:
             alert_type: 경고 유형 ('helmet', 'vest', 'danger')
             force: True일 경우 쿨다운 무시하고 강제 재생
         """
         if not self.enabled:
             return
-        
+
         # 쿨다운 체크
         with self.lock:
             current_time = time.time()
             last_time = self.last_alert_time.get(alert_type, 0)
-            
+
             if not force and (current_time - last_time) < self.cooldown_seconds:
                 return  # 쿨다운 중이므로 재생하지 않음
-            
+
             self.last_alert_time[alert_type] = current_time
-        
+
         # 경고 메시지 선택
         messages = {
             'helmet': '안전모를 착용하세요',
             'vest': '안전 조끼를 착용하세요',
             'danger': '위험! 안전 장비를 착용하세요'
         }
-        
+
         message = messages.get(alert_type, '안전 수칙을 준수하세요')
-        
+
         # 별도 스레드에서 재생 (메인 스레드 차단 방지)
         thread = threading.Thread(
             target=self._play_audio_thread,
@@ -117,11 +116,11 @@ class VoiceAlertManager:
             daemon=True
         )
         thread.start()
-    
+
     def _play_audio_thread(self, text: str):
         """
         음성 재생 스레드 (내부 메서드)
-        
+
         Args:
             text: 재생할 텍스트
         """
@@ -130,11 +129,11 @@ class VoiceAlertManager:
             if audio_path and os.path.exists(audio_path):
                 pygame.mixer.music.load(audio_path)
                 pygame.mixer.music.play()
-                
+
                 # 재생이 끝날 때까지 대기
                 while pygame.mixer.music.get_busy():
                     time.sleep(0.1)
-                    
+
         except Exception as e:
             print(f"⚠️ 음성 재생 실패: {e}")
     
@@ -407,23 +406,28 @@ def render_webcam_detector(model, conf_threshold: float, iou_threshold: float):
         iou_threshold: IoU 임계값
     """
     st.header("📹 실시간 웹캠 모니터링")
-    
+
     # 음성 경고 설정
     enable_voice = st.checkbox(
-        "🔊 AI 음성 경고 활성화",
+        "🔊 AI 음성 경고 활성화 (로컬 환경 전용)",
         value=True,
-        help="헬멧 미착용 감지 시 자동으로 음성 경고를 재생합니다"
+        help="로컬 환경에서 실행 시 헬멧 미착용 감지 시 음성 경고가 재생됩니다. Streamlit Cloud에서는 시각적 경고만 제공됩니다."
     )
-    
+
     st.markdown("""
     노트북 카메라 또는 외부 웹캠을 사용하여 **실시간으로** PPE 탐지를 수행합니다.
-    
+
     **✨ 특징:**
     - 🎥 **진짜 실시간 비디오 스트리밍** (25-30 FPS)
     - 🔍 **프레임 단위 객체 탐지** (Helmet, Head, Vest)
     - 📊 **실시간 통계 업데이트** (착용률, 안전 수준)
-    - 🔊 **AI 음성 경고 시스템** (헬멧 미착용 시 자동 알림)
+    - 🚨 **시각적 경고 시스템** (헬멧 미착용 시 화면 경고)
+    - 🔊 **AI 음성 경고** (로컬 환경에서만 작동)
     - ⚡ **낮은 지연시간** (< 100ms)
+
+    > 💡 **음성 경고 안내**:
+    > - **로컬 환경** (localhost): 음성 경고가 스피커로 재생됩니다.
+    > - **Streamlit Cloud**: 서버에 사운드 카드가 없어 음성 경고가 작동하지 않습니다. 시각적 경고만 제공됩니다.
     
     **🚀 사용 방법:**
     1. 아래 **"START"** 버튼을 클릭하세요
@@ -441,13 +445,13 @@ def render_webcam_detector(model, conf_threshold: float, iou_threshold: float):
     class VideoProcessorFactory:
         def __init__(self):
             self.processor = None
-            
+
         def __call__(self):
             self.processor = PPEVideoProcessor(
                 model=model,
                 conf_threshold=conf_threshold,
                 iou_threshold=iou_threshold,
-                enable_voice_alert=enable_voice
+                enable_voice_alert=enable_voice  # 사용자가 선택한 음성 경고 설정
             )
             return self.processor
     
