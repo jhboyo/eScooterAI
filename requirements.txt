@@ -20,9 +20,9 @@ streamlit==1.51.0
 plotly==6.5.0
 
 # Real-time webcam detection (WebRTC)
-streamlit-webrtc>=0.47.0
-av>=10.0.0  # PyAV for video encoding/decoding
-aiortc>=1.5.0  # WebRTC implementation
+streamlit-webrtc==0.47.7
+av==10.0.0  # PyAV for video encoding/decoding
+aiortc==1.4.0  # WebRTC implementation (downgraded to fix RTX codec error)
 
 # Voice alert system
 gTTS>=2.5.0
