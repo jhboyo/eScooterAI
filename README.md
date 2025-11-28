@@ -94,7 +94,7 @@
 - 🤖 **RAG 기반 챗봇**: 헬멧 관련 법규, 안전 가이드 질의응답
 - 24시간 자동 모니터링 가능
 
-<img src="materials/train_batch0.jpg" width="600" alt="Train Batch Sample">
+<img src="materials/train_batch_escooter.png" width="800" alt="E-Scooter/Bike Helmet Detection Sample">
 
 ---
 
@@ -321,39 +321,39 @@
 
 ## 추론 결과 예시
 
-### 통합 추론 시스템 실행 결과
+### 전동킥보드 헬멧 탐지 결과
 
-학습된 모델을 사용하여 실제 테스트 이미지에 대한 추론을 수행한 결과입니다.
+SafetyVisionAI 사전 훈련 모델을 사용하여 자전거/전동킥보드 이용자의 헬멧 착용 상태를 탐지한 결과입니다.
 
-<img src="materials/inference_result_example.png" width="800" alt="Inference Result Example">
+#### 예시 1: 안전한 상황 (2명 모두 헬멧 착용)
+
+<img src="materials/escooter_detection_example.png" width="800" alt="E-Scooter Helmet Detection - Safe Example">
 
 **탐지 결과:**
-- ✅ **Helmet (파란색)**: 5명 착용
+- ✅ **Helmet (파란색)**: 2명 착용
 - ⚠️ **Head (빨간색)**: 0명 (모두 착용)
-- 🦺 **Vest (노란색)**: 4개 착용
 
 **안전 평가:**
-- 총 작업자: 5명
+- 총 이용자: 2명
 - 헬멧 착용률: 100%
 - 안전 수준: ✅ Excellent (우수)
 
-이 예시는 모델이 helmet과 vest를 동시에 탐지하여 작업 현장의 안전 장비 착용 상태를 종합적으로 모니터링할 수 있음을 보여줍니다.
+전동킥보드/자전거 이용자가 헬멧을 착용한 안전한 상황입니다. 실제 도로 환경에서도 헬멧 착용 상태를 정확하게 탐지합니다.
 
-### 대규모 현장 탐지 결과 (11명)
+#### 예시 2: 위험 상황 (22명 중 11명만 헬멧 착용)
 
-<img src="materials/inference_result_vest_example.png" width="800" alt="Large Scale Detection Example">
+<img src="materials/escooter_inference_example1.png" width="800" alt="E-Scooter Helmet Detection - Dangerous Example">
 
 **탐지 결과:**
 - ✅ **Helmet (파란색)**: 11명 착용
-- ⚠️ **Head (빨간색)**: 0명 (모두 착용)
-- 🦺 **Vest (노란색)**: 8개 착용
+- ⚠️ **Head (빨간색)**: 11명 미착용 (위험!)
 
 **안전 평가:**
-- 총 작업자: 11명
-- 헬멧 착용률: 100%
-- 안전 수준: ✅ Excellent (우수)
+- 총 이용자: 22명
+- 헬멧 착용률: 50.0%
+- 안전 수준: ⚠️ Dangerous (위험)
 
-다수의 작업자가 밀집된 대규모 현장에서도 모든 객체를 정확하게 탐지하여 안전 상태를 실시간으로 모니터링할 수 있습니다.
+헬멧 미착용자가 다수 포함된 위험한 상황입니다. 이러한 경우 **Telegram 즉각 알림**이 자동으로 전송되어 안전 담당자에게 경고합니다. 대규모 군중 속에서도 헬멧 미착용자를 정확히 식별하여 실시간 안전 모니터링이 가능함을 보여줍니다.
 
 ---
 

@@ -23,7 +23,7 @@ dependencies = [
     # Utilities
     "python-dotenv>=1.2.1",      # 환경 변수 관리
     "requests>=2.31.0",          # HTTP 요청 (Telegram)
-    "numpy>=1.24.0",             # 수치 연산
+    "numpy>=1.24.0,<2.0.0",      # 수치 연산 (NumPy 2.x 호환성 문제로 1.x 제한)
     "pandas>=2.1.0",             # 데이터 처리
     "matplotlib>=3.7.0",         # 시각화
     "plotly>=6.5.0",             # 인터랙티브 차트
