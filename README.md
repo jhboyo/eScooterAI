@@ -1,31 +1,32 @@
-# SafetyVisionAI
+# eScooterAI - 전동킥보드 헬멧 착용 모니터링 모바일 서비스
 
-딥러닝 기반 건설현장 안전 장비(PPE) 착용 모니터링 플랫폼
+딥러닝 기반 전동킥보드(e-Scooter) 헬멧 착용 탐지 및 안전 모니터링 플랫폼
 
 ---
 
-## 🚀 웹 데모 (Live Demo)
+## 🚀 프로젝트 데모
 
-[![Streamlit Cloud](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://safetyvisionai.streamlit.app)
+[![Streamlit Cloud](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://escooter-helmet-detection.streamlit.app)
 
-**👉 실시간 웹 데모: https://safetyvisionai.streamlit.app**
+**👉 실시간 웹캠 데모** (예정)
 
-브라우저에서 바로 PPE 탐지를 테스트해보세요!
-- 📁 이미지 업로드 (드래그 앤 드롭)
-- 🎯 실시간 헬멧/안전조끼 탐지
+모바일/웹 브라우저에서 바로 헬멧 탐지를 테스트해보세요!
+- 📱 모바일 카메라 실시간 탐지
+- 🎯 헬멧 착용/미착용 자동 감지
 - 📊 안전 수준 자동 평가
-- 🖼️ 원본/결과 비교 시각화
-- 📱 **Telegram 실시간 알림** (헬멧 미착용 2명 이상 또는 착용률 80% 미만 시 자동 경고!)
+- 🖼️ 실시간 객체 탐지 시각화
+- 📱 **Telegram 실시간 알림** (헬멧 미착용 감지 시 자동 경고!)
+- 🤖 **RAG 기반 안전 가이드** (헬멧 관련 질의응답)
 
-> ⚠️ **실시간 안전 알림 시스템**: 위험 상황 감지 시 Telegram Bot이 팀 그룹 채팅으로 **즉각 알림 전송**!
+> ⚠️ **실시간 안전 알림 시스템**: 헬멧 미착용 감지 시 Telegram Bot이 **즉각 알림 전송**!
 > 탐지 결과 이미지와 안전 통계를 포함한 상세한 경고 메시지를 받아보세요.
 
 ---
 
 ## 팀 정보
 
-- **팀명**: SafetyVisionAI
-- **프로젝트**: 딥러닝 기반 건설현장 안전 장비 착용 모니터링 플랫폼
+- **팀명**: eScooterAI
+- **프로젝트**: 딥러닝 기반 전동킥보드 헬멧 착용 모니터링 모바일 서비스
 - **멤버**: 김상진, 김준호, 김한솔, 유승근, 홍준재
 
 ---
@@ -34,34 +35,39 @@
 
 | 항목 | 내용 |
 |------|------|
-| **목표** | 산업현장의 작업자 개인보호구(PPE) 착용/미착용 상태 감지 |
-| **탐지 대상** | 헬멧 착용(helmet), 헬멧 미착용(head), 안전조끼(vest) |
-| **모델** | YOLOv8 (Transfer Learning) |
-| **데이터셋** | 15,500장 (Kaggle 2개 데이터셋 통합) |
+| **목표** | 전동킥보드 이용자의 헬멧 착용/미착용 상태 실시간 감지 |
+| **탐지 대상** | 헬멧 착용(helmet), 헬멧 미착용(head) |
+| **모델** | YOLOv8n (SafetyVisionAI 사전 훈련 모델 활용) |
+| **플랫폼** | 모바일 웹 서비스 (Streamlit + WebRTC) |
+| **추가 기능** | RAG 기반 안전 가이드 챗봇 |
 
 ---
 
 ## 연구 배경
 
-### <span style="color: red;">산업안전보건기준에 관한 규칙 제32조 제1항</span>
+### <span style="color: red;">도로교통법 제50조 제3항 (개인형 이동장치 안전기준)</span>
 
-> ⚠️ 건설 사업주는 낙하·충돌 등 위험이 있는 작업에서 근로자에게 **안전모·안전조끼 등 보호구를 지급하고 착용**하도록 해야 함.
+> ⚠️ 개인형 이동장치(전동킥보드 등)를 운전하는 사람은 **행정안전부령으로 정하는 인명보호 장구(헬멧)를 착용**해야 함.
+>
+> **위반 시 과태료 20,000원 부과** (도로교통법 제160조 제2항 제2호의2)
 
 ### 현황 및 문제점
 
-- **현재 방식**: 인력 중심의 수동 점검
+- **현재 방식**: 경찰 단속 및 육안 확인
 - **한계점**:
-  - 대형 공사 현장에서 모든 작업자 실시간 감시 불가능
-  - 인적 오류 및 피로도로 인한 누락 발생
-  - 안전사고 대응 지연
+  - 전국 모든 전동킥보드 이용자를 실시간 감시 불가능
+  - 인력 기반 단속의 한계 (시간/장소 제약)
+  - 헬멧 미착용 사고 증가 추세
+  - 사고 발생 시 치명적 부상 위험 (머리 부상 70% 이상)
 
 ### 솔루션
 
-**AI 기반 자동 안전 모니터링 시스템**을 통해:
-- 실시간 PPE 착용 상태 자동 감지
-- **헬멧 미착용(head) 탐지로 즉각적인 경고 가능** ⚠️
-- **Telegram Bot 실시간 알림** (헬멧 미착용 2명 이상 또는 착용률 80% 미만 시) 📱
-- 24시간 지속적인 모니터링 가능
+**AI 기반 자동 헬멧 착용 모니터링 시스템**을 통해:
+- 📱 **모바일 웹 기반 실시간 헬멧 탐지**
+- ⚠️ **헬멧 미착용(head) 탐지 시 즉각적인 경고**
+- 📱 **Telegram Bot 실시간 알림** (헬멧 미착용 감지 시)
+- 🤖 **RAG 기반 챗봇**: 헬멧 관련 법규, 안전 가이드 질의응답
+- 24시간 자동 모니터링 가능
 
 <img src="materials/train_batch0.jpg" width="600" alt="Train Batch Sample">
 
@@ -69,71 +75,78 @@
 
 ## 🎯 핵심 차별점 및 연구 기여
 
-### 기존 연구 vs 본 연구
+### 기존 시스템 vs 본 연구
 
-#### 📌 기존 PPE 탐지 연구의 한계
+#### 📌 기존 헬멧 탐지 시스템의 한계
 ```
-기존 2 Class 방식: helmet, vest
-- ✅ "헬멧이 화면에 있습니다"
-- ❌ "이 작업자가 헬멧을 착용했나요?" → 판단 불가능
-- ❌ 단순 객체 존재 여부만 확인
-- ❌ 실질적인 안전 준수 여부 모니터링 불가
+기존 헬멧 탐지 방식:
+- ❌ CCTV 기반 사후 분석 (실시간 대응 불가)
+- ❌ 고정된 위치에서만 감지 가능
+- ❌ 고가의 전용 하드웨어 필요
+- ❌ 개인 사용자가 직접 활용 불가
+- ❌ 단순 경고만 제공 (교육 기능 없음)
 ```
 
-#### ⭐ 본 연구의 혁신: 3 Class State Detection
+#### ⭐ 본 연구의 혁신: Mobile-First AI Helmet Detection + RAG
 ```
-본 연구 3 Class 방식: helmet, head, vest
-- ✅ "5명 중 3명이 헬멧을 착용하고, 2명은 미착용입니다"
-- ✅ 착용/미착용 상태를 자동으로 구분
-- ✅ 작업자의 안전 준수 여부 실시간 판단
-- ✅ 즉각적인 안전 경고 및 조치 가능
+본 연구의 접근 방식:
+- ✅ 모바일 웹 기반 실시간 탐지 (어디서나 사용 가능)
+- ✅ 사전 훈련 모델 활용 (빠른 배포 및 경량화)
+- ✅ 개인 사용자 중심 서비스 (자가 진단)
+- ✅ Telegram 즉각 알림 (실시간 피드백)
+- ✅ RAG 기반 챗봇 (법규/안전 가이드 제공)
 ```
 
 ### 💡 주요 기여점 (Contributions)
 
-#### 1. **Binary State Detection for Safety Compliance**
-- 단순 객체 탐지를 넘어선 **상태 분류 (State Classification)**
-- `helmet` vs `head` 구분 → 작업자의 **안전 준수 상태 자동 판별**
-- 기존 연구에서 다루지 못한 **실질적 안전 모니터링** 구현
+#### 1. **Mobile-First Deployment Architecture**
+- 모바일 웹 기반 실시간 헬멧 탐지 서비스
+- WebRTC 기반 카메라 스트리밍 (별도 앱 설치 불필요)
+- 경량 YOLOv8n 모델로 모바일 환경 최적화
+- **전동킥보드 이용자가 직접 사용 가능한 접근성**
 
-#### 2. **High-Precision State Discrimination**
-- Helmet-Head 혼동률: **0.45%** (거의 완벽한 구분)
-- mAP@0.5: **93.7%** (목표 90% 초과 달성)
-- 3개 클래스 간 혼동률 **0.45%**로 매우 높은 신뢰도
+#### 2. **Transfer Learning from Industrial Safety Domain**
+- SafetyVisionAI 사전 훈련 모델 활용
+- 건설현장 PPE → 전동킥보드 헬멧 도메인 전이
+- mAP@0.5 **93.7%** 성능 유지
+- Helmet-Head 구분 정확도 **99.55%**
 
-#### 3. **Real-time Safety Compliance Monitoring**
-- 헬멧 착용률 자동 계산: `착용자 / 전체 작업자 × 100`
-- 안전 수준 자동 평가: Excellent (≥90%) / Caution (≥70%) / Dangerous (<70%)
-- 미착용자 즉시 식별 및 경고 가능
+#### 3. **RAG-Enhanced Safety Education**
+- 단순 탐지를 넘어 **교육 기능 통합**
+- 헬멧 관련 법규, 착용법, 사고 사례 질의응답
+- 벡터 DB 기반 관련 문서 검색 및 생성형 AI 답변
+- **탐지 + 교육**의 통합 안전 플랫폼
 
-#### 4. **Practical System Design**
-- 3 classes로 핵심 안전 요소 커버 (과도하지 않고 실용적)
-- 15,500장 데이터셋으로 현실적인 연구 규모
-- YOLOv8n 경량 모델로 실시간 추론 가능 (평균 32ms/이미지)
+#### 4. **Real-time Alert System**
+- Telegram Bot 즉각 알림 (헬멧 미착용 감지 시)
+- 탐지 결과 이미지 포함 전송
+- 가족/친구 그룹 공유 가능 (안전 네트워크 구축)
 
-### 📊 정량적 성과
+### 📊 정량적 성과 (기반 모델)
 
 | 지표 | 성능 | 의미 |
 |------|------|------|
 | **Helmet-Head 구분** | 혼동률 0.45% | 착용/미착용 거의 완벽 구분 |
 | **전체 정확도** | mAP@0.5 93.7% | 실무 적용 가능 수준 |
-| **Head 클래스 정확도** | 90% | 위험 감지 신뢰성 높음 |
-| **추론 속도** | 32ms/이미지 | 실시간 처리 가능 |
+| **Head 클래스 정확도** | 92.3% | 헬멧 미착용 감지 신뢰성 높음 |
+| **추론 속도** | 32ms/이미지 | 모바일 실시간 처리 가능 |
+| **모델 크기** | 6.0MB | 모바일 최적화 |
 
 ### 🎓 학술적 가치
 
-- **Novel Problem Formulation**: 객체 탐지 → 안전 상태 분류
-- **Domain-Specific Optimization**: PPE 안전 모니터링에 특화
-- **Practical Contribution**: 즉시 현장 적용 가능한 시스템
-- **Reproducible Research**: 공개 데이터셋 기반 재현 가능
+- **Domain Transfer Learning**: 산업안전 → 개인 모빌리티 안전
+- **Mobile AI Deployment**: 경량 모델 기반 모바일 웹 서비스 구현
+- **RAG Integration**: 객체 탐지 + 생성형 AI 챗봇 융합
+- **Accessible Safety Service**: 개인 사용자 중심 안전 서비스 설계
 
 ---
 
-## 훈련 결과
+## 기반 모델 (SafetyVisionAI 사전 훈련 모델)
 
-### 🎉 3 Class 모델 훈련 완료! (A100 GPU, 100 Epochs)
+### 🎉 3 Class 모델 (helmet, head, vest) - A100 GPU, 100 Epochs
 
-프로젝트를 2 Class (helmet, vest)에서 3 Class (helmet, head, vest)로 전환하여 **헬멧 미착용 상태 감지**가 가능하게 되었습니다!
+본 프로젝트는 SafetyVisionAI 프로젝트에서 사전 훈련된 **best.pt 모델**을 활용합니다.
+전동킥보드 헬멧 탐지를 위해 `helmet`과 `head` 클래스를 주로 사용합니다.
 
 ### ✅ 최종 성능 지표
 
@@ -278,130 +291,40 @@
 
 ## 빠른 시작
 
-### 환경 설정
+### 1. 환경 설정
 ```bash
-# 의존성 설치
+# 저장소 클론
+git clone https://github.com/jhboyo/eScooterAI.git
+cd eScooterAI
+
+# 의존성 설치 (uv 패키지 관리자)
 uv sync
 
-# 환경 변수 파일 생성 (최초 1회)
+# 환경 변수 파일 생성
 cp .env.example .env
-
-# .env 파일에서 PROJECT_ROOT를 본인의 경로로 수정
-# 예: PROJECT_ROOT=/Users/username/workspace/SafetyVisionAI
-
-# 가상환경 활성화 (자동 관리)
-source .venv/bin/activate
 ```
 
+### 2. 환경 변수 설정
+`.env` 파일을 편집하여 다음 항목들을 설정하세요:
 
-**4. .env 파일 설정**
 ```bash
-# .env 파일에 추가
+# 프로젝트 경로
+PROJECT_ROOT=/path/to/eScooterAI
+
+# Telegram Bot (선택사항)
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 TELEGRAM_CHAT_ID=your_chat_id_here
 TELEGRAM_ALERTS_ENABLED=true
+
+# OpenAI API (RAG 챗봇용)
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-**알림 발송 조건:**
-- 헬멧 미착용자 **2명 이상** 감지
-- 헬멧 착용률 **80% 미만**
-- (둘 중 하나만 만족해도 알림 전송)
-
-자세한 가이드: `docs/STREAMLIT_CLOUD_SECRETS.md` 참고
-
-### 데이터셋 다운로드 (Hugging Face)
+### 3. 모델 파일 확인
+사전 훈련된 모델이 다음 경로에 있는지 확인:
 ```bash
-# hf CLI 설치
-uv tool install huggingface-hub
-
-# 로그인 (최초 1회)
-uv tool run hf auth login
-
-# 데이터셋 다운로드
-uv tool run hf download jhboyo/ppe-dataset --repo-type dataset --local-dir ./dataset/data
+models/ppe_detection/weights/best.pt  # 6.0MB
 ```
-
-### 데이터셋 YAML 생성
-```bash
-uv run python src/preprocess/step5_generate_yaml.py
-```
-
-### 모델 훈련
-```bash
-uv run python src/training/train.py --data configs/ppe_dataset.yaml
-```
-
-### 추론
-
-#### 🌐 웹 인터페이스 (추천)
-
-**🚀 온라인 데모 (Streamlit Cloud 배포 완료)**
-```
-👉 https://safetyvisionai.streamlit.app
-```
-별도 설치 없이 브라우저에서 바로 사용 가능!
-
-**💻 로컬 실행**
-```bash
-# Streamlit 웹 대시보드 실행
-uv run streamlit run src/web_interface/app.py
-
-# 브라우저 자동 접속: http://localhost:8501
-```
-
-**주요 기능:**
-- 📁 **이미지 업로드**: 드래그 앤 드롭으로 다중 이미지 업로드
-- 🎯 **실시간 탐지**: YOLOv8 모델로 PPE 자동 탐지
-- 📊 **통계 분석**: 헬멧 착용률 자동 계산 및 안전 수준 평가
-- 🖼️ **시각화**: 원본/결과 비교 뷰, 바운딩 박스 시각화
-- ⚙️ **설정**: 신뢰도 임계값, IoU 임계값 조정 가능
-- 📱 **Telegram 알림**: 헬멧 미착용 감지 시 실시간 그룹 알림 전송
-
-#### 💻 CLI 추론 (명령줄)
-```bash
-# 통합 추론 시스템 (helmet, head, vest 동시 탐지)
-# 기본 사용 (테스트 데이터셋 전체)
-uv run python src/inference/inference.py
-
-# 단일 이미지 추론
-uv run python src/inference/inference.py --input test_image.jpg
-
-# 디렉토리 전체 추론
-uv run python src/inference/inference.py --input path/to/directory
-
-# 신뢰도 임계값 조정
-uv run python src/inference/inference.py --input test.jpg --conf 0.3
-
-# 샘플 추론 데모 (5개 샘플 이미지)
-uv run python src/inference/sample_inference.py
-```
-
-#### 📹 웹캠 실시간 추론 (NEW!) ✨
-
-**🎥 노트북 카메라 또는 외부 웹캠으로 실시간 PPE 탐지**
-
-```bash
-# 기본 실행 (노트북 내장 카메라)
-uv run python src/webcam_inference/webcam_inference.py
-
-# 외부 웹캠 사용
-uv run python src/webcam_inference/webcam_inference.py --camera 1
-
-# 신뢰도 조정
-uv run python src/webcam_inference/webcam_inference.py --conf 0.3
-
-# 해상도 설정
-uv run python src/webcam_inference/webcam_inference.py --width 1280 --height 720
-```
-
-**주요 기능:**
-- 🎥 **실시간 영상 처리**: 노트북/외부 웹캠 지원
-- 📊 **통계 오버레이**: FPS, 착용률, 안전 수준 실시간 표시
-- ⚠️ **즉각 경고**: 헬멧 미착용자 감지 시 화면 경고
-- ⌨️ **키보드 컨트롤**: Q(종료), S(스크린샷), P(일시정지), +/-(신뢰도), H(도움말)
-- ⚡ **고성능**: 평균 25-31 FPS (YOLOv8n)
-
-**자세한 사용법**: [웹캠 추론 가이드](src/webcam_inference/README.md)
 
 ---
 
@@ -411,11 +334,14 @@ uv run python src/webcam_inference/webcam_inference.py --width 1280 --height 720
 |------|------|
 | **언어** | Python 3.11 |
 | **패키지 관리** | uv |
-| **딥러닝** | PyTorch, Ultralytics (YOLOv8) |
+| **딥러닝** | PyTorch, Ultralytics (YOLOv8n) |
 | **이미지 처리** | OpenCV, PIL, NumPy |
-| **시각화** | Matplotlib, Plotly |
-| **웹 UI** | Streamlit |
+| **웹 프레임워크** | Streamlit |
+| **실시간 스트리밍** | WebRTC (streamlit-webrtc), aiortc |
+| **RAG** | LangChain, ChromaDB, OpenAI API |
+| **벡터 임베딩** | OpenAI Embeddings / Sentence-Transformers |
 | **알림** | Telegram Bot API |
+| **배포** | Streamlit Community Cloud (예정) |
 
 ---
 
@@ -473,54 +399,53 @@ uv run python src/webcam_inference/webcam_inference.py --width 1280 --height 720
 ## 프로젝트 구조
 
 ```
-SafetyVisionAI/
+eScooterAI/
 ├── configs/                # 설정 파일
-│   ├── ppe_dataset.yaml   # 데이터셋 설정 (YOLO 필수)
-│   └── train_config.yaml  # 훈련 하이퍼파라미터
-├── dataset/                # 데이터셋
-│   ├── data/              # 훈련 데이터 (Hugging Face 업로드용, 3 class)
-│   │   ├── train/         # 훈련 데이터 (64.5%, 9,999개)
-│   │   ├── val/           # 검증 데이터 (17.7%, 2,750개)
-│   │   └── test/          # 테스트 데이터 (17.7%, 2,751개)
-│   └── raw_data/          # 전처리 전 원본
-│       ├── raw/           # 원본 데이터
-│       └── processed/     # 전처리 중간 결과
-├── models/                 # 훈련된 모델
-│   └── ppe_detection/     # PPE 탐지 모델
-│       └── weights/       # 모델 가중치 (best.pt, last.pt)
+│   ├── ppe_dataset.yaml   # 기반 모델 데이터셋 설정
+│   └── rag_config.yaml    # RAG 설정 (예정)
+├── models/                 # 모델 파일
+│   └── ppe_detection/     # SafetyVisionAI 사전 훈련 모델
+│       └── weights/       # best.pt (6.0MB)
 ├── src/                    # 소스 코드
-│   ├── preprocess/      # 전처리 스크립트
-│   ├── training/        # 훈련 스크립트
-│   ├── test_eval/            # Test Dataset 평가 스크립트
-│   ├── inference/       # 추론 스크립트 (CLI)
-│   ├── web_interface/   # 웹 인터페이스 (Streamlit)
-│   │   ├── app.py         # 메인 앱
+│   ├── mobile_app/        # 모바일 웹 서비스 (메인)
+│   │   ├── app.py         # Streamlit 메인 앱
+│   │   ├── pages/         # 멀티페이지
+│   │   │   ├── 1_helmet_detection.py  # 헬멧 탐지 페이지
+│   │   │   └── 2_safety_chatbot.py    # RAG 챗봇 페이지
 │   │   ├── components/    # UI 컴포넌트
-│   │   │   ├── uploader.py   # 이미지 업로드
-│   │   │   └── statistics.py # 통계 차트
-│   │   ├── utils/         # 유틸리티
-│   │   │   ├── inference.py  # 추론 로직
-│   │   │   └── plotting.py   # 시각화
-│   │   └── assets/        # 정적 파일
-│   │       └── styles.css # CSS 스타일
-│   ├── webcam_inference/ # 웹캠 실시간 추론 (NEW!)
-│   │   ├── webcam_inference.py  # 실시간 추론 메인
-│   │   ├── utils.py       # 유틸리티 (FPS, 통계, 시각화)
-│   │   └── README.md      # 사용 가이드
-│   └── alert/             # 알림 모듈
-│       ├── __init__.py
-│       └── telegram_notifier.py  # Telegram Bot 알림
-├── notebooks/              # Jupyter 노트북
+│   │   │   ├── camera.py      # WebRTC 카메라
+│   │   │   ├── detector.py    # 헬멧 탐지
+│   │   │   └── chatbot.py     # RAG 챗봇 UI
+│   │   └── utils/         # 유틸리티
+│   │       ├── inference.py   # YOLO 추론
+│   │       └── alert.py       # Telegram 알림
+│   ├── rag/               # RAG 시스템 (NEW!)
+│   │   ├── __init__.py
+│   │   ├── vector_store.py    # ChromaDB 벡터 저장소
+│   │   ├── embeddings.py      # 문서 임베딩
+│   │   ├── retriever.py       # 문서 검색
+│   │   ├── generator.py       # LLM 답변 생성
+│   │   └── pipeline.py        # RAG 파이프라인
+│   ├── data/              # RAG 데이터 (NEW!)
+│   │   └── safety_docs/   # 헬멧 안전 관련 문서
+│   │       ├── laws/          # 법규 (도로교통법 등)
+│   │       ├── guides/        # 착용법, 선택 가이드
+│   │       └── cases/         # 사고 사례
+│   ├── alert/             # 알림 모듈
+│   │   ├── __init__.py
+│   │   └── telegram_notifier.py  # Telegram Bot
+│   ├── inference/         # 기존 CLI 추론 (유지)
+│   └── webcam_inference/  # 기존 웹캠 추론 (참고용)
 ├── output/                 # 출력 결과
-│   ├── inference/         # 통합 추론 결과 (이미지 + JSON)
-│   ├── batch_test/        # 배치 추론 테스트 결과
-│   ├── sample_detections/ # 샘플 탐지 결과 이미지
-│   ├── webcam_screenshots/ # 웹캠 스크린샷 (NEW!)
-│   └── test_results/      # Test Dataset 평가 결과
+│   ├── detections/        # 탐지 결과 저장
+│   └── screenshots/       # 스크린샷
+├── vector_db/              # ChromaDB 저장소 (NEW!)
 ├── materials/              # 참고 자료
 ├── .streamlit/             # Streamlit 설정
-│   └── config.toml        # 테마 및 서버 설정
+│   ├── config.toml        # 테마 및 서버 설정
+│   └── secrets.toml       # API 키 (gitignore)
 ├── pyproject.toml          # 의존성 정의
+├── .env.example            # 환경 변수 예시
 └── README.md
 ```
 
@@ -528,130 +453,127 @@ SafetyVisionAI/
 
 ## 진행 현황
 
-### Phase 1: 환경 설정 ✅
-- [v] Python 가상환경 생성 (uv)
-- [v] 라이브러리 설치
-- [v] 프로젝트 구조 생성
+### Phase 0: 기반 모델 준비 ✅ (SafetyVisionAI)
+- [v] YOLOv8n 모델 사전 훈련 완료 (mAP@0.5: 93.7%)
+- [v] best.pt 모델 확보 (6.0MB, 경량 모델)
+- [v] Helmet-Head 구분 정확도 99.55% 검증
+- [v] 모바일 실시간 추론 가능 확인 (32ms/이미지)
 
-### Phase 2: Dataset 준비 & 전처리 ✅
-- [v] Step 1: Dataset 1 VOC → YOLO 변환 (4,581개, **head 클래스 포함**)
-- [v] Step 2: Dataset 2 클래스 ID 확인 (10,500개)
-- [v] Step 3: Dataset 통합 (15,500개, **3 class 매핑**)
-- [v] Step 4: Train/Val/Test 분할 (64.5/17.7/17.7)
-- [v] Step 5: Dataset YAML 생성 (nc: 3)
-- [v] Step 6: 데이터 검증 및 시각화
+### Phase 1: 프로젝트 초기 설정 🚀 (진행 중)
+- [v] 프로젝트 개요 및 README 업데이트
+- [ ] 환경 설정 및 의존성 설치
+  - [ ] RAG 관련 라이브러리 추가 (LangChain, ChromaDB, OpenAI)
+  - [ ] WebRTC 라이브러리 확인 (streamlit-webrtc, aiortc)
+- [ ] 프로젝트 구조 재구성
+  - [ ] `src/mobile_app/` 디렉토리 생성
+  - [ ] `src/rag/` 디렉토리 생성
+  - [ ] `src/data/safety_docs/` 디렉토리 생성
 
-### Phase 3: 모델 훈련 ✅
-- [v] YOLOv8 모델 선택 (yolov8n - Nano)
-- [v] 훈련 설정 파일 작성 (nc: 3)
-- [v] 클래스 정의 (helmet, **head**, vest)
-- [v] Transfer Learning 실행 (MacBook 1 epoch 테스트 완료)
-- [v] **3 Class 본 훈련 (100 epochs) - RunPod A100 완료** ✅
-  - 훈련 시간: 54.4분 (A100 80GB)
-  - 최종 성능: **mAP@0.5 93.7%** (목표 90% 초과 달성)
-- [-] 하이퍼파라미터 튜닝 (추후 개선 예정)
+### Phase 2: RAG 시스템 구축 📚 (예정)
+- [ ] **안전 문서 데이터 수집**
+  - [ ] 도로교통법 제50조 (헬멧 착용 의무)
+  - [ ] 전동킥보드 안전 가이드
+  - [ ] 헬멧 선택 및 착용법
+  - [ ] 사고 사례 및 통계
+- [ ] **벡터 DB 구축**
+  - [ ] ChromaDB 설정
+  - [ ] 문서 임베딩 (OpenAI Embeddings / Sentence-Transformers)
+  - [ ] 벡터 저장소 생성 및 인덱싱
+- [ ] **RAG 파이프라인 구현**
+  - [ ] Retriever: 관련 문서 검색
+  - [ ] Generator: LLM 기반 답변 생성 (OpenAI API)
+  - [ ] 프롬프트 엔지니어링 (헬멧 안전 전문가 페르소나)
 
-### Phase 4: 모델 평가 (Validation Set) ✅
-- [v] **mAP@0.5, mAP@0.5:0.95 측정** (Validation Set) ✅
-  - mAP@0.5: 93.7% (목표 90% 초과)
-  - mAP@0.5:0.95: 69.0% (목표 70% 근접)
-- [v] **Precision, Recall 계산** (Validation Set) ✅
-  - Precision: 92.2% (목표 88% 초과)
-  - Recall: 87.2% (목표 85% 초과)
-- [v] **Confusion Matrix 생성** (Validation Set) ✅
-  - Helmet-Head 혼동률: 0.45% (매우 우수)
-- [v] **클래스별 성능 분석** (Validation Set) ✅
-  - Helmet AP: 95.1%, Head AP: 92.2%, Vest AP: 94.4%
-- [v] **훈련 결과 보고서 작성** (training_report.md) ✅
-  - 11개 섹션, 11개 시각화 포함
-  - 학술 논문 작성 가능 수준의 상세 분석
+### Phase 3: 모바일 웹 서비스 구현 📱 (예정)
+- [ ] **멀티페이지 Streamlit 앱 구조**
+  - [ ] 페이지 1: 실시간 헬멧 탐지 (WebRTC)
+  - [ ] 페이지 2: 안전 가이드 챗봇 (RAG)
+  - [ ] 홈 페이지: 프로젝트 소개 및 사용법
+- [ ] **WebRTC 기반 실시간 탐지**
+  - [ ] streamlit-webrtc 통합
+  - [ ] 모바일 카메라 스트리밍
+  - [ ] 프레임 단위 YOLO 추론
+  - [ ] 실시간 바운딩 박스 오버레이
+- [ ] **Telegram 알림 통합**
+  - [ ] 헬멧 미착용 감지 시 즉각 알림
+  - [ ] 탐지 결과 이미지 전송
+  - [ ] 알림 설정 UI (사용자가 활성화/비활성화)
+- [ ] **모바일 UI/UX 최적화**
+  - [ ] 반응형 레이아웃 (모바일/태블릿/데스크톱)
+  - [ ] 터치 인터페이스 최적화
+  - [ ] 로딩 시간 최소화
 
-### Phase 5: 최종 테스트 (Test Dataset) ✅
-- [v] **Test Set 성능 평가** (2,751개 이미지) ✅
-  - best.pt 모델로 test dataset 추론
-  - 최종 mAP@0.5: **94.14%** (Validation 93.68% → +0.46%p)
-  - 최종 mAP@0.5:0.95: **68.81%** (Validation 68.95% → -0.14%p)
-  - Precision: **91.65%** (Validation 92.23% → -0.58%p)
-  - Recall: **88.21%** (Validation 87.22% → +0.99%p)
-  - **일반화 성능 우수**: Validation ≈ Test (차이 1% 이내)
-- [v] **Test Set Confusion Matrix 생성** ✅
-  - 클래스별 탐지율: helmet 92%, head 89%, vest 92%
-  - 클래스 간 혼동: 1% 미만 (거의 없음)
-  - 주요 오류: 미탐지 (Background 분류)
-- [v] **클래스별 성능 분석** ✅
-  - helmet: AP@0.5 **95.31%** (최고 성능)
-  - head: AP@0.5 **92.34%** (소수 클래스에도 우수)
-  - vest: AP@0.5 **94.75%** (안정적 성능)
-- [v] **최종 평가 보고서 작성** ✅
-  - 파일: `test_evaluation_report.md`
-  - 10개 섹션, 7개 시각화 포함
-  - Validation vs Test 비교 분석
+### Phase 4: 통합 테스트 및 배포 🚀 (예정)
+- [ ] **로컬 테스트**
+  - [ ] 헬멧 탐지 기능 테스트 (다양한 각도, 조명)
+  - [ ] RAG 챗봇 응답 품질 평가
+  - [ ] Telegram 알림 테스트
+  - [ ] 모바일 브라우저 호환성 테스트
+- [ ] **Streamlit Community Cloud 배포**
+  - [ ] GitHub 연동 자동 배포 설정
+  - [ ] 환경 변수 및 Secrets 설정 (OpenAI API, Telegram Bot)
+  - [ ] 배포 URL 확보
+  - [ ] 배포 가이드 문서 작성
+- [ ] **성능 최적화**
+  - [ ] 모델 추론 속도 최적화
+  - [ ] 벡터 DB 쿼리 속도 최적화
+  - [ ] 메모리 사용량 최적화
 
-### Phase 6: 추론 시스템 ✅
-- [v] **통합 추론 시스템 구현** (3 class 대응) ✅
-  - `src/inference/inference.py`: 범용 추론 시스템
-  - `src/inference/sample_inference.py`: 샘플 데모 (5개 이미지)
-  - best.pt 모델 로드
-  - 단일 이미지 추론
-  - 디렉토리 추론 (순차 처리)
-  - 명령줄 인자 지원 (--input, --conf, --model, --output)
-- [v] **헬멧 미착용(head) 자동 감지** ⚠️
-  - head 클래스 자동 감지 및 카운팅
-  - 안전 수준 평가 (Excellent ≥90%, Caution ≥70%, Dangerous <70%)
-  - 헬멧 착용률 계산 (착용자 / 전체 작업자 × 100)
-- [v] **결과 시각화 및 저장**
-  - 바운딩 박스 (클래스별 색상: helmet-파랑, head-빨강, vest-노랑)
-  - 클래스명 + 신뢰도 표시
-  - 탐지 통계 (Helmet, Head, Vest 개수)
-  - 시각화 이미지 저장 (PNG)
-  - JSON 결과 저장 (상세 탐지 정보, 통계)
-
-### Phase 7: 웹 인터페이스 ✅
-- [v] **Streamlit 대시보드 구축 완료**
-  - [v] 이미지 업로드 인터페이스 (드래그 앤 드롭, 다중 파일)
-  - [v] 실시간 탐지 결과 표시 (진행 바, 예상 시간)
-  - [v] 바운딩 박스 시각화 (클래스별 색상 구분)
-  - [v] 원본/결과 비교 뷰 (2열 레이아웃)
-  - [v] 통계 분석 (헬멧 착용률, 클래스별 개수)
-  - [v] 안전 수준 평가 (Excellent/Caution/Dangerous)
-  - [v] 설정 패널 (신뢰도, IoU 임계값 조정)
-  - [v] 디버그 모드 (개발자용 상세 정보)
-  - [v] 반응형 UI 및 커스텀 CSS 스타일
-  - [v] **Telegram Bot 실시간 알림** 📱
-    - 헬멧 미착용자 2명 이상 또는 착용률 80% 미만 시 자동 알림
-    - 그룹 채팅 지원 (팀원 모두에게 알림 전송)
-    - 탐지 결과 이미지 포함 전송
-    - 안전 수준별 긴급도 표시 (Excellent/Caution/Dangerous)
-- [v] **Streamlit Community Cloud 배포 완료** ✅
-  - [v] GitHub 연동 자동 배포 (CI/CD)
-  - [v] YOLOv8 모델 (best.pt, 6.0MB) 포함
-  - [v] 경량화된 의존성 (opencv-python-headless 등)
-  - [v] 무료 호스팅 (Community Cloud)
-  - [v] 배포 URL: https://safetyvisionai.streamlit.app
-  - [v] 배포 가이드 문서 작성 (DEPLOYMENT_GUIDE.md)
-
-### Phase 8: 실시간 추론 및 성능 개선 🚀
-- [v] **웹캠 실시간 추론** ✅ (2025-11-23 구현 완료)
-  - [v] 실시간 영상 처리 (노트북 카메라 / 외부 웹캠)
-  - [v] 프레임 단위 객체 탐지 (helmet, head, vest)
-  - [v] 실시간 통계 오버레이 (FPS, 착용률, 안전 수준)
-  - [v] 실시간 안전 경고 알림 (헬멧 미착용자 감지 시)
-  - [v] 키보드 컨트롤 (Q: 종료, S: 스크린샷, P: 일시정지, +/-: 신뢰도 조정, H: 도움말)
-  - [v] FPS 카운터 및 성능 최적화
-  - [v] 구현 문서 작성 (docs/WEBCAM_INFERENCE_PLAN.md)
-- [ ] **배치 추론 최적화** (추후 과제)
-  - 현재: 순차 처리 (이미지를 하나씩 처리)
-  - 개선: 진짜 배치 처리 (여러 이미지를 한 번에 묶어서 처리)
-  - 효과: GPU 병렬 처리로 추론 속도 대폭 향상
-  - 예상: 처리 시간 50% 이상 단축 (특히 GPU 사용 시)
+### Phase 5: 논문 작성 및 발표 📝 (예정)
+- [ ] **실험 결과 정리**
+  - [ ] 헬멧 탐지 정확도 측정 (전동킥보드 환경)
+  - [ ] RAG 챗봇 응답 품질 평가
+  - [ ] 사용자 만족도 조사 (설문)
+  - [ ] 기존 시스템 대비 우수성 입증
+- [ ] **학술 논문 작성**
+  - [ ] 서론: 연구 배경 및 문제 정의
+  - [ ] 관련 연구: 기존 헬멧 탐지 시스템 분석
+  - [ ] 방법론: Transfer Learning + RAG 아키텍처
+  - [ ] 실험 결과: 정량적/정성적 평가
+  - [ ] 결론 및 향후 연구
+- [ ] **최종 발표 준비**
+  - [ ] 발표 자료 작성 (PPT)
+  - [ ] 데모 영상 제작
+  - [ ] 실시간 시연 준비
 
 ---
 
-## 🚨 현재 발견된 문제점 및 개선 과제
+## 향후 과제 및 개선 계획
 
-### ⚠️ DS2 데이터셋에서 Head 클래스 탐지 실패 (심각)
+### 🎯 핵심 개발 과제 (Phase 1-4)
 
-웹 인터페이스 테스트 중 **DS2 스타일 이미지에서 헬멧 미착용자(head) 탐지가 완전히 실패**하는 심각한 문제가 발견되었습니다.
+#### 1. RAG 시스템 구축 (최우선)
+- 헬멧 관련 법규, 안전 가이드 문서 수집 및 벡터화
+- LangChain + ChromaDB 기반 RAG 파이프라인 구현
+- OpenAI API 통합 (GPT-4 Turbo / GPT-3.5 Turbo)
+
+#### 2. 모바일 웹 서비스 개발
+- Streamlit 멀티페이지 구조 설계
+- WebRTC 기반 실시간 카메라 스트리밍
+- 모바일 반응형 UI/UX 최적화
+
+#### 3. 통합 및 배포
+- Streamlit Community Cloud 배포
+- 환경 변수 및 Secrets 관리
+- 성능 최적화 (추론 속도, 메모리)
+
+### 🔬 연구 과제 (Phase 5)
+
+#### 1. 전동킥보드 환경 성능 평가
+- 실제 전동킥보드 이용자 데이터 수집
+- 다양한 조명/각도/속도에서 탐지 성능 측정
+- 기반 모델의 도메인 전이 성능 분석
+
+#### 2. RAG 챗봇 품질 평가
+- 응답 정확도, 관련성, 유용성 평가
+- 사용자 만족도 조사 (설문/인터뷰)
+- 프롬프트 엔지니어링 최적화
+
+### ⚠️ 알려진 제한사항 (기반 모델)
+
+#### DS2 스타일 이미지에서 Head 클래스 탐지 한계
+
+SafetyVisionAI 기반 모델은 **어두운 배경 이미지(DS2 스타일)에서 헬멧 미착용자(head) 탐지 성능 저하** 문제가 있습니다.
 
 #### 🔍 문제 상황
 
