@@ -58,23 +58,34 @@ def build_vector_database(
     print("📚 전동킥보드 안전 교육 벡터 데이터베이스 구축")
     print("="*80 + "\n")
 
+    # ========================================================================
     # 1. 벡터 저장소 초기화
+    # ========================================================================
+    # FAISS IndexFlatL2 기반 벡터 저장소 생성
+    # - embedding_dimension: OpenAI text-embedding-3-small의 차원 (1536)
+    # - L2 거리 기반 유사도 검색 준비
     print(f"🔧 벡터 저장소 초기화 (차원: {embedding_dimension})")
     vector_store = FAISSVectorStore(dimension=embedding_dimension, api_key=api_key)
 
-    # 2. 문서 로드
+    # ========================================================================
+    # 2. 문서 로드 (Knowledge Base 구축)
+    # ========================================================================
+    # 안전 교육 지식 베이스를 3개 카테고리로 분류하여 로드
+    # - laws.json: 법규 문서 (도로교통법, 과태료 등)
+    # - guides.json: 안전 가이드 (헬멧 착용법, 운전 수칙 등)
+    # - cases.json: 사고 사례 및 통계
     docs_path = Path(docs_dir)
-    all_documents = []
+    all_documents = []  # 전체 문서를 하나의 리스트로 통합
 
-    # 법규 문서
+    # 법규 문서 로드
     laws_path = docs_path / "laws.json"
     if laws_path.exists():
         laws_docs = load_documents_from_json(str(laws_path))
-        all_documents.extend(laws_docs)
+        all_documents.extend(laws_docs)  # 전체 문서 리스트에 추가
     else:
         print(f"⚠️  Laws file not found: {laws_path}")
 
-    # 가이드 문서
+    # 가이드 문서 로드
     guides_path = docs_path / "guides.json"
     if guides_path.exists():
         guides_docs = load_documents_from_json(str(guides_path))
@@ -82,7 +93,7 @@ def build_vector_database(
     else:
         print(f"⚠️  Guides file not found: {guides_path}")
 
-    # 사례 문서
+    # 사례 문서 로드
     cases_path = docs_path / "cases.json"
     if cases_path.exists():
         cases_docs = load_documents_from_json(str(cases_path))
@@ -105,7 +116,14 @@ def build_vector_database(
     for category, count in category_stats.items():
         print(f"  - {category}: {count} documents")
 
+    # ========================================================================
     # 3. 임베딩 및 FAISS 인덱스 구축
+    # ========================================================================
+    # 각 문서를 OpenAI API로 임베딩하고 FAISS 인덱스에 추가
+    # - 텍스트 → 1536차원 벡터 변환 (의미적 표현)
+    # - FAISS IndexFlatL2에 벡터 저장
+    # - 시간 복잡도: O(N * D) where N=문서 수, D=차원 수
+    # - API 호출: N번 (문서당 1번)
     print(f"\n🔄 Embedding documents with OpenAI text-embedding-3-small...")
     print("   (This may take a few minutes depending on the number of documents)")
 
@@ -113,7 +131,13 @@ def build_vector_database(
 
     print(f"✅ Successfully embedded {len(all_documents)} documents")
 
-    # 4. 벡터 저장소 저장
+    # ========================================================================
+    # 4. 벡터 저장소 디스크에 저장
+    # ========================================================================
+    # FAISS 인덱스와 문서 데이터를 영구 저장
+    # - {output_dir}/index.faiss: FAISS 벡터 인덱스 (바이너리)
+    # - {output_dir}/documents.json: 원본 텍스트 + 메타데이터 (JSON)
+    # 런타임에 load() 메서드로 불러와서 사용 가능
     print(f"\n💾 Saving vector database to {output_dir}")
     vector_store.save(output_dir)
 

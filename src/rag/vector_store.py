@@ -38,16 +38,25 @@ class FAISSVectorStore:
             dimension: 임베딩 벡터 차원 (기본: 1536, OpenAI text-embedding-3-small)
             api_key: OpenAI API 키 (없으면 환경 변수에서 가져옴)
         """
+        # 임베딩 벡터의 차원 수 저장 (OpenAI text-embedding-3-small은 1536차원)
         self.dimension = dimension
 
         # FAISS 인덱스 생성 (L2 거리 기반)
+        # IndexFlatL2: Brute-force L2 거리 계산을 사용하는 Flat 인덱스
+        # - Flat: 모든 벡터를 순차적으로 비교 (정확도 100%)
+        # - L2: 유클리드 거리 사용 (||a-b||²)
+        # - 장점: 정확한 최근접 이웃 검색 (Exact NN)
+        # - 단점: 대용량 데이터에서는 느림 (본 프로젝트는 35개 문서로 충분히 빠름)
         self.index = faiss.IndexFlatL2(dimension)
 
         # 문서 및 메타데이터 저장소
-        self.documents: List[str] = []
-        self.metadatas: List[Dict] = []
+        # FAISS는 벡터만 저장하므로, 원본 텍스트와 메타데이터를 별도 리스트로 관리
+        # 인덱스 i의 벡터 → documents[i], metadatas[i]로 매핑
+        self.documents: List[str] = []  # 원본 텍스트 저장
+        self.metadatas: List[Dict] = []  # 카테고리, 출처 등 메타데이터 저장
 
         # OpenAI 클라이언트 초기화
+        # 임베딩 생성 및 LLM 호출에 사용
         self.client = OpenAI(api_key=api_key)
 
     def get_embedding(self, text: str) -> np.ndarray:
@@ -65,10 +74,18 @@ class FAISSVectorStore:
         Returns:
             np.ndarray: 1536차원 임베딩 벡터 (float32)
         """
+        # OpenAI Embeddings API 호출
+        # text-embedding-3-small: 2024년 출시된 경량 임베딩 모델
+        # - 1536차원 밀집 벡터 (Dense Vector) 생성
+        # - Transformer 기반 인코더 아키텍처
+        # - 의미적 유사도를 벡터 공간에 투영 (Semantic Embedding)
         response = self.client.embeddings.create(
             model="text-embedding-3-small",
             input=text
         )
+
+        # API 응답에서 임베딩 벡터 추출 및 NumPy 배열로 변환
+        # float32: FAISS가 요구하는 데이터 타입 (메모리 효율 + 계산 속도)
         embedding = np.array(response.data[0].embedding, dtype='float32')
         return embedding
 
@@ -93,16 +110,23 @@ class FAISSVectorStore:
             >>> vector_store.add_documents(docs)
         """
         for doc in docs:
+            # 문서에서 텍스트와 메타데이터 추출
             text = doc["text"]
             metadata = doc.get("metadata", {})
 
-            # 텍스트 임베딩 생성
+            # 텍스트 임베딩 생성 (OpenAI API 호출)
+            # text → 1536차원 벡터로 변환 (의미적 표현)
             embedding = self.get_embedding(text)
 
-            # FAISS 인덱스에 추가 (shape: (1, dimension))
+            # FAISS 인덱스에 벡터 추가
+            # reshape(1, -1): (1536,) → (1, 1536) 형태로 변환 (FAISS 요구사항)
+            # FAISS는 2D 배열을 입력받음 (batch 처리 가능하도록)
+            # add() 호출 시 내부적으로 인덱스 번호 자동 할당 (0, 1, 2, ...)
             self.index.add(embedding.reshape(1, -1))
 
             # 문서 및 메타데이터 저장
+            # FAISS 인덱스 번호와 동일한 순서로 저장하여 매핑 유지
+            # 예: FAISS 인덱스 5번 → documents[5], metadatas[5]
             self.documents.append(text)
             self.metadatas.append(metadata)
 
@@ -129,29 +153,42 @@ class FAISSVectorStore:
             >>> print(results[0]["text"])
             "헬멧 미착용 시 과태료 2만원"
         """
+        # 빈 인덱스 체크 (문서가 없으면 검색 불가)
         if self.index.ntotal == 0:
             return []
 
         # 쿼리 임베딩 생성
+        # 사용자 질문을 동일한 임베딩 공간으로 변환 (문서와 비교 가능하도록)
         query_embedding = self.get_embedding(query)
 
-        # FAISS 검색 (L2 거리 기반, Top-K)
+        # FAISS 검색 (L2 거리 기반, Top-K Nearest Neighbors)
+        # 1. query_embedding과 모든 문서 벡터 간 L2 거리 계산
+        #    L2 distance = ||query - doc||² = Σ(query_i - doc_i)²
+        # 2. 거리가 가장 가까운 K개 문서 반환 (작을수록 유사)
+        # 3. IndexFlatL2는 Exact Search (근사 아님, 정확도 100%)
         distances, indices = self.index.search(
-            query_embedding.reshape(1, -1),
+            query_embedding.reshape(1, -1),  # (1, 1536) 형태로 변환
             min(top_k, self.index.ntotal)  # top_k가 전체 문서 수보다 크면 조정
         )
+        # distances: (1, k) 형태의 거리 배열 (예: [[0.52, 0.78, 1.23]])
+        # indices: (1, k) 형태의 인덱스 배열 (예: [[5, 12, 3]])
 
         # 결과 구성
         results = []
-        for i, idx in enumerate(indices[0]):
-            if idx < len(self.documents) and idx >= 0:  # 유효한 인덱스
+        for i, idx in enumerate(indices[0]):  # 첫 번째 쿼리의 결과 순회
+            if idx < len(self.documents) and idx >= 0:  # 유효한 인덱스 체크
                 distance = float(distances[0][i])
 
                 results.append({
-                    "text": self.documents[idx],
-                    "metadata": self.metadatas[idx],
-                    "distance": distance,
-                    "score": 1.0 / (1.0 + distance)  # 거리를 점수로 변환 (0~1)
+                    "text": self.documents[idx],  # 원본 텍스트
+                    "metadata": self.metadatas[idx],  # 메타데이터
+                    "distance": distance,  # L2 거리 (낮을수록 유사)
+                    # 거리를 유사도 점수로 변환 (0~1, 높을수록 유사)
+                    # score = 1 / (1 + distance)
+                    # - distance=0 → score=1.0 (완전 일치)
+                    # - distance=1 → score=0.5
+                    # - distance=∞ → score≈0
+                    "score": 1.0 / (1.0 + distance)
                 })
 
         return results

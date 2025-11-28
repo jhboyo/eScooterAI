@@ -70,12 +70,22 @@ class RAGQueryEngine:
             str: LLM 프롬프트
         """
         # 컨텍스트 문서 포맷팅
+        # 검색된 Top-K 문서들을 번호와 출처와 함께 나열
+        # LLM이 참조할 수 있도록 구조화된 형태로 제공
         context_text = "\n\n".join([
             f"[문서 {i+1}] (출처: {ctx['metadata'].get('source', 'N/A')})\n{ctx['text']}"
             for i, ctx in enumerate(contexts)
         ])
 
         # 프롬프트 구성 (Few-shot + Domain-specific)
+        # RAG의 핵심: Retrieval된 문서를 컨텍스트로 제공하여 환각(Hallucination) 방지
+        #
+        # 프롬프트 엔지니어링 전략:
+        # 1. Role-playing: "전동킥보드 안전 교육 전문가" 역할 부여
+        # 2. Context grounding: 참고 문서를 명시적으로 제공
+        # 3. Instruction: 5가지 명확한 지침 제시
+        # 4. Few-shot (암묵적): 답변 형식 예시 내포
+        # 5. Constraint: 2-3문장 제한으로 간결성 확보
         prompt = f"""당신은 전동킥보드 안전 교육 전문가입니다. 아래 참고 문서를 기반으로 질문에 답변하세요.
 
 **참고 문서:**
@@ -118,9 +128,15 @@ class RAGQueryEngine:
             >>> print(result["answer"])
             "도로교통법 제160조에 따라 헬멧 미착용 시 과태료 2만원이 부과됩니다."
         """
-        # 1. Retrieval: FAISS 검색
+        # ========================================================================
+        # 1. Retrieval: FAISS 벡터 검색으로 관련 문서 검색
+        # ========================================================================
+        # - 사용자 질문을 임베딩 벡터로 변환
+        # - FAISS IndexFlatL2로 L2 거리 기반 Top-K 검색
+        # - 의미적으로 유사한 문서 K개 반환 (Semantic Search)
         search_results = self.vector_store.search(question, top_k=self.top_k)
 
+        # 검색 실패 처리 (관련 문서 없음)
         if not search_results:
             return {
                 "answer": "죄송합니다. 관련 정보를 찾을 수 없습니다. 질문을 다르게 표현해주시겠어요?",
@@ -132,20 +148,36 @@ class RAGQueryEngine:
                 }
             }
 
-        # 2. Augmentation: 프롬프트 구성
+        # ========================================================================
+        # 2. Augmentation: 검색된 문서를 컨텍스트로 프롬프트 구성
+        # ========================================================================
+        # - 검색된 문서들을 프롬프트에 삽입
+        # - LLM이 참조할 수 있는 지식 증강 (Knowledge Augmentation)
+        # - 환각(Hallucination) 방지: 문서에 기반한 답변 유도
         prompt = self._build_prompt(question, search_results)
 
-        # 3. Generation: LLM 답변 생성
+        # ========================================================================
+        # 3. Generation: OpenAI LLM으로 답변 생성
+        # ========================================================================
+        # OpenAI Chat Completions API 호출
+        # - model: gpt-4-turbo-preview 또는 gpt-3.5-turbo
+        # - temperature: 0.3 (낮음, 사실 기반 답변에 적합)
+        #   * 0.0: 결정론적 (항상 같은 답변)
+        #   * 1.0: 창의적 (매번 다른 답변)
+        # - max_tokens: 500 (답변 길이 제한)
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
+                # System message: AI의 역할 정의 (페르소나 설정)
                 {"role": "system", "content": "당신은 전동킥보드 안전 교육 전문가입니다."},
+                # User message: 실제 프롬프트 (질문 + 컨텍스트)
                 {"role": "user", "content": prompt}
             ],
-            temperature=self.temperature,
-            max_tokens=self.max_tokens
+            temperature=self.temperature,  # 낮은 온도 → 일관적 답변
+            max_tokens=self.max_tokens  # 답변 길이 제한
         )
 
+        # LLM 응답에서 답변 텍스트 추출
         answer = response.choices[0].message.content.strip()
 
         # 결과 구성

@@ -52,21 +52,36 @@ class RAGTester:
         print("📊 Retrieval Precision@K Test")
         print("="*80 + "\n")
 
+        # ========================================================================
+        # Precision@K 평가
+        # ========================================================================
+        # 정보 검색(IR) 분야의 대표적인 평가 지표
+        # - K개의 검색 결과 중 관련 문서가 포함된 비율
+        # - Formula: Precision@K = (관련 문서 수) / K
+        # - 본 테스트: Top-3 중 하나라도 올바른 카테고리면 정답 (Recall@3)
+        #
+        # 예시:
+        # - Query: "헬멧 안 쓰면 벌금?"
+        # - Expected: "법규" 카테고리
+        # - Top-3 결과: ["법규", "가이드", "사례"]
+        # - Hit: True (법규 포함됨)
         total = len(test_cases)
         correct = 0
         results = []
 
         for query, expected_category in test_cases:
+            # FAISS 벡터 검색 수행 (Top-3)
             search_results = self.vector_store.search(query, top_k=3)
 
             # Top-3 중 하나라도 expected_category와 일치하면 정답
+            # any(): 리스트에서 하나라도 True면 True 반환
             hit = any(
                 doc["metadata"].get("category") == expected_category
                 for doc in search_results
             )
 
             if hit:
-                correct += 1
+                correct += 1  # 정답 카운트 증가
 
             results.append({
                 "query": query,
@@ -111,6 +126,21 @@ class RAGTester:
         print("💬 Answer Quality Test")
         print("="*80 + "\n")
 
+        # ========================================================================
+        # 답변 품질 평가
+        # ========================================================================
+        # RAG 시스템의 종단간(End-to-End) 성능 평가
+        # 측정 지표:
+        # 1. Response Time: 답변 생성 속도 (초)
+        #    - Retrieval + LLM 호출 포함
+        # 2. Token Usage: OpenAI API 토큰 사용량
+        #    - 비용 추정 및 최적화에 활용
+        # 3. Answer Relevance: 답변 관련성 (수동 평가 필요)
+        #
+        # 자동화된 평가를 위해서는:
+        # - GPT-4 as Judge: LLM으로 답변 품질 평가
+        # - BLEU/ROUGE: 참조 답변과 비교
+        # - Semantic Similarity: 임베딩 코사인 유사도
         results = []
         total_time = 0
         total_tokens = 0
@@ -118,10 +148,12 @@ class RAGTester:
         for i, question in enumerate(test_questions, 1):
             print(f"\n[{i}/{len(test_questions)}] Question: {question}")
 
+            # 시간 측정 시작 (Retrieval + Generation 전체 시간)
             start_time = time.time()
             result = self.query_engine.query(question, return_sources=True)
             elapsed_time = time.time() - start_time
 
+            # 누적 통계 업데이트
             total_time += elapsed_time
             total_tokens += result["metadata"]["total_tokens"]
 
@@ -167,19 +199,36 @@ class RAGTester:
         print("🧪 Edge Cases Test")
         print("="*80 + "\n")
 
+        # ========================================================================
+        # 엣지 케이스 평가
+        # ========================================================================
+        # RAG 시스템의 견고성(Robustness) 검증
+        #
+        # 1. Hallucination Check (환각 현상 검증)
+        #    - 지식 베이스에 없는 정보를 물어봄
+        #    - "모르겠다"고 답변해야 함 (거짓 정보 생성 방지)
+        #    - 중요: 의료/법률 분야에서 치명적
+        #
+        # 2. Ambiguous Queries (모호한 질문)
+        #    - 불완전하거나 애매한 질문 처리 능력
+        #    - 일반적인 안전 수칙으로 답변해야 함
+        #
+        # 3. Complex Queries (복합 질문)
+        #    - 여러 개념을 결합한 질문
+        #    - 다중 문서 참조 및 추론 능력 평가
         edge_cases = [
             {
-                "type": "missing_info",
+                "type": "missing_info",  # 환각 방지 테스트
                 "question": "전동킥보드 보험료는 얼마야?",
                 "expected_behavior": "제공된 자료에 없다고 답변"
             },
             {
-                "type": "ambiguous",
+                "type": "ambiguous",  # 모호한 질문 처리
                 "question": "안전하게 타려면?",
                 "expected_behavior": "헬멧 착용 및 안전 수칙 안내"
             },
             {
-                "type": "complex",
+                "type": "complex",  # 복합 추론 테스트
                 "question": "헬멧 안 쓰고 인도로 달리면 벌금 얼마야?",
                 "expected_behavior": "헬멧 미착용(2만원) + 인도 주행(4만원) = 6만원"
             }
