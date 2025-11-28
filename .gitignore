@@ -72,6 +72,8 @@ dataset/data_backup_*/
 # Data files
 *.csv
 *.json
+# RAG 안전 교육 문서는 예외 (지식 베이스 필수)
+!src/data/safety_docs/*.json
 *.xml
 !requirements.txt
 !README.md
