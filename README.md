@@ -1,6 +1,8 @@
-# eScooterAI - 전동킥보드 헬멧 착용 모니터링 모바일 서비스
+# eScooterAI - RAG 기반 전동킥보드 헬멧 안전 통합 플랫폼
 
-딥러닝 기반 전동킥보드(e-Scooter) 헬멧 착용 탐지 및 안전 모니터링 플랫폼
+**딥러닝 객체 탐지 + RAG 기반 자연어 처리 융합 시스템**
+
+전동킥보드 헬멧 착용 실시간 탐지 및 RAG(Retrieval-Augmented Generation) 기반 안전 교육 챗봇 통합 플랫폼
 
 ---
 
@@ -35,11 +37,19 @@
 
 | 항목 | 내용 |
 |------|------|
-| **목표** | 전동킥보드 이용자의 헬멧 착용/미착용 상태 실시간 감지 |
+| **목표** | 전동킥보드 이용자의 헬멧 착용 실시간 감지 + RAG 기반 안전 교육 |
 | **탐지 대상** | 헬멧 착용(helmet), 헬멧 미착용(head) |
-| **모델** | YOLOv8n (SafetyVisionAI 사전 훈련 모델 활용) |
+| **객체 탐지 모델** | YOLOv8n (SafetyVisionAI 사전 훈련 모델 활용) |
+| **NLP 시스템** | **RAG (Retrieval-Augmented Generation) 기반 질의응답** |
+| **벡터 DB** | ChromaDB (문서 임베딩 및 유사도 검색) |
+| **LLM** | OpenAI GPT-4/GPT-3.5 Turbo (답변 생성) |
 | **플랫폼** | 모바일 웹 서비스 (Streamlit + WebRTC) |
-| **추가 기능** | RAG 기반 안전 가이드 챗봇 |
+
+### 🔬 NLP 연구 핵심
+- **Semantic Search**: 벡터 임베딩 기반 의미적 문서 검색
+- **Domain-Specific QA**: 헬멧 안전 도메인 특화 질의응답 시스템
+- **Context-Aware Generation**: 검색된 문서 컨텍스트 기반 답변 생성
+- **Prompt Engineering**: 안전 전문가 페르소나 프롬프트 설계
 
 ---
 
@@ -87,37 +97,67 @@
 - ❌ 단순 경고만 제공 (교육 기능 없음)
 ```
 
-#### ⭐ 본 연구의 혁신: Mobile-First AI Helmet Detection + RAG
+#### ⭐ 본 연구의 혁신: Computer Vision + NLP Fusion Platform
 ```
 본 연구의 접근 방식:
-- ✅ 모바일 웹 기반 실시간 탐지 (어디서나 사용 가능)
-- ✅ 사전 훈련 모델 활용 (빠른 배포 및 경량화)
-- ✅ 개인 사용자 중심 서비스 (자가 진단)
-- ✅ Telegram 즉각 알림 (실시간 피드백)
-- ✅ RAG 기반 챗봇 (법규/안전 가이드 제공)
+- ✅ CV + NLP 융합: 객체 탐지 + RAG 기반 대화형 교육
+- ✅ RAG 시스템: 벡터 DB 기반 의미적 문서 검색 + LLM 생성
+- ✅ Domain-Specific QA: 헬멧 안전 특화 질의응답 시스템
+- ✅ Mobile-First: 모바일 웹 기반 실시간 탐지 (어디서나 사용)
+- ✅ Transfer Learning: SafetyVisionAI 사전 훈련 모델 활용
+- ✅ Real-time Alert: Telegram 즉각 알림 (실시간 피드백)
 ```
 
 ### 💡 주요 기여점 (Contributions)
 
-#### 1. **Mobile-First Deployment Architecture**
-- 모바일 웹 기반 실시간 헬멧 탐지 서비스
-- WebRTC 기반 카메라 스트리밍 (별도 앱 설치 불필요)
-- 경량 YOLOv8n 모델로 모바일 환경 최적화
-- **전동킥보드 이용자가 직접 사용 가능한 접근성**
+#### 1. **RAG-based Domain-Specific Question Answering System** 🔬
+**자연어 처리 핵심 연구**
 
-#### 2. **Transfer Learning from Industrial Safety Domain**
+- **Semantic Document Retrieval**:
+  - ChromaDB 벡터 저장소 기반 의미적 문서 검색
+  - OpenAI Embeddings / Sentence-Transformers 임베딩
+  - Cosine Similarity 기반 Top-K 검색
+
+- **Context-Aware Answer Generation**:
+  - 검색된 문서를 컨텍스트로 LLM에 전달
+  - GPT-4/GPT-3.5 Turbo 기반 답변 생성
+  - Hallucination 방지 (문서 기반 답변 제한)
+
+- **Prompt Engineering**:
+  - 헬멧 안전 전문가 페르소나 설계
+  - Few-shot Learning 예시 포함
+  - Chain-of-Thought 추론 유도
+
+- **Domain-Specific Knowledge Base**:
+  - 도로교통법, 헬멧 착용법, 사고 사례 등 구조화
+  - 법규, 가이드, 사례 카테고리 분류
+  - 문서 청크 최적화 (512 tokens)
+
+**NLP 평가 지표**:
+- Retrieval Precision@K (검색 정확도)
+- Answer Relevance Score (답변 관련성)
+- Semantic Similarity (의미 유사도)
+- User Satisfaction Survey (사용자 만족도)
+
+#### 2. **Computer Vision + NLP Multimodal Fusion**
+- **CV 모듈**: YOLOv8n 실시간 헬멧 탐지
+- **NLP 모듈**: RAG 기반 질의응답 시스템
+- **통합 플랫폼**: 탐지 → 알림 → 교육 파이프라인
+- **시너지 효과**: 탐지 결과 기반 맞춤형 안전 교육 제공
+
+#### 3. **Transfer Learning from Industrial Safety Domain**
 - SafetyVisionAI 사전 훈련 모델 활용
 - 건설현장 PPE → 전동킥보드 헬멧 도메인 전이
 - mAP@0.5 **93.7%** 성능 유지
 - Helmet-Head 구분 정확도 **99.55%**
 
-#### 3. **RAG-Enhanced Safety Education**
-- 단순 탐지를 넘어 **교육 기능 통합**
-- 헬멧 관련 법규, 착용법, 사고 사례 질의응답
-- 벡터 DB 기반 관련 문서 검색 및 생성형 AI 답변
-- **탐지 + 교육**의 통합 안전 플랫폼
+#### 4. **Mobile-First Deployment Architecture**
+- 모바일 웹 기반 실시간 헬멧 탐지 서비스
+- WebRTC 기반 카메라 스트리밍 (별도 앱 설치 불필요)
+- 경량 YOLOv8n 모델로 모바일 환경 최적화
+- **전동킥보드 이용자가 직접 사용 가능한 접근성**
 
-#### 4. **Real-time Alert System**
+#### 5. **Real-time Alert System**
 - Telegram Bot 즉각 알림 (헬멧 미착용 감지 시)
 - 탐지 결과 이미지 포함 전송
 - 가족/친구 그룹 공유 가능 (안전 네트워크 구축)
@@ -134,10 +174,23 @@
 
 ### 🎓 학술적 가치
 
-- **Domain Transfer Learning**: 산업안전 → 개인 모빌리티 안전
+#### 자연어 처리 (NLP) 연구
+- **RAG Architecture**: Retrieval-Augmented Generation 기반 질의응답 시스템
+- **Semantic Search**: 벡터 임베딩 기반 의미적 문서 검색 최적화
+- **Domain Adaptation**: 헬멧 안전 도메인 특화 지식베이스 구축
+- **Prompt Engineering**: 안전 전문가 페르소나 기반 프롬프트 설계
+- **Hallucination Mitigation**: 문서 기반 답변 제한을 통한 환각 방지
+- **Evaluation Metrics**: Retrieval Precision, Answer Relevance, Semantic Similarity
+
+#### 컴퓨터 비전 (CV) + 멀티모달 융합
+- **Domain Transfer Learning**: 산업안전 (PPE) → 개인 모빌리티 안전 (헬멧)
+- **Multimodal Integration**: CV (탐지) + NLP (교육) 융합 플랫폼
 - **Mobile AI Deployment**: 경량 모델 기반 모바일 웹 서비스 구현
-- **RAG Integration**: 객체 탐지 + 생성형 AI 챗봇 융합
+
+#### 실용성 및 접근성
+- **End-to-End Pipeline**: 탐지 → 알림 → 교육 통합 시스템
 - **Accessible Safety Service**: 개인 사용자 중심 안전 서비스 설계
+- **Reproducible Research**: 공개 모델 및 RAG 파이프라인 기반 재현 가능
 
 ---
 
@@ -470,19 +523,72 @@ eScooterAI/
   - [ ] `src/data/safety_docs/` 디렉토리 생성
 
 ### Phase 2: RAG 시스템 구축 📚 (예정)
-- [ ] **안전 문서 데이터 수집**
+
+#### 2.1 안전 문서 데이터 수집 및 전처리
+- [ ] **법규 문서**
   - [ ] 도로교통법 제50조 (헬멧 착용 의무)
-  - [ ] 전동킥보드 안전 가이드
-  - [ ] 헬멧 선택 및 착용법
-  - [ ] 사고 사례 및 통계
-- [ ] **벡터 DB 구축**
-  - [ ] ChromaDB 설정
-  - [ ] 문서 임베딩 (OpenAI Embeddings / Sentence-Transformers)
-  - [ ] 벡터 저장소 생성 및 인덱싱
-- [ ] **RAG 파이프라인 구현**
-  - [ ] Retriever: 관련 문서 검색
-  - [ ] Generator: LLM 기반 답변 생성 (OpenAI API)
-  - [ ] 프롬프트 엔지니어링 (헬멧 안전 전문가 페르소나)
+  - [ ] 도로교통법 제160조 (과태료 규정)
+  - [ ] 개인형 이동장치 안전기준 고시
+- [ ] **안전 가이드**
+  - [ ] 헬멧 선택 기준 (인증 마크, 크기, 재질)
+  - [ ] 헬멧 올바른 착용법 (각도, 턱끈, 조절)
+  - [ ] 전동킥보드 안전 운전 수칙
+- [ ] **사고 사례 및 통계**
+  - [ ] 헬멧 미착용 사고 통계 (교통안전공단)
+  - [ ] 헬멧 착용 효과 연구 결과
+  - [ ] 실제 사고 사례 분석
+- [ ] **문서 전처리**
+  - [ ] PDF/웹 크롤링 및 텍스트 추출
+  - [ ] 문서 청크 분할 (512 tokens, overlap 50)
+  - [ ] 메타데이터 태깅 (카테고리, 출처, 날짜)
+
+#### 2.2 벡터 DB 구축 (ChromaDB)
+- [ ] **임베딩 모델 선택 및 비교**
+  - [ ] OpenAI text-embedding-3-small (성능 우선)
+  - [ ] Sentence-Transformers paraphrase-multilingual (무료 대안)
+  - [ ] 한국어 도메인 성능 벤치마크
+- [ ] **ChromaDB 설정**
+  - [ ] Collection 생성 (helmet_safety_docs)
+  - [ ] 문서 임베딩 및 저장
+  - [ ] 인덱싱 최적화 (HNSW 알고리즘)
+- [ ] **검색 성능 최적화**
+  - [ ] Top-K 파라미터 튜닝 (K=3~5)
+  - [ ] Similarity Threshold 설정 (>0.7)
+  - [ ] Re-ranking 알고리즘 적용 (선택사항)
+
+#### 2.3 RAG 파이프라인 구현 (LangChain)
+- [ ] **Retriever 구현**
+  - [ ] Query Embedding 생성
+  - [ ] Cosine Similarity 기반 Top-K 검색
+  - [ ] 검색 결과 필터링 및 정렬
+- [ ] **Generator 구현**
+  - [ ] OpenAI API 통합 (GPT-4 Turbo / GPT-3.5 Turbo)
+  - [ ] Context 구성 (검색 문서 + 사용자 질문)
+  - [ ] Temperature, Max Tokens 설정
+- [ ] **Prompt Engineering**
+  - [ ] System Prompt: 헬멧 안전 전문가 페르소나
+  - [ ] Few-shot Examples: 질문-답변 예시 3~5개
+  - [ ] Chain-of-Thought: 단계별 추론 유도
+  - [ ] Output Format: 답변 구조화 (근거 + 핵심 답변 + 추가 정보)
+- [ ] **RAG Chain 통합**
+  - [ ] LangChain LCEL 기반 파이프라인 구축
+  - [ ] Retrieval → Context → Generation 자동화
+  - [ ] 에러 핸들링 및 폴백 메커니즘
+
+#### 2.4 RAG 평가 및 최적화
+- [ ] **검색 성능 평가**
+  - [ ] Retrieval Precision@K (K=3, 5, 10)
+  - [ ] Recall@K (관련 문서 검색율)
+  - [ ] MRR (Mean Reciprocal Rank)
+- [ ] **답변 품질 평가**
+  - [ ] Answer Relevance Score (LLM as Judge)
+  - [ ] Semantic Similarity (답변-정답 유사도)
+  - [ ] Factual Consistency (문서 기반 사실 일치도)
+  - [ ] Hallucination Rate (환각 발생률)
+- [ ] **사용자 평가**
+  - [ ] User Satisfaction Survey (5점 척도)
+  - [ ] Response Time (응답 속도)
+  - [ ] Usefulness Rating (답변 유용성)
 
 ### Phase 3: 모바일 웹 서비스 구현 📱 (예정)
 - [ ] **멀티페이지 Streamlit 앱 구조**
@@ -520,21 +626,107 @@ eScooterAI/
   - [ ] 메모리 사용량 최적화
 
 ### Phase 5: 논문 작성 및 발표 📝 (예정)
-- [ ] **실험 결과 정리**
-  - [ ] 헬멧 탐지 정확도 측정 (전동킥보드 환경)
-  - [ ] RAG 챗봇 응답 품질 평가
-  - [ ] 사용자 만족도 조사 (설문)
-  - [ ] 기존 시스템 대비 우수성 입증
-- [ ] **학술 논문 작성**
-  - [ ] 서론: 연구 배경 및 문제 정의
-  - [ ] 관련 연구: 기존 헬멧 탐지 시스템 분석
-  - [ ] 방법론: Transfer Learning + RAG 아키텍처
-  - [ ] 실험 결과: 정량적/정성적 평가
-  - [ ] 결론 및 향후 연구
-- [ ] **최종 발표 준비**
-  - [ ] 발표 자료 작성 (PPT)
-  - [ ] 데모 영상 제작
-  - [ ] 실시간 시연 준비
+
+#### 5.1 실험 결과 정리
+
+**컴퓨터 비전 실험**
+- [ ] 헬멧 탐지 정확도 측정 (전동킥보드 환경)
+  - [ ] 실제 전동킥보드 이용자 테스트 영상 수집
+  - [ ] 다양한 조명/각도/속도에서 탐지 성능
+  - [ ] mAP@0.5, Precision, Recall 측정
+  - [ ] Transfer Learning 효과 분석
+
+**자연어 처리 실험 (핵심)**
+- [ ] **RAG 검색 성능 평가**
+  - [ ] Test Set 구성 (질문-정답 쌍 50~100개)
+  - [ ] Retrieval Precision@K (K=3, 5, 10) 측정
+  - [ ] Recall@K 및 MRR 계산
+  - [ ] 임베딩 모델 비교 (OpenAI vs Sentence-Transformers)
+- [ ] **RAG 답변 품질 평가**
+  - [ ] Answer Relevance Score (GPT-4 as Judge, 5점 척도)
+  - [ ] Semantic Similarity (답변-정답 코사인 유사도)
+  - [ ] Factual Consistency (문서 기반 사실 일치도)
+  - [ ] Hallucination Rate (환각 발생률, < 10% 목표)
+  - [ ] Response Time (평균 응답 속도, < 3초 목표)
+- [ ] **프롬프트 엔지니어링 효과**
+  - [ ] Baseline (프롬프트 없음) vs 전문가 페르소나
+  - [ ] Few-shot Learning 예시 개수별 비교 (0, 3, 5개)
+  - [ ] Chain-of-Thought 유무 비교
+- [ ] **사용자 평가 (User Study)**
+  - [ ] 사용자 만족도 설문 (5점 척도, N=20~30명)
+  - [ ] 답변 유용성, 이해도, 신뢰도 평가
+  - [ ] 기존 검색 엔진 대비 선호도
+
+**통합 시스템 평가**
+- [ ] End-to-End 성능 측정 (탐지 → 알림 → 챗봇)
+- [ ] 기존 시스템 대비 우수성 입증
+- [ ] 사용 시나리오별 효과성 분석
+
+#### 5.2 학술 논문 작성
+
+**논문 구조 (한국어/영어)**
+- [ ] **Abstract (초록)**
+  - [ ] 연구 배경 및 동기
+  - [ ] RAG 기반 접근 방식 요약
+  - [ ] 주요 결과 (정량적 지표 포함)
+- [ ] **1. Introduction (서론)**
+  - [ ] 전동킥보드 헬멧 미착용 문제
+  - [ ] 기존 탐지 시스템의 한계
+  - [ ] RAG 기반 교육 통합의 필요성
+  - [ ] 연구 목표 및 기여점
+- [ ] **2. Related Work (관련 연구)**
+  - [ ] 헬멧 탐지 시스템 (YOLO 기반)
+  - [ ] RAG 시스템 (LangChain, ChromaDB)
+  - [ ] Domain-Specific QA Systems
+  - [ ] Transfer Learning in Safety Domain
+- [ ] **3. Methodology (방법론)**
+  - [ ] 3.1 System Architecture (전체 아키텍처)
+  - [ ] 3.2 Helmet Detection Module (YOLOv8n)
+  - [ ] 3.3 **RAG-based QA Module (핵심)**
+    - [ ] Document Collection & Preprocessing
+    - [ ] Vector Embedding (ChromaDB, OpenAI)
+    - [ ] Semantic Retrieval (Cosine Similarity)
+    - [ ] Context-Aware Generation (GPT-4)
+    - [ ] Prompt Engineering Strategy
+  - [ ] 3.4 Integration & Deployment (통합)
+- [ ] **4. Experiments (실험)**
+  - [ ] 4.1 Experimental Setup (실험 환경)
+  - [ ] 4.2 Helmet Detection Results (CV 결과)
+  - [ ] 4.3 **RAG System Evaluation (NLP 결과 - 핵심)**
+    - [ ] Retrieval Performance
+    - [ ] Answer Quality Metrics
+    - [ ] Prompt Engineering Effects
+    - [ ] User Study Results
+  - [ ] 4.4 Ablation Study (제거 실험)
+  - [ ] 4.5 Comparison with Baselines (베이스라인 비교)
+- [ ] **5. Discussion (논의)**
+  - [ ] 연구 결과 해석
+  - [ ] RAG 시스템의 강점 및 한계
+  - [ ] 실용적 함의 (Practical Implications)
+  - [ ] 한계점 및 개선 방향
+- [ ] **6. Conclusion (결론)**
+  - [ ] 연구 요약
+  - [ ] 주요 기여점 재강조
+  - [ ] 향후 연구 방향
+- [ ] **References (참고문헌)**
+  - [ ] YOLO, RAG, LangChain 관련 논문
+  - [ ] 헬멧 안전, 전동킥보드 관련 연구
+
+#### 5.3 최종 발표 준비
+- [ ] **발표 자료 작성 (PPT)**
+  - [ ] 연구 배경 및 동기 (3분)
+  - [ ] RAG 시스템 아키텍처 (5분)
+  - [ ] 실험 결과 (정량적 지표 중심, 7분)
+  - [ ] 데모 시연 (3분)
+  - [ ] 결론 및 질의응답 (2분)
+- [ ] **데모 영상 제작**
+  - [ ] 헬멧 탐지 실시간 데모
+  - [ ] RAG 챗봇 질의응답 예시
+  - [ ] 통합 시스템 사용 시나리오
+- [ ] **실시간 시연 준비**
+  - [ ] 모바일 웹 앱 배포 URL
+  - [ ] 백업 데모 영상 준비
+  - [ ] 예상 질문 답변 준비
 
 ---
 
@@ -783,24 +975,63 @@ names:
 
 ---
 
-## 일정
+## 개발 일정
 
-| 주차 | 기간 | 목표 |
-|------|------|------|
-| Week 1 | ~11/24 | 데이터셋 확보 및 전처리 완료 |
-| Week 2 | ~12/1 | 모델 훈련 및 추론 시스템 완료 |
-| Week 3 | ~12/7 | 최종 시스템 완성 및 발표 준비 |
+| 단계 | 기간 | 주요 목표 | 핵심 Deliverable | 상태 |
+|------|------|----------|------------------|------|
+| **Phase 1** | Week 1 (11/28~) | 프로젝트 초기화, 구조 재구성 | README, 디렉토리 구조 | 🚀 진행 중 |
+| **Phase 2** | Week 2-3 | **RAG 시스템 구축 (NLP 핵심)** | **벡터 DB, QA 파이프라인** | 📅 예정 |
+|  | Week 2 | 문서 수집 및 전처리 | 안전 문서 데이터셋 (법규, 가이드, 사례) |  |
+|  | Week 2-3 | ChromaDB 벡터화 | 임베딩 모델, 검색 성능 벤치마크 |  |
+|  | Week 3 | LangChain RAG 파이프라인 | Retriever + Generator + Prompt |  |
+|  | Week 3 | **RAG 평가 실험** | **Precision@K, Relevance, Hallucination** |  |
+| **Phase 3** | Week 4 | 모바일 웹 서비스 개발 | Streamlit 멀티페이지 앱 | 📅 예정 |
+|  |  | WebRTC 통합 | 실시간 카메라 스트리밍 |  |
+|  |  | RAG 챗봇 UI | 질의응답 인터페이스 |  |
+| **Phase 4** | Week 5 | 통합 테스트 및 배포 | Streamlit Cloud 배포 URL | 📅 예정 |
+|  |  | End-to-End 테스트 | 탐지 → 알림 → 챗봇 통합 |  |
+| **Phase 5** | Week 6-7 | **실험, 논문 작성, 발표** | **학술 논문, 발표 자료** | 📅 예정 |
+|  | Week 6 | **RAG 성능 평가 실험** | **NLP 정량적 지표 측정** |  |
+|  | Week 6-7 | 논문 작성 | 서론, 방법론, 실험, 결론 |  |
+|  | Week 7 | 발표 준비 | PPT, 데모 영상, 시연 |  |
 
 ---
 
 ## 참고 자료
 
-- 논문: `딥 러닝 기반 작업자 개인보호구 착용 및 얼굴 신원 확인 시스템에 관한 연구`
-- 논문: `Construction Site Hazards Identification Using Deep Learning and Computer Vision`
+### 법규 및 규정
+- [도로교통법 제50조](https://www.law.go.kr/) (개인형 이동장치 안전기준)
+- 도로교통법 제160조 (헬멧 미착용 과태료)
+- 개인형 이동장치 안전기준 고시 (국토교통부)
+
+### RAG 및 자연어 처리 (NLP) 🔬
+- **RAG 논문**: [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al., 2020)](https://arxiv.org/abs/2005.11401)
+- **LangChain**: [LangChain Documentation](https://python.langchain.com/) - RAG 파이프라인 구축
+- **ChromaDB**: [ChromaDB Documentation](https://docs.trychroma.com/) - 벡터 임베딩 및 검색
+- **OpenAI Embeddings**: [text-embedding-3-small](https://platform.openai.com/docs/guides/embeddings) - 문서 벡터화
+- **Sentence-Transformers**: [paraphrase-multilingual-MiniLM](https://huggingface.co/sentence-transformers) - 다국어 임베딩
+- **Prompt Engineering**: [OpenAI Best Practices](https://platform.openai.com/docs/guides/prompt-engineering)
+- **RAG Evaluation**: [RAGAS Framework](https://docs.ragas.io/) - RAG 평가 지표 (Precision, Relevance, Hallucination)
+
+### 컴퓨터 비전 (CV)
+- **YOLO**: [Ultralytics YOLOv8 Documentation](https://docs.ultralytics.com/)
+- **Transfer Learning**: [Fine-tuning Pre-trained Models](https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html)
 - 논문: `YOLO(You Only Look Once) 모델별 건설 현장 위험 상태 및 객체 인식 성능 비교`
-- 특허: `빅데이터 기술 및 인공지능 기술에 기초하여 위험 시설물에 대한 실시간 정보를 모니터링함과 함께 상기 위험 시설물의 안전사고를 관리하는 위험 시설물 관리 시스템`
-- 특허: `인공지능기반 이륜자동차의 헬맷 미착용 단속시스템 및 방법`
+
+### 모바일 웹 및 배포
+- **Streamlit**: [Streamlit Documentation](https://docs.streamlit.io/)
+- **WebRTC**: [streamlit-webrtc GitHub](https://github.com/whitphx/streamlit-webrtc) - 실시간 카메라 스트리밍
+- **aiortc**: [aiortc Documentation](https://aiortc.readthedocs.io/) - Python WebRTC 구현
+
+### 관련 연구 (헬멧 탐지 및 안전)
+- 논문: `딥 러닝 기반 작업자 개인보호구 착용 및 얼굴 신원 확인 시스템에 관한 연구`
+- 특허: `인공지능기반 이륜자동차의 헬맷 미착용 단속시스템 및 방법` (KR 특허)
+- 논문: `Construction Site Hazards Identification Using Deep Learning and Computer Vision`
 - 논문: `SYSTEM AND METHOD FOR AI VISUAL INSPECTION`
-- [YOLO 공식 문서](https://docs.ultralytics.com/)
-- [영상 - 중대재해법 비웃는 건설현장](https://www.youtube.com/watch?v=9rDv59u3cnc)
-- [스타트업 미스릴 브로셔](https://6542f7fa-15be-45d4-980e-46706516dc78.usrfiles.com/ugd/6542f7_9f7aaea5869742518907c1a3bf09ba8a.pdf)
+
+### 기반 프로젝트
+- [SafetyVisionAI](https://github.com/jhboyo/SafetyVisionAI) - YOLOv8n 사전 훈련 모델 제공 (mAP@0.5 93.7%)
+
+### 데이터셋 및 통계
+- [교통안전공단 통계](https://www.ts2020.kr/) - 전동킥보드 사고 통계
+- [도로교통공단 교통사고 분석](http://taas.koroad.or.kr/) - 개인형 이동장치 사고 데이터
