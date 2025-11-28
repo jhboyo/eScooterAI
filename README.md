@@ -20,7 +20,7 @@
   - "헬멧을 안 쓰면 과태료가 얼마인가요?"
   - "헬멧을 올바르게 착용하는 방법을 알려주세요"
   - "헬멧 착용의 효과는 무엇인가요?"
-- **벡터 DB 검색**: ChromaDB 기반 의미적 문서 검색
+- **벡터 DB 검색**: FAISS 기반 의미적 문서 검색
 - **LLM 답변 생성**: GPT-4 기반 컨텍스트 인식 답변
 - **환각 방지**: 문서 기반 사실만 전달
 
@@ -44,7 +44,7 @@
 
 - **팀명**: eScooterAI
 - **프로젝트**: 딥러닝 기반 전동킥보드 헬멧 착용 모니터링 모바일 서비스
-- **멤버**: 김상진, 김준호, 김한솔, 유승근, 홍준재
+- **멤버**: 김준호
 
 ---
 
@@ -56,7 +56,7 @@
 | **탐지 대상** | 헬멧 착용(helmet), 헬멧 미착용(head) |
 | **객체 탐지 모델** | YOLOv8n (SafetyVisionAI 사전 훈련 모델 활용) |
 | **NLP 시스템** | **RAG (Retrieval-Augmented Generation) 기반 질의응답** |
-| **벡터 DB** | ChromaDB (문서 임베딩 및 유사도 검색) |
+| **벡터 DB** | FAISS (Meta AI Similarity Search, L2 거리 기반) |
 | **LLM** | OpenAI GPT-4/GPT-3.5 Turbo (답변 생성) |
 | **플랫폼** | 모바일 웹 서비스 (Streamlit + WebRTC) |
 
@@ -129,9 +129,9 @@
 **자연어 처리 핵심 연구**
 
 - **Semantic Document Retrieval**:
-  - ChromaDB 벡터 저장소 기반 의미적 문서 검색
-  - OpenAI Embeddings / Sentence-Transformers 임베딩
-  - Cosine Similarity 기반 Top-K 검색
+  - FAISS 벡터 저장소 기반 의미적 문서 검색
+  - OpenAI text-embedding-3-small 임베딩 (1536차원)
+  - L2 Distance 기반 Top-K 검색
 
 - **Context-Aware Answer Generation**:
   - 검색된 문서를 컨텍스트로 LLM에 전달
@@ -406,7 +406,7 @@ models/ppe_detection/weights/best.pt  # 6.0MB
 | **이미지 처리** | OpenCV, PIL, NumPy |
 | **웹 프레임워크** | Streamlit |
 | **실시간 스트리밍** | WebRTC (streamlit-webrtc), aiortc |
-| **RAG** | LangChain, ChromaDB, OpenAI API |
+| **RAG** | FAISS (Meta AI), OpenAI API |
 | **벡터 임베딩** | OpenAI Embeddings / Sentence-Transformers |
 | **알림** | Telegram Bot API |
 | **배포** | Streamlit Community Cloud (예정) |
@@ -489,7 +489,7 @@ eScooterAI/
 │   │       └── alert.py       # Telegram 알림
 │   ├── rag/               # RAG 시스템 (NEW!)
 │   │   ├── __init__.py
-│   │   ├── vector_store.py    # ChromaDB 벡터 저장소
+│   │   ├── vector_store.py    # FAISS 벡터 저장소
 │   │   ├── embeddings.py      # 문서 임베딩
 │   │   ├── retriever.py       # 문서 검색
 │   │   ├── generator.py       # LLM 답변 생성
@@ -507,7 +507,7 @@ eScooterAI/
 ├── output/                 # 출력 결과
 │   ├── detections/        # 탐지 결과 저장
 │   └── screenshots/       # 스크린샷
-├── vector_db/              # ChromaDB 저장소 (NEW!)
+├── vector_db/              # FAISS 저장소 (NEW!)
 ├── materials/              # 참고 자료
 ├── .streamlit/             # Streamlit 설정
 │   ├── config.toml        # 테마 및 서버 설정
@@ -530,7 +530,7 @@ eScooterAI/
 ### Phase 1: 프로젝트 초기 설정 🚀 (진행 중)
 - [v] 프로젝트 개요 및 README 업데이트
 - [ ] 환경 설정 및 의존성 설치
-  - [ ] RAG 관련 라이브러리 추가 (LangChain, ChromaDB, OpenAI)
+  - [v] RAG 관련 라이브러리 추가 (FAISS, OpenAI)
   - [ ] WebRTC 라이브러리 확인 (streamlit-webrtc, aiortc)
 - [ ] 프로젝트 구조 재구성
   - [ ] `src/mobile_app/` 디렉토리 생성
@@ -557,24 +557,24 @@ eScooterAI/
   - [ ] 문서 청크 분할 (512 tokens, overlap 50)
   - [ ] 메타데이터 태깅 (카테고리, 출처, 날짜)
 
-#### 2.2 벡터 DB 구축 (ChromaDB)
+#### 2.2 벡터 DB 구축 (FAISS)
 - [ ] **임베딩 모델 선택 및 비교**
   - [ ] OpenAI text-embedding-3-small (성능 우선)
   - [ ] Sentence-Transformers paraphrase-multilingual (무료 대안)
   - [ ] 한국어 도메인 성능 벤치마크
-- [ ] **ChromaDB 설정**
-  - [ ] Collection 생성 (helmet_safety_docs)
+- [ ] **FAISS 인덱스 설정**
+  - [ ] IndexFlatL2 생성 (L2 거리 기반)
   - [ ] 문서 임베딩 및 저장
-  - [ ] 인덱싱 최적화 (HNSW 알고리즘)
+  - [ ] 인덱싱 최적화 (필요시 IndexIVFFlat으로 업그레이드)
 - [ ] **검색 성능 최적화**
   - [ ] Top-K 파라미터 튜닝 (K=3~5)
   - [ ] Similarity Threshold 설정 (>0.7)
   - [ ] Re-ranking 알고리즘 적용 (선택사항)
 
-#### 2.3 RAG 파이프라인 구현 (LangChain)
+#### 2.3 RAG 파이프라인 구현 (직접 구현)
 - [ ] **Retriever 구현**
-  - [ ] Query Embedding 생성
-  - [ ] Cosine Similarity 기반 Top-K 검색
+  - [ ] Query Embedding 생성 (OpenAI API)
+  - [ ] L2 Distance 기반 Top-K 검색 (FAISS)
   - [ ] 검색 결과 필터링 및 정렬
 - [ ] **Generator 구현**
   - [ ] OpenAI API 통합 (GPT-4 Turbo / GPT-3.5 Turbo)
@@ -585,8 +585,8 @@ eScooterAI/
   - [ ] Few-shot Examples: 질문-답변 예시 3~5개
   - [ ] Chain-of-Thought: 단계별 추론 유도
   - [ ] Output Format: 답변 구조화 (근거 + 핵심 답변 + 추가 정보)
-- [ ] **RAG Chain 통합**
-  - [ ] LangChain LCEL 기반 파이프라인 구축
+- [ ] **RAG 파이프라인 통합**
+  - [ ] FAISSVectorStore + OpenAI API 통합
   - [ ] Retrieval → Context → Generation 자동화
   - [ ] 에러 핸들링 및 폴백 메커니즘
 
@@ -691,7 +691,7 @@ eScooterAI/
   - [ ] 연구 목표 및 기여점
 - [ ] **2. Related Work (관련 연구)**
   - [ ] 헬멧 탐지 시스템 (YOLO 기반)
-  - [ ] RAG 시스템 (LangChain, ChromaDB)
+  - [ ] RAG 시스템 (FAISS, OpenAI)
   - [ ] Domain-Specific QA Systems
   - [ ] Transfer Learning in Safety Domain
 - [ ] **3. Methodology (방법론)**
@@ -699,8 +699,8 @@ eScooterAI/
   - [ ] 3.2 Helmet Detection Module (YOLOv8n)
   - [ ] 3.3 **RAG-based QA Module (핵심)**
     - [ ] Document Collection & Preprocessing
-    - [ ] Vector Embedding (ChromaDB, OpenAI)
-    - [ ] Semantic Retrieval (Cosine Similarity)
+    - [ ] Vector Embedding (FAISS, OpenAI)
+    - [ ] Semantic Retrieval (L2 Distance)
     - [ ] Context-Aware Generation (GPT-4)
     - [ ] Prompt Engineering Strategy
   - [ ] 3.4 Integration & Deployment (통합)
@@ -751,7 +751,7 @@ eScooterAI/
 
 #### 1. RAG 시스템 구축 (최우선)
 - 헬멧 관련 법규, 안전 가이드 문서 수집 및 벡터화
-- LangChain + ChromaDB 기반 RAG 파이프라인 구현
+- FAISS + OpenAI API 기반 RAG 파이프라인 직접 구현
 - OpenAI API 통합 (GPT-4 Turbo / GPT-3.5 Turbo)
 
 #### 2. 모바일 웹 서비스 개발
@@ -997,8 +997,8 @@ names:
 | **Phase 1** | Week 1 (11/28~) | 프로젝트 초기화, 구조 재구성 | README, 디렉토리 구조 | 🚀 진행 중 |
 | **Phase 2** | Week 2-3 | **RAG 시스템 구축 (NLP 핵심)** | **벡터 DB, QA 파이프라인** | 📅 예정 |
 |  | Week 2 | 문서 수집 및 전처리 | 안전 문서 데이터셋 (법규, 가이드, 사례) |  |
-|  | Week 2-3 | ChromaDB 벡터화 | 임베딩 모델, 검색 성능 벤치마크 |  |
-|  | Week 3 | LangChain RAG 파이프라인 | Retriever + Generator + Prompt |  |
+|  | Week 2-3 | FAISS 벡터화 | 임베딩 모델, 검색 성능 벤치마크 |  |
+|  | Week 3 | RAG 파이프라인 구현 | Retriever + Generator + Prompt (직접 구현) |  |
 |  | Week 3 | **RAG 평가 실험** | **Precision@K, Relevance, Hallucination** |  |
 | **Phase 3** | Week 4 | 모바일 웹 서비스 개발 | Streamlit 멀티페이지 앱 | 📅 예정 |
 |  |  | WebRTC 통합 | 실시간 카메라 스트리밍 |  |
@@ -1021,10 +1021,11 @@ names:
 
 ### RAG 및 자연어 처리 (NLP) 🔬
 - **RAG 논문**: [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al., 2020)](https://arxiv.org/abs/2005.11401)
-- **LangChain**: [LangChain Documentation](https://python.langchain.com/) - RAG 파이프라인 구축
-- **ChromaDB**: [ChromaDB Documentation](https://docs.trychroma.com/) - 벡터 임베딩 및 검색
-- **OpenAI Embeddings**: [text-embedding-3-small](https://platform.openai.com/docs/guides/embeddings) - 문서 벡터화
-- **Sentence-Transformers**: [paraphrase-multilingual-MiniLM](https://huggingface.co/sentence-transformers) - 다국어 임베딩
+- **FAISS**: [FAISS GitHub (Meta AI)](https://github.com/facebookresearch/faiss) - 벡터 유사도 검색 라이브러리
+- **FAISS 논문**: [Billion-scale similarity search with GPUs (Johnson et al., 2017)](https://arxiv.org/abs/1702.08734)
+- **OpenAI Embeddings**: [text-embedding-3-small](https://platform.openai.com/docs/guides/embeddings) - 문서 벡터화 (1536차원)
+- **OpenAI API**: [OpenAI API Documentation](https://platform.openai.com/docs/api-reference) - GPT-4, Embeddings
+- **Sentence-Transformers**: [paraphrase-multilingual-MiniLM](https://huggingface.co/sentence-transformers) - 다국어 임베딩 (무료 대안)
 - **Prompt Engineering**: [OpenAI Best Practices](https://platform.openai.com/docs/guides/prompt-engineering)
 - **RAG Evaluation**: [RAGAS Framework](https://docs.ragas.io/) - RAG 평가 지표 (Precision, Relevance, Hallucination)
 

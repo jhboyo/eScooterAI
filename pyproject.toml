@@ -1,26 +1,30 @@
 [project]
-name = "tfguard"
+name = "escooter-ai"
 version = "0.1.0"
-description = "Industrial Safety Object Detection System using TensorFlow"
+description = "RAG-based e-Scooter Helmet Detection and Safety Education Platform"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "tensorflow==2.13.0",
-    "opencv-python>=4.8.0",
-    "numpy>=1.24.0",
-    "matplotlib>=3.7.0",
-    "pillow>=9.5.0",
-    "jupyter>=1.0.0",
-    "ultralytics>=8.3.229",
-    "python-dotenv>=1.2.1",
-    "pandas>=2.1.0",
-    "huggingface-hub>=0.20.0",
-    "hf-transfer>=0.1.0",
-    "streamlit>=1.51.0",
-    "plotly>=6.5.0",
-    "requests>=2.31.0",
-    "streamlit-webrtc>=0.47.0",
-    "av>=10.0.0",
-    "gTTS>=2.5.0",
-    "pygame>=2.5.0",
+    # Computer Vision (Object Detection)
+    "ultralytics>=8.3.229",      # YOLOv8
+    "opencv-python>=4.8.0",      # 이미지 처리
+    "pillow>=9.5.0",             # 이미지 로드
+
+    # RAG & NLP (핵심)
+    "faiss-cpu>=1.7.4",          # 벡터 유사도 검색 (Meta AI)
+    "openai>=1.0.0",             # LLM API + Embeddings
+    "tiktoken>=0.5.0",           # 토큰 카운팅
+
+    # Web Framework
+    "streamlit>=1.51.0",         # 웹 인터페이스
+    "streamlit-webrtc>=0.47.0",  # WebRTC 카메라 스트리밍
+    "av>=10.0.0",                # 비디오 처리
+
+    # Utilities
+    "python-dotenv>=1.2.1",      # 환경 변수 관리
+    "requests>=2.31.0",          # HTTP 요청 (Telegram)
+    "numpy>=1.24.0",             # 수치 연산
+    "pandas>=2.1.0",             # 데이터 처리
+    "matplotlib>=3.7.0",         # 시각화
+    "plotly>=6.5.0",             # 인터랙티브 차트
 ]
