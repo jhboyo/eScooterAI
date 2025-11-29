@@ -211,10 +211,14 @@
 
 ## 기반 모델 (SafetyVisionAI 사전 훈련 모델)
 
-### 🎉 3 Class 모델 (helmet, head, vest) - A100 GPU, 100 Epochs
+### 🎉 기반 모델: 3-Class YOLOv8n (A100 GPU, 100 Epochs)
 
 본 프로젝트는 SafetyVisionAI 프로젝트에서 사전 훈련된 **best.pt 모델**을 활용합니다.
-전동킥보드 헬멧 탐지를 위해 `helmet`과 `head` 클래스를 주로 사용합니다.
+
+**기반 모델 학습 클래스**: helmet, head, vest (3-class)
+**본 프로젝트 사용 클래스**: `helmet`, `head` (2-class)
+
+> ℹ️ 기반 모델은 건설현장 안전을 위해 3개 클래스로 훈련되었으나, 전동킥보드 헬멧 안전에 특화하여 helmet과 head 클래스만 활용합니다.
 
 ### ✅ 최종 성능 지표
 
@@ -227,15 +231,16 @@
 
 ### 🎯 클래스별 성능 (Validation Set)
 
+**본 프로젝트 활용 클래스 (helmet, head):**
+
 | 클래스 | 정확도 | 정답 탐지 | 주요 오분류 | 미탐지율 |
 |--------|--------|-----------|-------------|----------|
 | **⛑️ Helmet** | **93%** | 6,304개 | head: 29개 (0.4%) | 10% |
 | **👤 Head** | **90%** | 1,024개 | helmet: 6개 (0.5%) | 13% |
-| **🦺 Vest** | **92%** | 2,529개 | helmet: 6개 (0.2%) | 18% |
 
 **📌 핵심 성과:**
 - ✅ **Helmet vs Head 구분 성공**: 헬멧 착용/미착용 간 혼동률 **0.4%**로 매우 낮음
-- ✅ **클래스 간 혼동 최소화**: 전체 10,862개 객체 중 49개만 오분류 (**0.45%**)
+- ✅ **클래스 간 혼동 최소화**: 7,328개 객체 중 35개만 오분류 (**0.48%**)
 - ✅ **실시간 안전 경고 가능**: Head 클래스 90% 정확도로 미착용 탐지
 
 ### ⚙️ 훈련 환경
@@ -273,14 +278,13 @@
 
 <img src="models/ppe_detection/confusion_matrix_normalized.png" width="500" alt="3 Class Confusion Matrix">
 
-#### 클래스 간 혼동 통계
+#### 클래스 간 혼동 통계 (Helmet ↔ Head)
 
 | 혼동 유형 | 건수 | 비율 | 평가 |
 |-----------|------|------|------|
 | **Helmet → Head** | 29개 | 0.4% | ✅ 매우 낮음 |
 | **Head → Helmet** | 6개 | 0.5% | ✅ 매우 낮음 |
-| **Helmet ↔ Vest** | 14개 | 0.2% | ✅ 매우 낮음 |
-| **Head ↔ Vest** | 0개 | 0% | ✅ 없음 |
+| **총 혼동** | 35개 | 0.48% | ✅ 거의 완벽한 구분 |
 
 ### 💡 결과 해석
 
@@ -296,7 +300,6 @@
 
 1. **IoU 엄격 기준**: mAP@0.5:0.95가 69.0%로 목표(70%) 대비 1%p 부족
 2. **Head 클래스 Recall**: 87% (1,024/1,178)로 13% 미탐지 → 데이터 증강 필요
-3. **Vest 클래스 Recall**: 82% (2,529/3,082)로 18% 미탐지 → Recall 개선 필요
 
 #### 🎯 결론
 
@@ -304,7 +307,7 @@
 
 - ✅ **실용성**: 93.7% mAP@0.5로 실시간 모니터링 가능
 - ⚠️ **안전 경고**: Head 클래스 90% 정확도로 헬멧 미착용 즉각 감지
-- 🔒 **신뢰성**: Helmet/Head/Vest 간 혼동률 0.45%로 매우 신뢰할 수 있음
+- 🔒 **신뢰성**: Helmet/Head 간 혼동률 0.48%로 매우 신뢰할 수 있음
 - ⚡ **효율성**: YOLOv8n 경량 모델로 빠른 추론 속도 기대
 
 ### 📁 결과 파일
@@ -413,57 +416,6 @@ models/ppe_detection/weights/best.pt  # 6.0MB
 
 ---
 
-## 데이터셋
-
-### 데이터 출처
-
-| Dataset | 이미지 수 | 원본 형식 | 클래스 |
-|---------|-----------|-----------|--------|
-| Hard Hat Detection | 5,000 | Pascal VOC | helmet, head, person |
-| Safety Helmet & Jacket | 10,500 | YOLO | helmet, vest |
-
-### 클래스 매핑 (3 Class)
-
-| 통일 클래스 | Dataset 1 | Dataset 2 |
-|-------------|-----------|-----------|
-| 0: helmet | helmet | Safety-Helmet |
-| 1: head | **head** ⚠️ | - |
-| 2: vest | - | Reflective-Jacket |
-| (제외) | person | - |
-
-**주요 변경사항:**
-- Dataset 1의 **head 클래스 포함** → 헬멧 미착용 탐지 가능
-- vest 클래스 ID: 1 → 2로 변경
-
-### 최종 데이터셋 (3 Class)
-
-| 구분 | 이미지 수 | 비율 |
-|------|-----------|------|
-| Train | 9,999 | 64.5% |
-| Val | 2,750 | 17.7% |
-| Test | 2,751 | 17.7% |
-| **합계** | **15,500** | 100% |
-
-**분할 비율 변경 이유:**
-- Train 데이터를 9,999개로 제한하여 검증/테스트 데이터 확보
-- Val/Test 비율 증가로 더 신뢰성 있는 모델 평가 가능
-
-### 데이터 검증 결과 (3 Class)
-
-| 구분 | 이미지 | 라벨 | 매칭 | helmet | head | vest | 총 객체 |
-|------|--------|------|------|--------|------|------|---------|
-| Train | 9,999 | 9,999 | 100% | 25,425 | 3,679 | 10,351 | 39,455 |
-| Val | 2,750 | 2,750 | 100% | 6,793 | 1,144 | 2,737 | 10,674 |
-| Test | 2,751 | 2,751 | 100% | 6,939 | 962 | 2,961 | 10,862 |
-| **합계** | **15,500** | **15,500** | **100%** | **39,157** | **5,785** | **16,049** | **60,991** |
-
-**클래스 분포:**
-- Helmet: 39,157개 (64.2%) - 헬멧 착용
-- **Head: 5,785개 (9.5%)** - 헬멧 미착용 ⚠️
-- Vest: 16,049개 (26.3%) - 안전조끼 착용
-
----
-
 ## 프로젝트 구조
 
 ```
@@ -519,496 +471,25 @@ eScooterAI/
 
 ---
 
-## 진행 현황
-
-### Phase 0: 기반 모델 준비 ✅ (SafetyVisionAI)
-- [v] YOLOv8n 모델 사전 훈련 완료 (mAP@0.5: 93.7%)
-- [v] best.pt 모델 확보 (6.0MB, 경량 모델)
-- [v] Helmet-Head 구분 정확도 99.55% 검증
-- [v] 모바일 실시간 추론 가능 확인 (32ms/이미지)
-
-### Phase 1: 프로젝트 초기 설정 🚀 (진행 중)
-- [v] 프로젝트 개요 및 README 업데이트
-- [ ] 환경 설정 및 의존성 설치
-  - [v] RAG 관련 라이브러리 추가 (FAISS, OpenAI)
-  - [ ] WebRTC 라이브러리 확인 (streamlit-webrtc, aiortc)
-- [ ] 프로젝트 구조 재구성
-  - [ ] `src/mobile_app/` 디렉토리 생성
-  - [ ] `src/rag/` 디렉토리 생성
-  - [ ] `src/data/safety_docs/` 디렉토리 생성
-
-### Phase 2: RAG 시스템 구축 📚 (예정)
-
-#### 2.1 안전 문서 데이터 수집 및 전처리
-- [ ] **법규 문서**
-  - [ ] 도로교통법 제50조 (헬멧 착용 의무)
-  - [ ] 도로교통법 제160조 (과태료 규정)
-  - [ ] 개인형 이동장치 안전기준 고시
-- [ ] **안전 가이드**
-  - [ ] 헬멧 선택 기준 (인증 마크, 크기, 재질)
-  - [ ] 헬멧 올바른 착용법 (각도, 턱끈, 조절)
-  - [ ] 전동킥보드 안전 운전 수칙
-- [ ] **사고 사례 및 통계**
-  - [ ] 헬멧 미착용 사고 통계 (교통안전공단)
-  - [ ] 헬멧 착용 효과 연구 결과
-  - [ ] 실제 사고 사례 분석
-- [ ] **문서 전처리**
-  - [ ] PDF/웹 크롤링 및 텍스트 추출
-  - [ ] 문서 청크 분할 (512 tokens, overlap 50)
-  - [ ] 메타데이터 태깅 (카테고리, 출처, 날짜)
-
-#### 2.2 벡터 DB 구축 (FAISS)
-- [ ] **임베딩 모델 선택 및 비교**
-  - [ ] OpenAI text-embedding-3-small (성능 우선)
-  - [ ] Sentence-Transformers paraphrase-multilingual (무료 대안)
-  - [ ] 한국어 도메인 성능 벤치마크
-- [ ] **FAISS 인덱스 설정**
-  - [ ] IndexFlatL2 생성 (L2 거리 기반)
-  - [ ] 문서 임베딩 및 저장
-  - [ ] 인덱싱 최적화 (필요시 IndexIVFFlat으로 업그레이드)
-- [ ] **검색 성능 최적화**
-  - [ ] Top-K 파라미터 튜닝 (K=3~5)
-  - [ ] Similarity Threshold 설정 (>0.7)
-  - [ ] Re-ranking 알고리즘 적용 (선택사항)
-
-#### 2.3 RAG 파이프라인 구현 (직접 구현)
-- [ ] **Retriever 구현**
-  - [ ] Query Embedding 생성 (OpenAI API)
-  - [ ] L2 Distance 기반 Top-K 검색 (FAISS)
-  - [ ] 검색 결과 필터링 및 정렬
-- [ ] **Generator 구현**
-  - [ ] OpenAI API 통합 (GPT-4 Turbo / GPT-3.5 Turbo)
-  - [ ] Context 구성 (검색 문서 + 사용자 질문)
-  - [ ] Temperature, Max Tokens 설정
-- [ ] **Prompt Engineering**
-  - [ ] System Prompt: 헬멧 안전 전문가 페르소나
-  - [ ] Few-shot Examples: 질문-답변 예시 3~5개
-  - [ ] Chain-of-Thought: 단계별 추론 유도
-  - [ ] Output Format: 답변 구조화 (근거 + 핵심 답변 + 추가 정보)
-- [ ] **RAG 파이프라인 통합**
-  - [ ] FAISSVectorStore + OpenAI API 통합
-  - [ ] Retrieval → Context → Generation 자동화
-  - [ ] 에러 핸들링 및 폴백 메커니즘
-
-#### 2.4 RAG 평가 및 최적화
-- [ ] **검색 성능 평가**
-  - [ ] Retrieval Precision@K (K=3, 5, 10)
-  - [ ] Recall@K (관련 문서 검색율)
-  - [ ] MRR (Mean Reciprocal Rank)
-- [ ] **답변 품질 평가**
-  - [ ] Answer Relevance Score (LLM as Judge)
-  - [ ] Semantic Similarity (답변-정답 유사도)
-  - [ ] Factual Consistency (문서 기반 사실 일치도)
-  - [ ] Hallucination Rate (환각 발생률)
-- [ ] **사용자 평가**
-  - [ ] User Satisfaction Survey (5점 척도)
-  - [ ] Response Time (응답 속도)
-  - [ ] Usefulness Rating (답변 유용성)
-
-### Phase 3: 모바일 웹 서비스 구현 📱 (예정)
-- [ ] **멀티페이지 Streamlit 앱 구조**
-  - [ ] 페이지 1: 실시간 헬멧 탐지 (WebRTC)
-  - [ ] 페이지 2: 안전 가이드 챗봇 (RAG)
-  - [ ] 홈 페이지: 프로젝트 소개 및 사용법
-- [ ] **WebRTC 기반 실시간 탐지**
-  - [ ] streamlit-webrtc 통합
-  - [ ] 모바일 카메라 스트리밍
-  - [ ] 프레임 단위 YOLO 추론
-  - [ ] 실시간 바운딩 박스 오버레이
-- [ ] **Telegram 알림 통합**
-  - [ ] 헬멧 미착용 감지 시 즉각 알림
-  - [ ] 탐지 결과 이미지 전송
-  - [ ] 알림 설정 UI (사용자가 활성화/비활성화)
-- [ ] **모바일 UI/UX 최적화**
-  - [ ] 반응형 레이아웃 (모바일/태블릿/데스크톱)
-  - [ ] 터치 인터페이스 최적화
-  - [ ] 로딩 시간 최소화
-
-### Phase 4: 통합 테스트 및 배포 🚀 (예정)
-- [ ] **로컬 테스트**
-  - [ ] 헬멧 탐지 기능 테스트 (다양한 각도, 조명)
-  - [ ] RAG 챗봇 응답 품질 평가
-  - [ ] Telegram 알림 테스트
-  - [ ] 모바일 브라우저 호환성 테스트
-- [ ] **Streamlit Community Cloud 배포**
-  - [ ] GitHub 연동 자동 배포 설정
-  - [ ] 환경 변수 및 Secrets 설정 (OpenAI API, Telegram Bot)
-  - [ ] 배포 URL 확보
-  - [ ] 배포 가이드 문서 작성
-- [ ] **성능 최적화**
-  - [ ] 모델 추론 속도 최적화
-  - [ ] 벡터 DB 쿼리 속도 최적화
-  - [ ] 메모리 사용량 최적화
-
-### Phase 5: 논문 작성 및 발표 📝 (예정)
-
-#### 5.1 실험 결과 정리
-
-**컴퓨터 비전 실험**
-- [ ] 헬멧 탐지 정확도 측정 (전동킥보드 환경)
-  - [ ] 실제 전동킥보드 이용자 테스트 영상 수집
-  - [ ] 다양한 조명/각도/속도에서 탐지 성능
-  - [ ] mAP@0.5, Precision, Recall 측정
-  - [ ] Transfer Learning 효과 분석
-
-**자연어 처리 실험 (핵심)**
-- [ ] **RAG 검색 성능 평가**
-  - [ ] Test Set 구성 (질문-정답 쌍 50~100개)
-  - [ ] Retrieval Precision@K (K=3, 5, 10) 측정
-  - [ ] Recall@K 및 MRR 계산
-  - [ ] 임베딩 모델 비교 (OpenAI vs Sentence-Transformers)
-- [ ] **RAG 답변 품질 평가**
-  - [ ] Answer Relevance Score (GPT-4 as Judge, 5점 척도)
-  - [ ] Semantic Similarity (답변-정답 코사인 유사도)
-  - [ ] Factual Consistency (문서 기반 사실 일치도)
-  - [ ] Hallucination Rate (환각 발생률, < 10% 목표)
-  - [ ] Response Time (평균 응답 속도, < 3초 목표)
-- [ ] **프롬프트 엔지니어링 효과**
-  - [ ] Baseline (프롬프트 없음) vs 전문가 페르소나
-  - [ ] Few-shot Learning 예시 개수별 비교 (0, 3, 5개)
-  - [ ] Chain-of-Thought 유무 비교
-- [ ] **사용자 평가 (User Study)**
-  - [ ] 사용자 만족도 설문 (5점 척도, N=20~30명)
-  - [ ] 답변 유용성, 이해도, 신뢰도 평가
-  - [ ] 기존 검색 엔진 대비 선호도
-
-**통합 시스템 평가**
-- [ ] End-to-End 성능 측정 (탐지 → 알림 → 챗봇)
-- [ ] 기존 시스템 대비 우수성 입증
-- [ ] 사용 시나리오별 효과성 분석
-
-#### 5.2 학술 논문 작성
-
-**논문 구조 (한국어/영어)**
-- [ ] **Abstract (초록)**
-  - [ ] 연구 배경 및 동기
-  - [ ] RAG 기반 접근 방식 요약
-  - [ ] 주요 결과 (정량적 지표 포함)
-- [ ] **1. Introduction (서론)**
-  - [ ] 전동킥보드 헬멧 미착용 문제
-  - [ ] 기존 탐지 시스템의 한계
-  - [ ] RAG 기반 교육 통합의 필요성
-  - [ ] 연구 목표 및 기여점
-- [ ] **2. Related Work (관련 연구)**
-  - [ ] 헬멧 탐지 시스템 (YOLO 기반)
-  - [ ] RAG 시스템 (FAISS, OpenAI)
-  - [ ] Domain-Specific QA Systems
-  - [ ] Transfer Learning in Safety Domain
-- [ ] **3. Methodology (방법론)**
-  - [ ] 3.1 System Architecture (전체 아키텍처)
-  - [ ] 3.2 Helmet Detection Module (YOLOv8n)
-  - [ ] 3.3 **RAG-based QA Module (핵심)**
-    - [ ] Document Collection & Preprocessing
-    - [ ] Vector Embedding (FAISS, OpenAI)
-    - [ ] Semantic Retrieval (L2 Distance)
-    - [ ] Context-Aware Generation (GPT-4)
-    - [ ] Prompt Engineering Strategy
-  - [ ] 3.4 Integration & Deployment (통합)
-- [ ] **4. Experiments (실험)**
-  - [ ] 4.1 Experimental Setup (실험 환경)
-  - [ ] 4.2 Helmet Detection Results (CV 결과)
-  - [ ] 4.3 **RAG System Evaluation (NLP 결과 - 핵심)**
-    - [ ] Retrieval Performance
-    - [ ] Answer Quality Metrics
-    - [ ] Prompt Engineering Effects
-    - [ ] User Study Results
-  - [ ] 4.4 Ablation Study (제거 실험)
-  - [ ] 4.5 Comparison with Baselines (베이스라인 비교)
-- [ ] **5. Discussion (논의)**
-  - [ ] 연구 결과 해석
-  - [ ] RAG 시스템의 강점 및 한계
-  - [ ] 실용적 함의 (Practical Implications)
-  - [ ] 한계점 및 개선 방향
-- [ ] **6. Conclusion (결론)**
-  - [ ] 연구 요약
-  - [ ] 주요 기여점 재강조
-  - [ ] 향후 연구 방향
-- [ ] **References (참고문헌)**
-  - [ ] YOLO, RAG, LangChain 관련 논문
-  - [ ] 헬멧 안전, 전동킥보드 관련 연구
-
-#### 5.3 최종 발표 준비
-- [ ] **발표 자료 작성 (PPT)**
-  - [ ] 연구 배경 및 동기 (3분)
-  - [ ] RAG 시스템 아키텍처 (5분)
-  - [ ] 실험 결과 (정량적 지표 중심, 7분)
-  - [ ] 데모 시연 (3분)
-  - [ ] 결론 및 질의응답 (2분)
-- [ ] **데모 영상 제작**
-  - [ ] 헬멧 탐지 실시간 데모
-  - [ ] RAG 챗봇 질의응답 예시
-  - [ ] 통합 시스템 사용 시나리오
-- [ ] **실시간 시연 준비**
-  - [ ] 모바일 웹 앱 배포 URL
-  - [ ] 백업 데모 영상 준비
-  - [ ] 예상 질문 답변 준비
-
----
-
-## 향후 과제 및 개선 계획
-
-### 🎯 핵심 개발 과제 (Phase 1-4)
-
-#### 1. RAG 시스템 구축 (최우선)
-- 헬멧 관련 법규, 안전 가이드 문서 수집 및 벡터화
-- FAISS + OpenAI API 기반 RAG 파이프라인 직접 구현
-- OpenAI API 통합 (GPT-4 Turbo / GPT-3.5 Turbo)
-
-#### 2. 모바일 웹 서비스 개발
-- Streamlit 멀티페이지 구조 설계
-- WebRTC 기반 실시간 카메라 스트리밍
-- 모바일 반응형 UI/UX 최적화
-
-#### 3. 통합 및 배포
-- Streamlit Community Cloud 배포
-- 환경 변수 및 Secrets 관리
-- 성능 최적화 (추론 속도, 메모리)
-
-### 🔬 연구 과제 (Phase 5)
-
-#### 1. 전동킥보드 환경 성능 평가
-- 실제 전동킥보드 이용자 데이터 수집
-- 다양한 조명/각도/속도에서 탐지 성능 측정
-- 기반 모델의 도메인 전이 성능 분석
-
-#### 2. RAG 챗봇 품질 평가
-- 응답 정확도, 관련성, 유용성 평가
-- 사용자 만족도 조사 (설문/인터뷰)
-- 프롬프트 엔지니어링 최적화
-
-### ⚠️ 알려진 제한사항 (기반 모델)
-
-#### DS2 스타일 이미지에서 Head 클래스 탐지 한계
-
-SafetyVisionAI 기반 모델은 **어두운 배경 이미지(DS2 스타일)에서 헬멧 미착용자(head) 탐지 성능 저하** 문제가 있습니다.
-
-#### 🔍 문제 상황
-
-테스트 이미지 3개 모두에서 **Head 클래스 탐지 실패**:
-
-| 이미지 | 실제 상황 | 모델 탐지 | 결과 |
-|--------|----------|-----------|------|
-| ds2_helmet_jacket_10142.jpg | 검은 머리 (헬멧 ❌) | Vest만 탐지 | ❌ 미탐지 |
-| ds2_helmet_jacket_03480.jpg | 측면 머리 (헬멧 ❌) | Vest만 탐지 | ❌ 미탐지 |
-| ds2_helmet_jacket_01267.jpg | 뒤쪽 머리 (헬멧 ❌) | Vest만 탐지 | ❌ 미탐지 |
-
-**신뢰도 0.01 (매우 낮음)에서도 Head 탐지 0개** → 모델이 DS2 스타일 head를 전혀 학습하지 못함
-
-#### 📊 근본 원인 분석
-
-##### 1. **데이터셋 클래스 불균형**
-
-```
-전체 학습 데이터 분포:
-├── Helmet: 25,425개 (64.5%) ✅
-├── Head: 3,679개 (9.3%) ⚠️ 너무 적음!
-└── Vest: 10,351개 (26.2%) ✅
-```
-
-- **Head 클래스가 전체의 9.3%에 불과**
-- Helmet 대비 1/7 수준 → 심각한 불균형
-
-##### 2. **DS1과 DS2 데이터 분포 차이**
-
-| 데이터셋 | Helmet | Head | Vest | 특징 |
-|---------|--------|------|------|------|
-| **DS1** (Hard Hat Detection) | 12,354 | **3,679** ✅ | 0 | 노란색/주황색 헬멧, 밝은 배경 |
-| **DS2** (Helmet & Vest) | 13,071 | **0** ❌ | 10,351 | 검은색 헬멧, 어두운 배경 |
-
-**핵심 문제:**
-- DS2 데이터셋은 원본부터 **Head 클래스가 하나도 없음**
-- DS2는 "안전한 상황"만 수집 (모두 헬멧 착용)
-- 모델이 DS2 스타일의 head를 전혀 학습하지 못함
-
-##### 3. **결과: 심각한 모델 편향**
-
-- ✅ **DS1 스타일 head** (밝은 배경, 노란색 헬멧 환경): 잘 탐지 (90% AP)
-- ❌ **DS2 스타일 head** (어두운 배경, 검은색 헬멧 환경): 완전 실패 (0% 탐지)
-
-#### 🎯 실제 영향
-
-**산업 현장에서의 위험성:**
-1. ❌ **헬멧 미착용자를 탐지하지 못함** → 안전사고 위험
-2. ❌ **DS2 스타일 현장(어두운 터널, 실내)에서 시스템 무용지물**
-3. ❌ **False Negative**: 위험한 상황을 안전하다고 잘못 판단
-
-**모델 평가 지표와의 괴리:**
-- Validation/Test Set: Head AP 90% (우수) ✅
-- 실제 DS2 이미지: Head 탐지 0% (완전 실패) ❌
-- **평가 세트에는 DS1 스타일만 포함** → 실제 성능 과대평가
-
-#### 💡 해결 방안
-
-##### 즉시 조치 (단기)
-
-1. **DS2 이미지에 Head 레이블 추가** (최우선)
-   - DS2 데이터에서 헬멧 미착용 케이스 찾아 수동 레이블링
-   - 또는 외부 데이터셋 추가 확보
-   - 목표: Head 클래스 비율 20% 이상으로 증가
-
-2. **클래스 가중치(Class Weights) 조정**
-   ```python
-   # train.py 수정
-   class_weights = [1.0, 3.0, 1.0]  # [helmet, head, vest]
-   # Head 클래스에 3배 가중치 부여
-   ```
-
-3. **Head 클래스 데이터 증강(Augmentation) 강화**
-   - 밝기 조절 (어두운 환경 시뮬레이션)
-   - 배경 변화 (터널, 실내 등)
-   - 색상 변환 (검은 머리 → 다양한 색상)
-   - 목표: Head 데이터 3배 증강 (3,679 → 11,000개)
-
-4. **두 단계 학습(Two-Stage Training)**
-   - Stage 1: Helmet-Vest 학습 (DS2 활용)
-   - Stage 2: Head 추가 학습 (DS1 + 증강 데이터)
-
-##### 근본 해결 (장기)
-
-5. **추가 데이터 수집**
-   - DS2 스타일(어두운 배경, 검은색)의 헬멧 미착용 이미지 확보
-   - 다양한 조명 환경의 Head 클래스 데이터 추가
-   - 목표: Head 클래스 최소 10,000개 이상
-
-6. **2-Stage 탐지 모델 고려**
-   - Stage 1: Person Detection (사람 먼저 찾기)
-   - Stage 2: Helmet Classification (헬멧 착용 여부 분류)
-   - 각 stage를 별도로 최적화
-
-7. **하드 네거티브 마이닝(Hard Negative Mining)**
-   - 현재 탐지 실패한 DS2 이미지들을 훈련 데이터에 추가
-   - 모델이 어려워하는 케이스 집중 학습
-
-#### 📈 개선 목표
-
-| 항목 | 현재 | 목표 |
-|------|------|------|
-| Head 클래스 비율 | 9.3% | **≥ 20%** |
-| DS2 스타일 Head 데이터 | 0개 | **≥ 5,000개** |
-| DS2 이미지 Head 탐지율 | 0% | **≥ 80%** |
-| 전체 Head AP | 90% | **≥ 92%** (모든 스타일) |
-
-#### 🔄 다음 단계
-
-1. **긴급**: DS2 이미지에서 헬멧 미착용 케이스 확보 및 레이블링
-2. **우선**: 클래스 가중치 적용 및 재학습
-3. **중요**: 데이터 증강 전략 수립 및 적용
-4. **검증**: DS2 스타일 테스트 세트로 재평가
-
-**이 문제는 실제 산업 현장 적용 시 심각한 안전 위험으로 이어질 수 있으므로 최우선 해결 과제입니다.**
-
----
-
-## 설정 파일
-
-### ppe_dataset.yaml
-YOLO 모델이 데이터를 찾기 위한 **필수** 설정 파일
-
-```yaml
-path: /path/to/project/images   # 절대 경로 (자동 생성)
-train: train/images
-val: val/images
-test: test/images
-
-nc: 3
-names:
-  0: helmet
-  1: head
-  2: vest
-```
-
-**주의:** 이 파일의 `path`는 `.env`의 `PROJECT_ROOT`를 기반으로 자동 생성됩니다.
-
-### train_config.yaml
-훈련 하이퍼파라미터 관리 파일
-
-| 파라미터 | 기본값 | 설명 |
-|----------|--------|------|
-| **nc** | **3** | **클래스 수 (helmet, head, vest)** |
-| epochs | 100 | 학습 반복 횟수 |
-| batch_size | 128 | 배치 크기 (A100: 128, MacBook: 16) |
-| lr0 | 0.01 | 초기 학습률 |
-| img_size | 640 | 입력 이미지 크기 |
-
----
-
-## 향후 과제
-
-### 완료된 개선사항
-- ✅ **헬멧 미착용 탐지**: head 클래스 추가로 헬멧 미착용 상태 감지 가능
-- ✅ **데이터 재구성**: 3 class (helmet, head, vest) 데이터셋 구축 완료
-- ✅ **3 Class 모델 성능 검증 완료**
-   - A100 GPU 100 epochs 본 훈련 완료
-   - 목표 성능 달성: **mAP@0.5 = 93.7%** (목표 90% 초과)
-   - Helmet-Head 혼동률 0.45%로 거의 완벽한 구분
-   - 상세 분석 보고서 작성 완료 (training_report.md)
-- ✅ **통합 추론 시스템 구현 완료**
-   - helmet, head, vest 3개 클래스 동시 탐지
-   - 단일 이미지 / 디렉토리 처리 지원
-   - 헬멧 착용률 자동 계산 및 안전 수준 평가
-   - 시각화 결과 (PNG) 및 JSON 저장
-   - 명령줄 인터페이스 (CLI) 지원
-- ✅ **웹 인터페이스 구축 완료** (Phase 7)
-   - Streamlit 기반 대시보드 개발 완료
-   - 이미지 업로드 및 실시간 탐지 결과 표시
-   - 바운딩 박스 시각화 및 원본/결과 비교 뷰
-   - 헬멧 착용률 및 안전 수준 평가 자동화
-   - 신뢰도/IoU 임계값 설정 UI
-- ✅ **Streamlit Community Cloud 배포 완료** (2025-11-23)
-   - GitHub 연동 자동 배포
-   - YOLOv8 모델 포함 (best.pt, 6.0MB)
-   - 무료 호스팅 (Streamlit Community Cloud)
-   - 실시간 웹 데모: https://safetyvisionai.streamlit.app
-   - 배포 가이드 문서 (DEPLOYMENT_GUIDE.md)
-- ✅ **Telegram Bot 실시간 알림 시스템 구축 완료** (2025-11-23) 📱
-   - 헬멧 미착용자 2명 이상 또는 착용률 80% 미만 시 자동 알림
-   - Telegram 그룹 채팅 지원 (팀원 모두 알림 수신)
-   - 탐지 결과 이미지 포함 전송
-   - 안전 수준별 메시지 포맷 (Excellent/Caution/Dangerous)
-   - 환경 변수 기반 설정 (.env 파일)
-   - Streamlit Cloud Secrets 지원
-   - 알림 모듈 (`src/alert/telegram_notifier.py`) 구현
-
-### 남은 과제
-
-다음 과제들은 **Phase 8 이후**에서 개발 예정입니다:
-
-1. **실시간 추론 및 성능 개선** (Phase 8)
-   - 웹캠 실시간 추론 (프레임 단위 객체 탐지)
-   - 배치 추론 최적화 (GPU 병렬 처리로 속도 50% 이상 향상)
-   - 실시간 안전 경고 알림 시스템
-
-2. **안전조끼 미착용 탐지** (향후 연구)
-   - 현재: vest 착용만 탐지
-   - 개선: person 클래스 추가하여 vest 미착용자 식별
-   - 구현: person 탐지 후 vest가 없으면 경고
-
-3. **웹 인터페이스 고도화** (선택사항)
-   - 결과 다운로드 (ZIP, PDF 리포트)
-   - 세션 히스토리 관리
-   - 여러 모델 비교 모드
-
----
-
-## 개발 일정
-
-| 단계 | 기간 | 주요 목표 | 핵심 Deliverable | 상태 |
-|------|------|----------|------------------|------|
-| **Phase 1** | Week 1 (11/28~) | 프로젝트 초기화, 구조 재구성 | README, 디렉토리 구조 | 🚀 진행 중 |
-| **Phase 2** | Week 2-3 | **RAG 시스템 구축 (NLP 핵심)** | **벡터 DB, QA 파이프라인** | 📅 예정 |
-|  | Week 2 | 문서 수집 및 전처리 | 안전 문서 데이터셋 (법규, 가이드, 사례) |  |
-|  | Week 2-3 | FAISS 벡터화 | 임베딩 모델, 검색 성능 벤치마크 |  |
-|  | Week 3 | RAG 파이프라인 구현 | Retriever + Generator + Prompt (직접 구현) |  |
-|  | Week 3 | **RAG 평가 실험** | **Precision@K, Relevance, Hallucination** |  |
-| **Phase 3** | Week 4 | 모바일 웹 서비스 개발 | Streamlit 멀티페이지 앱 | 📅 예정 |
-|  |  | WebRTC 통합 | 실시간 카메라 스트리밍 |  |
-|  |  | RAG 챗봇 UI | 질의응답 인터페이스 |  |
-| **Phase 4** | Week 5 | 통합 테스트 및 배포 | Streamlit Cloud 배포 URL | 📅 예정 |
-|  |  | End-to-End 테스트 | 탐지 → 알림 → 챗봇 통합 |  |
-| **Phase 5** | Week 6-7 | **실험, 논문 작성, 발표** | **학술 논문, 발표 자료** | 📅 예정 |
-|  | Week 6 | **RAG 성능 평가 실험** | **NLP 정량적 지표 측정** |  |
-|  | Week 6-7 | 논문 작성 | 서론, 방법론, 실험, 결론 |  |
-|  | Week 7 | 발표 준비 | PPT, 데모 영상, 시연 |  |
+## 📅 개발 현황
+
+**현재 Phase**: Phase 2 완료 ✅
+
+자세한 개발 진행 현황, 일정, 향후 과제는 **[PROGRESS.md](PROGRESS.md)**를 참고하세요.
+
+### 최근 완료 사항
+- ✅ **Phase 0**: YOLOv8n 기반 모델 훈련 (mAP@0.5: 93.7%)
+- ✅ **Phase 1**: 프로젝트 초기 설정 및 구조 재구성
+- ✅ **Phase 2**: RAG 시스템 구축 완료
+  - 35개 안전 교육 문서 (법규 10, 가이드 12, 사례 13)
+  - FAISS 벡터 저장소 + OpenAI 임베딩 (1536차원)
+  - RAG 파이프라인: Retrieval → Augmentation → Generation
+  - 평가 시스템: Precision@K, Hallucination Check
+
+### 다음 단계
+- 📅 **Phase 3**: 모바일 웹 서비스 개발 (Streamlit + WebRTC)
+- 📅 **Phase 4**: 통합 테스트 및 Streamlit Cloud 배포
+- 📅 **Phase 5**: NLP 연구 실험 및 논문 작성
 
 ---
 
