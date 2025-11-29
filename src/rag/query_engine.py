@@ -6,10 +6,16 @@ FAISS 검색 결과를 컨텍스트로 사용하여 OpenAI LLM이 답변 생성
 """
 
 import os
+import sys
+from pathlib import Path
 from typing import List, Dict, Optional
 from openai import OpenAI
 
-from .vector_store import FAISSVectorStore
+# 프로젝트 루트를 Python 경로에 추가
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.rag.vector_store import FAISSVectorStore
 
 
 class RAGQueryEngine:

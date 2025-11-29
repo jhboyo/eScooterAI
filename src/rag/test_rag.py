@@ -9,12 +9,18 @@ RAG 시스템 성능 평가 및 테스트
 """
 
 import os
+import sys
 import time
+from pathlib import Path
 from typing import List, Dict, Tuple
 from dotenv import load_dotenv
 
-from .vector_store import FAISSVectorStore
-from .query_engine import RAGQueryEngine
+# 프로젝트 루트를 Python 경로에 추가
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.rag.vector_store import FAISSVectorStore
+from src.rag.query_engine import RAGQueryEngine
 
 
 class RAGTester:

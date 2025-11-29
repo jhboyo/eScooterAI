@@ -6,12 +6,17 @@ Vector Database Builder
 """
 
 import os
+import sys
 import json
 from pathlib import Path
 from typing import List, Dict
 from dotenv import load_dotenv
 
-from .vector_store import FAISSVectorStore
+# 프로젝트 루트를 Python 경로에 추가
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+from src.rag.vector_store import FAISSVectorStore
 
 
 def load_documents_from_json(json_path: str) -> List[Dict[str, any]]:
