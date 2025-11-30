@@ -9,8 +9,11 @@
 ## 🚀 프로젝트 데모
 
 [![Streamlit Cloud](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://escooter-helmet-detection.streamlit.app)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/jhboyo/eScooterAI)
 
-**👉 실시간 웹캠 데모 + RAG 챗봇** (예정)
+**👉 [실시간 웹 데모 + RAG 챗봇 체험하기](https://escooter-helmet-detection.streamlit.app)** ✅
+
+> 🎉 **모바일 웹 서비스 배포 완료!** 브라우저에서 바로 헬멧 탐지 및 RAG 챗봇을 사용할 수 있습니다.
 
 ### 🎯 주요 기능
 
@@ -348,7 +351,18 @@
 
 ## 빠른 시작
 
-### 1. 환경 설정
+### 🌐 온라인 데모 (가장 빠름)
+
+**바로 사용하기**: [https://escooter-helmet-detection.streamlit.app](https://escooter-helmet-detection.streamlit.app)
+
+- ✅ 설치 불필요
+- ✅ 모바일/데스크톱 브라우저에서 즉시 실행
+- ✅ RAG 챗봇 바로 체험 가능
+- ⚠️ 헬멧 탐지 기능은 로컬 실행 권장 (WebRTC 권한 필요)
+
+### 🖥️ 로컬 실행
+
+#### 1. 환경 설정
 ```bash
 # 저장소 클론
 git clone https://github.com/jhboyo/eScooterAI.git
@@ -361,26 +375,45 @@ uv sync
 cp .env.example .env
 ```
 
-### 2. 환경 변수 설정
+#### 2. 환경 변수 설정
 `.env` 파일을 편집하여 다음 항목들을 설정하세요:
 
 ```bash
 # 프로젝트 경로
 PROJECT_ROOT=/path/to/eScooterAI
 
+# OpenAI API (RAG 챗봇용, 필수)
+OPENAI_API_KEY=your_openai_api_key_here
+
 # Telegram Bot (선택사항)
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 TELEGRAM_CHAT_ID=your_chat_id_here
 TELEGRAM_ALERTS_ENABLED=true
-
-# OpenAI API (RAG 챗봇용)
-OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-### 3. 모델 파일 확인
-사전 훈련된 모델이 다음 경로에 있는지 확인:
+#### 3. 모바일 웹 앱 실행
 ```bash
-models/ppe_detection/weights/best.pt  # 6.0MB
+# Streamlit 앱 실행
+uv run streamlit run src/mobile_app/home.py
+
+# 브라우저에서 자동으로 열림 (http://localhost:8501)
+```
+
+#### 4. 기타 유틸리티
+
+**RAG 챗봇 테스트 (CLI)**:
+```bash
+uv run python src/rag/test_rag.py
+```
+
+**Telegram 알림 테스트**:
+```bash
+uv run python test_telegram.py
+```
+
+**CLI 이미지 추론**:
+```bash
+uv run python src/inference/inference.py --input test_image.jpg
 ```
 
 ---
@@ -413,31 +446,23 @@ eScooterAI/
 │   └── ppe_detection/     # 훈련 모델
 │       └── weights/       # best.pt (6.0MB)
 ├── src/                    # 소스 코드
-│   ├── mobile_app/        # 모바일 웹 서비스 (메인)
-│   │   ├── app.py         # Streamlit 메인 앱
-│   │   ├── pages/         # 멀티페이지
-│   │   │   ├── 1_helmet_detection.py  # 헬멧 탐지 페이지
-│   │   │   └── 2_safety_chatbot.py    # RAG 챗봇 페이지
-│   │   ├── components/    # UI 컴포넌트
-│   │   │   ├── camera.py      # WebRTC 카메라
-│   │   │   ├── detector.py    # 헬멧 탐지
-│   │   │   └── chatbot.py     # RAG 챗봇 UI
-│   │   └── utils/         # 유틸리티
-│   │       ├── inference.py   # YOLO 추론
-│   │       └── alert.py       # Telegram 알림
-│   ├── rag/               # RAG 시스템 (NEW!)
+│   ├── mobile_app/        # 모바일 웹 서비스 (메인) ✅
+│   │   ├── home.py        # Streamlit 메인 앱 (홈)
+│   │   └── pages/         # 멀티페이지
+│   │       ├── helmet_detection.py  # 헬멧 탐지 페이지
+│   │       └── safety_chatbot.py    # RAG 챗봇 페이지
+│   ├── rag/               # RAG 시스템 ✅
 │   │   ├── __init__.py
 │   │   ├── vector_store.py    # FAISS 벡터 저장소
-│   │   ├── embeddings.py      # 문서 임베딩
-│   │   ├── retriever.py       # 문서 검색
-│   │   ├── generator.py       # LLM 답변 생성
-│   │   └── pipeline.py        # RAG 파이프라인
-│   ├── data/              # RAG 데이터 (NEW!)
-│   │   └── safety_docs/   # 헬멧 안전 관련 문서
-│   │       ├── laws/          # 법규 (도로교통법 등)
-│   │       ├── guides/        # 착용법, 선택 가이드
-│   │       └── cases/         # 사고 사례
-│   ├── alert/             # 알림 모듈
+│   │   ├── query_engine.py    # RAG 쿼리 엔진
+│   │   ├── build_vector_db.py # 벡터 DB 구축 스크립트
+│   │   └── test_rag.py        # RAG 테스트
+│   ├── data/              # RAG 데이터 ✅
+│   │   └── safety_docs/   # 헬멧 안전 관련 문서 (35개)
+│   │       ├── laws/          # 법규 (도로교통법 등) - 10개
+│   │       ├── guides/        # 착용법, 선택 가이드 - 12개
+│   │       └── cases/         # 사고 사례 - 13개
+│   ├── alert/             # 알림 모듈 ✅
 │   │   ├── __init__.py
 │   │   └── telegram_notifier.py  # Telegram Bot
 │   ├── inference/         # 기존 CLI 추론 (유지)
@@ -445,7 +470,10 @@ eScooterAI/
 ├── output/                 # 출력 결과
 │   ├── detections/        # 탐지 결과 저장
 │   └── screenshots/       # 스크린샷
-├── vector_db/              # FAISS 저장소 (NEW!)
+├── vector_db/              # FAISS 저장소 ✅
+│   ├── index.faiss        # FAISS 인덱스 (204KB, L2 거리 기반)
+│   └── documents.json     # 문서 메타데이터 (14KB, 35개 문서)
+├── test_telegram.py        # Telegram 알림 테스트 스크립트
 ├── materials/              # 참고 자료
 ├── .streamlit/             # Streamlit 설정
 │   ├── config.toml        # 테마 및 서버 설정
@@ -459,23 +487,36 @@ eScooterAI/
 
 ## 📅 개발 현황
 
-**현재 Phase**: Phase 2 완료 ✅
+**현재 Phase**: Phase 4 완료 ✅ (Streamlit Cloud 배포 완료)
 
 자세한 개발 진행 현황, 일정, 향후 과제는 **[PROGRESS.md](PROGRESS.md)**를 참고하세요.
 
-### 최근 완료 사항
+### 완료 사항
 - ✅ **Phase 0**: YOLOv8n 기반 모델 훈련 (mAP@0.5: 93.7%)
 - ✅ **Phase 1**: 프로젝트 초기 설정 및 구조 재구성
 - ✅ **Phase 2**: RAG 시스템 구축 완료
   - 35개 안전 교육 문서 (법규 10, 가이드 12, 사례 13)
   - FAISS 벡터 저장소 + OpenAI 임베딩 (1536차원)
   - RAG 파이프라인: Retrieval → Augmentation → Generation
-  - 평가 시스템: Precision@K, Hallucination Check
+  - 평가 시스템: Precision@K, Hallucination Check, Top-K=5로 성능 개선
+- ✅ **Phase 3**: 모바일 웹 서비스 개발 완료
+  - Streamlit 기반 모바일 웹 앱 (3개 페이지)
+  - 홈페이지: 프로젝트 소개 및 기능 안내
+  - 헬멧 탐지 페이지: WebRTC 실시간 카메라 탐지
+  - 안전 챗봇 페이지: RAG 기반 질의응답 시스템
+  - Mobile-First 디자인 (반응형 UI)
+- ✅ **Phase 4**: 통합 테스트 및 Streamlit Cloud 배포
+  - Telegram Bot 알림 시스템 통합
+  - Vector DB 배포 (documents.json + index.faiss)
+  - Streamlit Community Cloud 배포 완료
+  - 실시간 웹 데모 서비스 운영 중
 
 ### 다음 단계
-- 📅 **Phase 3**: 모바일 웹 서비스 개발 (Streamlit + WebRTC)
-- 📅 **Phase 4**: 통합 테스트 및 Streamlit Cloud 배포
 - 📅 **Phase 5**: NLP 연구 실험 및 논문 작성
+  - RAG 성능 평가 (Retrieval Precision, Answer Relevance)
+  - 사용자 만족도 조사
+  - Transfer Learning 효과 분석
+  - 학술 논문 작성 및 투고
 
 ---
 
