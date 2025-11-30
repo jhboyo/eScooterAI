@@ -431,7 +431,40 @@ uv run python src/inference/inference.py --input test_image.jpg
 | **RAG** | FAISS (Meta AI), OpenAI API |
 | **벡터 임베딩** | OpenAI Embeddings / Sentence-Transformers |
 | **알림** | Telegram Bot API |
-| **배포** | Streamlit Community Cloud (예정) |
+| **배포** | Streamlit Community Cloud ✅ |
+
+---
+
+## 🚀 배포 정보
+
+### Streamlit Community Cloud 배포
+
+**배포 URL**: [https://escooter-helmet-detection.streamlit.app](https://escooter-helmet-detection.streamlit.app)
+
+#### 배포 구성
+- **플랫폼**: Streamlit Community Cloud (무료 티어)
+- **Python**: 3.11
+- **메인 파일**: `src/mobile_app/home.py`
+- **필수 파일**:
+  - `requirements.txt` - Python 패키지 의존성
+  - `vector_db/` - FAISS 벡터 DB (documents.json + index.faiss)
+  - `models/ppe_detection/weights/best.pt` - YOLOv8n 모델 (6.0MB)
+  - `.streamlit/config.toml` - Streamlit 설정
+
+#### 환경 변수 설정 (Streamlit Secrets)
+```toml
+# .streamlit/secrets.toml (배포 환경)
+OPENAI_API_KEY = "your_openai_api_key"
+TELEGRAM_BOT_TOKEN = "your_telegram_bot_token"  # 선택사항
+TELEGRAM_CHAT_ID = "your_telegram_chat_id"      # 선택사항
+TELEGRAM_ALERTS_ENABLED = "true"                # 선택사항
+```
+
+#### 배포 특징
+- ✅ **자동 배포**: GitHub master 브랜치 푸시 시 자동 재배포
+- ✅ **RAG 챗봇**: FAISS 벡터 DB 포함하여 즉시 사용 가능
+- ✅ **모바일 최적화**: 반응형 UI 디자인
+- ⚠️ **WebRTC 제한**: 브라우저 권한 필요 (HTTPS 환경에서 동작)
 
 ---
 
