@@ -1,9 +1,9 @@
 """
 Telegram Bot 알림 모듈
-건설 현장 안전 경고를 Telegram으로 전송
+전동킥보드 헬멧 착용 안전 경고를 Telegram으로 전송
 
-Author: Safety Vision AI Team
-Date: 2025-11-23
+Author: eScooter Safety AI Team
+Date: 2025-11-30
 """
 import os
 import requests
@@ -36,17 +36,17 @@ class TelegramNotifier:
         total_workers: int,
         helmet_rate: float,
         image: Optional[Image.Image] = None,
-        location: str = "건설 현장"
+        location: str = "전동킥보드 구역"
     ) -> bool:
         """
-        안전 경고 알림 전송
+        헬멧 착용 안전 경고 알림 전송
 
         Args:
             head_count: 헬멧 미착용자 수
-            total_workers: 전체 작업자 수
+            total_workers: 전체 탐지 인원 수
             helmet_rate: 헬멧 착용률 (%)
             image: 탐지 결과 이미지 (PIL Image)
-            location: 현장 위치
+            location: 탐지 위치
 
         Returns:
             bool: 전송 성공 여부
@@ -58,28 +58,28 @@ class TelegramNotifier:
         # 안전 수준 판정 (착용률 기준)
         if helmet_rate >= 90:
             # 90% 이상: 우수한 안전 수준
-            level = "✅ Excellent"
+            level = "✅ 안전"
             emoji = "✅"
             urgency = ""
         elif helmet_rate >= 70:
             # 70~90%: 주의 필요
-            level = "⚠️ Caution"
+            level = "⚠️ 주의"
             emoji = "⚠️"
-            urgency = "⚠️ 현장 확인이 필요합니다."
+            urgency = "⚠️ 라이더 안전 주의가 필요합니다."
         else:
             # 70% 미만: 위험 수준
-            level = "🚨 Dangerous"
+            level = "🚨 위험"
             emoji = "🚨"
-            urgency = "🚨 즉시 확인 필요!"
+            urgency = "🚨 헬멧 미착용 라이더 발견! 즉시 조치 필요!"
 
         # 메시지 작성
-        message = f"""{emoji} *Safety Vision AI 경고*
+        message = f"""{emoji} *eScooter Safety AI - 헬멧 착용 알림*
 
-📅 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-🏗️ 현장: {location}
+📅 탐지 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+📍 위치: {location}
 
-⚠️ *헬멧 미착용: {head_count}명*
-👷 전체 작업자: {total_workers}명
+🚨 *헬멧 미착용: {head_count}명*
+🛴 전체 라이더: {total_workers}명
 📊 착용률: {helmet_rate:.1f}%
 🛡️ 안전 수준: {level}
 
@@ -146,7 +146,7 @@ class TelegramNotifier:
             url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
             data = {
                 "chat_id": self.chat_id,  # 채팅방 ID
-                "text": "✅ Safety Vision AI Bot 연결 테스트 성공!"  # 테스트 메시지
+                "text": "✅ eScooter Safety AI Bot 연결 테스트 성공!\n🛴 전동킥보드 헬멧 착용 모니터링 시스템이 준비되었습니다."  # 테스트 메시지
             }
             response = requests.post(url, data=data, timeout=10)
             # HTTP 200 상태 코드면 성공

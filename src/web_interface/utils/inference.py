@@ -79,28 +79,8 @@ def load_model(model_path: str) -> Optional[YOLO]:
                 with st.expander("🔍 파일 헤더"):
                     st.code(f"First 50 bytes: {first_bytes[:50]}")
 
-        # 모델 로드 (스피너 표시)
-        with st.spinner(f"🔄 YOLOv8 모델 로딩 중... ({model_file.name})"):
-            model = YOLO(str(model_file))
-
-        st.success(f"✅ 모델 로드 완료: {model_file.name}")
-
-        # 모델 정보 출력 (디버그용)
-        class_list = ', '.join([f"{k}: {v}" for k, v in model.names.items()])
-        st.sidebar.info(f"""
-        **모델 정보**
-        - 파일: {model_file.name}
-        - 클래스 수: {len(model.names)}개
-        - 클래스 목록: {class_list}
-        - 장치: {'GPU (CUDA)' if model.device.type == 'cuda' else 'CPU'}
-        """)
-
-        # 클래스 확인용 경고 메시지
-        expected_classes = {'helmet', 'head', 'vest'}
-        actual_classes = set(model.names.values())
-        if not expected_classes.issubset(actual_classes):
-            missing = expected_classes - actual_classes
-            st.sidebar.warning(f"⚠️ 예상 클래스 누락: {missing}")
+        # 모델 로드 (완전히 조용히 실행)
+        model = YOLO(str(model_file))
 
         return model
 
