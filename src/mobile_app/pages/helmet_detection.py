@@ -5,6 +5,9 @@ Helmet Detection Page - Mobile First Design
 실시간 웹캠 스트리밍 기반 헬멧 착용 상태 탐지 + Telegram 알림
 """
 
+# Streamlit 사이드바 메뉴 이름
+title = "📸 헬멧 탐지"
+
 import streamlit as st
 from pathlib import Path
 import sys
@@ -61,6 +64,13 @@ st.markdown("""
     /* Toolbar 배경도 파란색 */
     [data-testid="stToolbar"] {
         background: #3B82F6;
+    }
+
+    /* Deploy 버튼 숨김 */
+    [data-testid="stToolbar"] button[kind="header"],
+    [data-testid="stToolbar"] > div > button,
+    button[data-testid="baseButton-header"] {
+        display: none !important;
     }
 
     /* 전체 배경 */
@@ -261,6 +271,82 @@ st.markdown("""
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         margin-bottom: 1rem;
         text-align: center;
+    }
+
+    /* Streamlit columns 모바일에서도 2열 유지 - 우선순위 강화 */
+    div.row-widget.stHorizontalBlock,
+    .row-widget.stHorizontalBlock,
+    [data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 1rem !important;
+        flex-wrap: nowrap !important;
+    }
+
+    div[data-testid="column"],
+    [data-testid="column"],
+    .stHorizontalBlock [data-testid="column"] {
+        width: calc(50% - 0.5rem) !important;
+        flex: 1 1 calc(50% - 0.5rem) !important;
+        min-width: calc(50% - 0.5rem) !important;
+        max-width: calc(50% - 0.5rem) !important;
+    }
+
+    .stHorizontalBlock > div,
+    div.stHorizontalBlock > div {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    /* 모바일에서도 2열 강제 유지 */
+    @media (max-width: 768px) {
+        div[data-testid="column"],
+        [data-testid="column"] {
+            width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+            max-width: calc(50% - 0.5rem) !important;
+        }
+
+        div.row-widget.stHorizontalBlock,
+        .row-widget.stHorizontalBlock {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+        div[data-testid="column"],
+        [data-testid="column"] {
+            width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+            max-width: calc(50% - 0.5rem) !important;
+        }
+    }
+
+    /* 안전 통계 카드 - 컴팩트 */
+    .stat-card {
+        background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        margin-bottom: 0.8rem;
+    }
+
+    .stat-title {
+        color: #1E293B;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .stat-item {
+        color: #3B82F6;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 0.3rem 0;
+        text-align: center;
+        line-height: 1.4;
     }
 
 </style>
@@ -530,25 +616,23 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 웹캠 스트리머 (중앙 정렬 컨테이너)
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    ctx = webrtc_streamer(
-        key="mobile-helmet-detection",
-        mode=WebRtcMode.SENDRECV,
-        rtc_configuration=rtc_configuration,
-        video_processor_factory=factory,
-        media_stream_constraints={
-            "video": {
-                "width": {"ideal": 1280},
-                "height": {"ideal": 720},
-                "facingMode": "environment"  # 모바일 후면 카메라
-            },
-            "audio": False
+# 웹캠 스트리머 (전체 너비 사용)
+ctx = webrtc_streamer(
+    key="mobile-helmet-detection",
+    mode=WebRtcMode.SENDRECV,
+    rtc_configuration=rtc_configuration,
+    video_processor_factory=factory,
+    media_stream_constraints={
+        "video": {
+            "width": {"ideal": 1280},
+            "height": {"ideal": 720},
+            "facingMode": "environment"  # 모바일 후면 카메라
         },
-        async_processing=True,
-        sendback_audio=False,
-    )
+        "audio": False
+    },
+    async_processing=True,
+    sendback_audio=False,
+)
 
 # 실시간 통계
 st.markdown("---")
@@ -589,13 +673,49 @@ if ctx.state.playing:
         time.sleep(0.5)
 
 # ============================================================================
-# 탐지 클래스 설명
+# 탐지 클래스 설명 - 범례 형태
 # ============================================================================
 
-with st.expander("ℹ️ 탐지 정보"):
-    st.markdown("""
-    **🔵 Helmet** - 헬멧 착용 (안전)
-
-    **🔴 Head** - 헬멧 미착용 (위험, 알림)
-    """)
-
+st.markdown("""
+<div style="
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    margin-bottom: 1rem;
+">
+    <div style="
+        color: #64748B;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        text-align: center;
+    ">탐지 Boundary 색상 안내</div>
+    <div style="
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    ">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="
+                width: 20px;
+                height: 20px;
+                background: #3B82F6;
+                border-radius: 4px;
+            "></div>
+            <span style="color: #1E293B; font-size: 0.85rem; font-weight: 500;">Helmet (안전)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="
+                width: 20px;
+                height: 20px;
+                background: #EF4444;
+                border-radius: 4px;
+            "></div>
+            <span style="color: #1E293B; font-size: 0.85rem; font-weight: 500;">Head (위험)</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)

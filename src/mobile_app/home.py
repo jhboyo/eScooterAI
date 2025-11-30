@@ -41,6 +41,13 @@ st.markdown("""
         background: #3B82F6;
     }
 
+    /* Deploy 버튼 숨김 */
+    [data-testid="stToolbar"] button[kind="header"],
+    [data-testid="stToolbar"] > div > button,
+    button[data-testid="baseButton-header"] {
+        display: none !important;
+    }
+
     /* 메인 컨테이너 배경 */
     .main {
         background: #F8FAFC;
@@ -108,29 +115,53 @@ st.markdown("""
         line-height: 1.5;
     }
 
-    /* Streamlit columns 모바일에서도 2열 유지 */
-    .row-widget.stHorizontalBlock {
+    /* Streamlit columns 모바일에서도 2열 유지 - 우선순위 강화 */
+    div.row-widget.stHorizontalBlock,
+    .row-widget.stHorizontalBlock,
+    [data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         gap: 1rem !important;
+        flex-wrap: nowrap !important;
     }
 
-    [data-testid="column"] {
+    div[data-testid="column"],
+    [data-testid="column"],
+    .stHorizontalBlock [data-testid="column"] {
         width: calc(50% - 0.5rem) !important;
         flex: 1 1 calc(50% - 0.5rem) !important;
         min-width: calc(50% - 0.5rem) !important;
+        max-width: calc(50% - 0.5rem) !important;
     }
 
-    .stHorizontalBlock > div {
+    .stHorizontalBlock > div,
+    div.stHorizontalBlock > div {
         flex: 1 !important;
         min-width: 0 !important;
     }
 
-    /* 모바일 미디어 쿼리 */
+    /* 모바일에서도 2열 강제 유지 */
     @media (max-width: 768px) {
+        div[data-testid="column"],
         [data-testid="column"] {
             width: calc(50% - 0.5rem) !important;
             flex: 1 1 calc(50% - 0.5rem) !important;
+            max-width: calc(50% - 0.5rem) !important;
+        }
+
+        div.row-widget.stHorizontalBlock,
+        .row-widget.stHorizontalBlock {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+        }
+    }
+
+    @media (max-width: 640px) {
+        div[data-testid="column"],
+        [data-testid="column"] {
+            width: calc(50% - 0.5rem) !important;
+            flex: 1 1 calc(50% - 0.5rem) !important;
+            max-width: calc(50% - 0.5rem) !important;
         }
     }
 
@@ -330,7 +361,7 @@ with col1:
     """, unsafe_allow_html=True)
 
     if st.button("시작하기", key="btn_detection", use_container_width=True):
-        st.switch_page("pages/1_helmet_detection.py")
+        st.switch_page("pages/helmet_detection.py")
 
 # 안전 챗봇
 with col2:
@@ -342,7 +373,7 @@ with col2:
     """, unsafe_allow_html=True)
 
     if st.button("질문하기", key="btn_chatbot", use_container_width=True):
-        st.switch_page("pages/2_safety_chatbot.py")
+        st.switch_page("pages/safety_chatbot.py")
 
 # ============================================================================
 # 사용 가이드
@@ -356,16 +387,54 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================================================
-# 안전 통계
+# 안전 통계 & 법적 주의사항 (2열)
 # ============================================================================
 
-st.markdown("""
-<div class="stat-card">
-    <div class="stat-title">🛡️ 알고 계셨나요?</div>
-    <div class="stat-item">헬멧 착용 시 머리 부상 85% ↓</div>
-    <div class="stat-item">킥보드 사고의 60%가 머리 부상</div>
-</div>
-""", unsafe_allow_html=True)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("""
+    <div class="stat-card">
+        <div class="stat-title">🛡️ 알고 계셨나요?</div>
+        <div class="stat-item">헬멧 착용 시 머리 부상 85% ↓</div>
+        <div class="stat-item">킥보드 사고의 60%가 머리 부상</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        margin-bottom: 0.8rem;
+    ">
+        <div style="
+            color: #991B1B;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        ">⚠️ 법적 의무</div>
+        <div style="
+            color: #DC2626;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.3rem 0;
+            text-align: center;
+            line-height: 1.4;
+        ">안전모 착용 필수</div>
+        <div style="
+            color: #DC2626;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.3rem 0;
+            text-align: center;
+            line-height: 1.4;
+        ">미착용 시 과태료 2만원</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ============================================================================
 # Footer

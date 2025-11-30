@@ -5,15 +5,22 @@ Safety Chatbot Page - Mobile First Design
 RAG 기반 헬멧 안전 질의응답 시스템
 """
 
+# Streamlit 사이드바 메뉴 이름
+title = "💬 안전 챗봇"
+
 import streamlit as st
 import os
 import sys
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
 
 # 프로젝트 루트를 Python 경로에 추가
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
+
+# .env 파일 로드
+load_dotenv(project_root / ".env")
 
 from src.rag.vector_store import FAISSVectorStore
 from src.rag.query_engine import RAGQueryEngine
@@ -35,7 +42,33 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* 전체 배경 */
+    /* Streamlit 최상단 헤더 영역 - 파란색 */
+    [data-testid="stHeader"] {
+        background: #3B82F6;
+    }
+
+    header[data-testid="stHeader"] {
+        background: #3B82F6;
+    }
+
+    /* 헤더 하단 구분선 제거 */
+    [data-testid="stHeader"]::after {
+        display: none;
+    }
+
+    /* Toolbar 배경도 파란색 */
+    [data-testid="stToolbar"] {
+        background: #3B82F6;
+    }
+
+    /* Deploy 버튼 숨김 */
+    [data-testid="stToolbar"] button[kind="header"],
+    [data-testid="stToolbar"] > div > button,
+    button[data-testid="baseButton-header"] {
+        display: none !important;
+    }
+
+    /* 메인 컨테이너 배경 */
     .main {
         background: #F8FAFC;
     }
@@ -44,32 +77,57 @@ st.markdown("""
         padding-top: 0rem;
     }
 
-    /* 헤더 - 밝은 파란색 */
-    .header-container {
-        background: #3B82F6;
-        padding: 2rem 1.5rem;
-        border-radius: 0 0 25px 25px;
-        margin: -1rem -1rem 1.5rem -1rem;
-        text-align: center;
+    /* 상단 여백 조정 */
+    .block-container {
+        padding-top: 1rem;
     }
 
-    .header-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.3rem;
+    /* 헤더 - 파란색, 좌우 레이아웃 */
+    .header-container {
+        background: #3B82F6;
+        padding: 2.5rem 1.5rem 4rem 1.5rem;
+        margin: -1rem -1rem 0 -1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-left {
+        flex: 1;
+        color: white;
     }
 
     .header-title {
         color: white;
-        font-size: 1.8rem;
+        font-size: 1.4rem;
         font-weight: 700;
         margin: 0;
+        margin-bottom: 0.3rem;
     }
 
     .header-subtitle {
         color: rgba(255, 255, 255, 0.95);
-        font-size: 0.9rem;
-        margin-top: 0.3rem;
+        font-size: 0.85rem;
+        margin: 0;
         font-weight: 400;
+    }
+
+    .header-icon {
+        font-size: 3rem;
+        flex-shrink: 0;
+        margin-left: 0.5rem;
+    }
+
+    /* 레이어드 카드 - 헤더와 겹치기 */
+    .layered-card {
+        background: white;
+        padding: 0.9rem 1rem;
+        border-radius: 18px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        margin: -3rem 1rem 1rem 1rem;
+        text-align: center;
+        position: relative;
+        z-index: 10;
     }
 
     /* 채팅 메시지 */
@@ -79,36 +137,38 @@ st.markdown("""
         margin: 0.5rem 0;
     }
 
-    /* 버튼 스타일 - 밝은 파란색 */
+    /* 버튼 스타일 - 배지 크기 */
     .stButton > button {
         width: 100%;
-        height: 50px;
-        font-size: 0.95rem;
-        font-weight: 600;
+        height: 24px;
+        font-size: 0.65rem;
+        font-weight: 500;
         border-radius: 12px;
         border: none;
-        background: #3B82F6;
-        color: white;
-        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-        transition: all 0.2s;
+        background: #EFF6FF;
+        color: #3B82F6;
+        box-shadow: none;
+        transition: all 0.15s;
+        padding: 0 0.6rem;
+        line-height: 24px;
     }
 
     .stButton > button:hover {
-        background: #2563EB;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+        background: #DBEAFE;
+        transform: scale(1.05);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
     }
 
-    /* 상태 배지 */
+    /* 성능 배지 - 작게 */
     .status-badge {
+        display: inline-block;
         background: #EFF6FF;
         color: #3B82F6;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
         font-weight: 600;
-        display: inline-block;
-        margin: 0.5rem 0;
+        margin: 0.2rem;
     }
 
     /* 질문 예시 카드 */
@@ -137,13 +197,16 @@ st.markdown("""
 def load_rag_engine():
     """RAG 엔진 로드 (한 번만 실행)"""
     try:
-        vector_db_dir = project_root / "vector_db"
-        vector_store = FAISSVectorStore()
-        vector_store.load(vector_db_dir)
+        # .env 파일 재로드 (캐시 함수 내에서도 확실히 로드)
+        load_dotenv(project_root / ".env")
 
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             return None, "OpenAI API 키가 설정되지 않았습니다."
+
+        vector_db_dir = project_root / "vector_db"
+        vector_store = FAISSVectorStore(api_key=api_key)
+        vector_store.load(vector_db_dir)
 
         rag_engine = RAGQueryEngine(
             vector_store=vector_store,
@@ -176,9 +239,11 @@ if "show_sources" not in st.session_state:
 
 st.markdown("""
 <div class="header-container">
+    <div class="header-left">
+        <div class="header-title">안전 가이드 챗봇</div>
+        <div class="header-subtitle">헬멧 법규·착용법·사고 사례 질의응답</div>
+    </div>
     <div class="header-icon">💬</div>
-    <h1 class="header-title">안전 가이드 챗봇</h1>
-    <p class="header-subtitle">헬멧 법규·착용법·사고 사례 질의응답</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -193,35 +258,47 @@ if error_msg:
     st.info("📝 .env 파일에 OPENAI_API_KEY를 설정하세요")
     st.stop()
 
-# 상태 표시
+# 레이어드 카드 - 헤더와 겹치는 스타일
 st.markdown("""
-<div style="text-align: center; margin-bottom: 1rem;">
-    <span class="status-badge">✅ 온라인</span>
+<div class="layered-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+        <h3 style="color: #1E293B; margin: 0; font-size: 0.9rem; font-weight: 600;">안전 가이드 챗봇</h3>
+        <div>
+            <span style="background: #DCFCE7; color: #16A34A; padding: 0.2rem 0.5rem; border-radius: 8px; font-size: 0.65rem; font-weight: 600; margin-right: 0.3rem;">● RAG</span>
+            <span style="background: #DCFCE7; color: #16A34A; padding: 0.2rem 0.5rem; border-radius: 8px; font-size: 0.65rem; font-weight: 600;">🤖 AI</span>
+        </div>
+    </div>
+    <p style="color: #64748B; font-size: 0.7rem; line-height: 1.2; margin: 0 0 0.4rem 0;">
+        RAG 기반으로 헬멧 관련 법규와 안전 가이드를 제공합니다
+    </p>
+    <div>
+        <span class="status-badge">📚 35개 문서</span>
+        <span class="status-badge">🔍 FAISS</span>
+        <span class="status-badge">⚡ GPT</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ============================================================================
-# 질문 예시 버튼
-# ============================================================================
+# 빠른 질문 배지 - 레이어드 카드 내부 스타일
+st.markdown("""
+<div style="text-align: center; margin: -0.3rem 1rem 1rem 1rem; padding: 0.3rem 0;">
+    <span style="color: #94A3B8; font-size: 0.65rem; font-weight: 500; margin-bottom: 0.3rem; display: block;">빠른 질문</span>
+</div>
+""", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
-
+col1, col2, col3 = st.columns([1, 1, 1], gap="small")
 with col1:
-    if st.button("💰 과태료", use_container_width=True):
+    if st.button("💰 과태료", key="chip_fine"):
         st.session_state.current_question = "헬멧을 안 쓰면 과태료가 얼마인가요?"
         st.rerun()
-
 with col2:
-    if st.button("🎓 착용법", use_container_width=True):
+    if st.button("🎓 착용법", key="chip_how"):
         st.session_state.current_question = "헬멧을 올바르게 착용하는 방법을 알려주세요"
         st.rerun()
-
 with col3:
-    if st.button("📊 사고", use_container_width=True):
+    if st.button("📊 사고", key="chip_accident"):
         st.session_state.current_question = "전동킥보드 사고 통계를 알려주세요"
         st.rerun()
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # ============================================================================
 # 채팅 인터페이스
@@ -231,9 +308,6 @@ st.markdown("<br>", unsafe_allow_html=True)
 chat_container = st.container()
 
 with chat_container:
-    if len(st.session_state.chat_history) == 0:
-        st.info("👋 안녕하세요! 헬멧 관련 질문을 해주세요.", icon="💡")
-
     for chat in st.session_state.chat_history:
         # 사용자 질문
         with st.chat_message("user", avatar="👤"):
@@ -308,36 +382,3 @@ if question:
 
             except Exception as e:
                 st.error(f"❌ 오류 발생: {str(e)}")
-
-# ============================================================================
-# 하단 메뉴
-# ============================================================================
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("🗑️ 대화 지우기", use_container_width=True):
-        st.session_state.chat_history = []
-        st.rerun()
-
-with col2:
-    if st.button("🏠 홈", use_container_width=True):
-        st.switch_page("app.py")
-
-# ============================================================================
-# 시스템 정보
-# ============================================================================
-
-with st.expander("ℹ️ 시스템 정보"):
-    st.markdown("""
-    **📚 지식 베이스**
-    35개 문서 • FAISS • GPT-3.5
-
-    **🔍 검색 방식**
-    벡터 변환 → Top-3 검색 → LLM 답변 생성
-
-    **✅ 특징**
-    문서 기반 답변 • 출처 표시 • 빠른 응답
-    """)
