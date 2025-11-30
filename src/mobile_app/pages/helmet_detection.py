@@ -27,7 +27,7 @@ import numpy as np
 from collections import deque
 
 # 기존 유틸리티 import
-from src.web_interface.utils.inference import load_model, get_model_path
+from src.mobile_app.utils.inference import load_model, get_model_path
 from src.alert.telegram_notifier import TelegramNotifier
 
 # ============================================================================
