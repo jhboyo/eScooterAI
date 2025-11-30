@@ -20,7 +20,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # 웹캠 및 추론 관련 import
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration, WebRtcMode
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, WebRtcMode
 import av
 import cv2
 import numpy as np
@@ -587,10 +587,13 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# WebRTC 설정
-rtc_configuration = RTCConfiguration(
-    {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
-)
+# WebRTC 설정 (최신 API 사용)
+rtc_config = {
+    "iceServers": [
+        {"urls": ["stun:stun.l.google.com:19302"]},
+        {"urls": ["stun:stun1.l.google.com:19302"]}
+    ]
+}
 
 # VideoProcessor 팩토리
 class VideoProcessorFactory:
@@ -616,28 +619,34 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 웹캠 스트리머 (전체 너비 사용)
-ctx = webrtc_streamer(
-    key="mobile-helmet-detection",
-    mode=WebRtcMode.SENDRECV,
-    rtc_configuration=rtc_configuration,
-    video_processor_factory=factory,
-    media_stream_constraints={
-        "video": {
-            "width": {"ideal": 1280},
-            "height": {"ideal": 720},
-            "facingMode": "environment"  # 모바일 후면 카메라
+# 웹캠 스트리머 (최신 API: frontend/server rtc_configuration 분리)
+try:
+    ctx = webrtc_streamer(
+        key="mobile-helmet-detection",
+        mode=WebRtcMode.SENDRECV,
+        frontend_rtc_configuration=rtc_config,  # 최신 API 사용
+        server_rtc_configuration=rtc_config,    # 최신 API 사용
+        media_stream_constraints={
+            "video": {
+                "width": {"ideal": 1280},
+                "height": {"ideal": 720},
+                "facingMode": "environment"  # 모바일 후면 카메라
+            },
+            "audio": False
         },
-        "audio": False
-    },
-    async_processing=True,
-    sendback_audio=False,
-)
+        video_processor_factory=factory,
+        async_processing=True,
+    )
+except Exception as e:
+    # WebRTC 초기화 실패 시 에러 메시지 표시
+    st.error(f"⚠️ WebRTC 초기화 실패: {str(e)}")
+    st.info("💡 브라우저를 새로고침하거나 HTTPS 환경에서 접속하세요. Chrome 또는 Safari 브라우저를 사용해주세요.")
+    ctx = None
 
 # 실시간 통계
 st.markdown("---")
 
-if ctx.state.playing:
+if ctx and ctx.state.playing:
     stats_placeholder = st.empty()
 
     while ctx.state.playing:
