@@ -54,7 +54,7 @@
 |------|------|
 | **목표** | 전동킥보드 이용자의 헬멧 착용 실시간 감지 + RAG 기반 안전 교육 |
 | **탐지 대상** | 헬멧 착용(helmet), 헬멧 미착용(head) |
-| **객체 탐지 모델** | YOLOv8n (SafetyVisionAI 사전 훈련 모델 활용) |
+| **객체 탐지 모델** | YOLOv8n |
 | **NLP 시스템** | **RAG (Retrieval-Augmented Generation) 기반 질의응답** |
 | **벡터 DB** | FAISS (Meta AI Similarity Search, L2 거리 기반) |
 | **LLM** | OpenAI GPT-4/GPT-3.5 Turbo (답변 생성) |
@@ -119,7 +119,7 @@
 - ✅ RAG 시스템: 벡터 DB 기반 의미적 문서 검색 + LLM 생성
 - ✅ Domain-Specific QA: 헬멧 안전 특화 질의응답 시스템
 - ✅ Mobile-First: 모바일 웹 기반 실시간 탐지 (어디서나 사용)
-- ✅ Transfer Learning: SafetyVisionAI 사전 훈련 모델 활용
+- ✅ Transfer Learning: Yolov8로 직접 훈련
 - ✅ Real-time Alert: Telegram 즉각 알림 (실시간 피드백)
 ```
 
@@ -160,19 +160,13 @@
 - **통합 플랫폼**: 탐지 → 알림 → 교육 파이프라인
 - **시너지 효과**: 탐지 결과 기반 맞춤형 안전 교육 제공
 
-#### 3. **Transfer Learning from Industrial Safety Domain**
-- SafetyVisionAI 사전 훈련 모델 활용
-- 건설현장 PPE → 전동킥보드 헬멧 도메인 전이
-- mAP@0.5 **93.7%** 성능 유지
-- Helmet-Head 구분 정확도 **99.55%**
-
-#### 4. **Mobile-First Deployment Architecture**
+#### 3. **Mobile-First Deployment Architecture**
 - 모바일 웹 기반 실시간 헬멧 탐지 서비스
 - WebRTC 기반 카메라 스트리밍 (별도 앱 설치 불필요)
 - 경량 YOLOv8n 모델로 모바일 환경 최적화
 - **전동킥보드 이용자가 직접 사용 가능한 접근성**
 
-#### 5. **Real-time Alert System**
+#### 4. **Real-time Alert System**
 - Telegram Bot 즉각 알림 (헬멧 미착용 감지 시)
 - 탐지 결과 이미지 포함 전송
 - 가족/친구 그룹 공유 가능 (안전 네트워크 구축)
@@ -198,7 +192,7 @@
 - **Evaluation Metrics**: Retrieval Precision, Answer Relevance, Semantic Similarity
 
 #### 컴퓨터 비전 (CV) + 멀티모달 융합
-- **Domain Transfer Learning**: 산업안전 (PPE) → 개인 모빌리티 안전 (헬멧)
+- **Domain Transfer Learning**: 개인 모빌리티 안전 (헬멧)
 - **Multimodal Integration**: CV (탐지) + NLP (교육) 융합 플랫폼
 - **Mobile AI Deployment**: 경량 모델 기반 모바일 웹 서비스 구현
 
@@ -213,12 +207,7 @@
 
 ### 🎉 기반 모델: 3-Class YOLOv8n (A100 GPU, 100 Epochs)
 
-본 프로젝트는 SafetyVisionAI 프로젝트에서 사전 훈련된 **best.pt 모델**을 활용합니다.
-
-**기반 모델 학습 클래스**: helmet, head, vest (3-class)
 **본 프로젝트 사용 클래스**: `helmet`, `head` (2-class)
-
-> ℹ️ 기반 모델은 건설현장 안전을 위해 3개 클래스로 훈련되었으나, 전동킥보드 헬멧 안전에 특화하여 helmet과 head 클래스만 활용합니다.
 
 ### ✅ 최종 성능 지표
 
@@ -303,7 +292,6 @@
 
 #### 🎯 결론
 
-이 모델은 **🏗️ 건설현장 PPE 탐지 및 안전 경고에 매우 적합**합니다:
 
 - ✅ **실용성**: 93.7% mAP@0.5로 실시간 모니터링 가능
 - ⚠️ **안전 경고**: Head 클래스 90% 정확도로 헬멧 미착용 즉각 감지
@@ -325,8 +313,6 @@
 ## 추론 결과 예시
 
 ### 전동킥보드 헬멧 탐지 결과
-
-SafetyVisionAI 사전 훈련 모델을 사용하여 자전거/전동킥보드 이용자의 헬멧 착용 상태를 탐지한 결과입니다.
 
 #### 예시 1: 안전한 상황 (2명 모두 헬멧 착용)
 
@@ -424,7 +410,7 @@ eScooterAI/
 │   ├── ppe_dataset.yaml   # 기반 모델 데이터셋 설정
 │   └── rag_config.yaml    # RAG 설정 (예정)
 ├── models/                 # 모델 파일
-│   └── ppe_detection/     # SafetyVisionAI 사전 훈련 모델
+│   └── ppe_detection/     # 훈련 모델
 │       └── weights/       # best.pt (6.0MB)
 ├── src/                    # 소스 코드
 │   ├── mobile_app/        # 모바일 웹 서비스 (메인)
@@ -513,7 +499,7 @@ eScooterAI/
 ### 컴퓨터 비전 (CV)
 - **YOLO**: [Ultralytics YOLOv8 Documentation](https://docs.ultralytics.com/)
 - **Transfer Learning**: [Fine-tuning Pre-trained Models](https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html)
-- 논문: `YOLO(You Only Look Once) 모델별 건설 현장 위험 상태 및 객체 인식 성능 비교`
+
 
 ### 모바일 웹 및 배포
 - **Streamlit**: [Streamlit Documentation](https://docs.streamlit.io/)
@@ -525,9 +511,6 @@ eScooterAI/
 - 특허: `인공지능기반 이륜자동차의 헬맷 미착용 단속시스템 및 방법` (KR 특허)
 - 논문: `Construction Site Hazards Identification Using Deep Learning and Computer Vision`
 - 논문: `SYSTEM AND METHOD FOR AI VISUAL INSPECTION`
-
-### 기반 프로젝트
-- [SafetyVisionAI](https://github.com/jhboyo/SafetyVisionAI) - YOLOv8n 사전 훈련 모델 제공 (mAP@0.5 93.7%)
 
 ### 데이터셋 및 통계
 - [교통안전공단 통계](https://www.ts2020.kr/) - 전동킥보드 사고 통계
