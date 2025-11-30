@@ -74,6 +74,9 @@ dataset/data_backup_*/
 *.json
 # RAG 안전 교육 문서는 예외 (지식 베이스 필수)
 !src/data/safety_docs/*.json
+# RAG 벡터 DB는 예외 (배포에 필수)
+!vector_db/*.json
+!vector_db/*.faiss
 *.xml
 !requirements.txt
 !README.md
